@@ -1,1 +1,81 @@
 symbol,coingecko_id,name,primary_narrative,secondary_narratives,include_in_score,notes
+BTC,bitcoin,Bitcoin,Layer 1,Store of value; settlement asset,TRUE,Baseline crypto monetary asset; useful as market reference asset.
+ETH,ethereum,Ethereum,Layer 1,DeFi; Layer 2 settlement; RWA,TRUE,Core smart contract settlement layer.
+SOL,solana,Solana,Layer 1,DeFi; Gaming / GameFi; DePIN,TRUE,High-throughput L1 with strong app ecosystem.
+XRP,ripple,XRP,Layer 1,Payments; RWA,TRUE,Payment and settlement-oriented network asset.
+ADA,cardano,Cardano,Layer 1,Smart contract platform,TRUE,Large-cap L1; useful for broad L1 basket coverage.
+AVAX,avalanche-2,Avalanche,Layer 1,DeFi; RWA; appchains,TRUE,L1/subnet ecosystem with institutional and DeFi relevance.
+TON,the-open-network,Toncoin,Layer 1,Gaming / GameFi; consumer apps,TRUE,Consumer-distribution L1 tied to Telegram ecosystem.
+TRX,tron,TRON,Layer 1,Stablecoin settlement; payments,TRUE,High stablecoin-transfer relevance.
+SUI,sui,Sui,Layer 1,DeFi; Gaming / GameFi,TRUE,Newer high-performance L1; good growth narrative proxy.
+DOT,polkadot,Polkadot,Layer 1,Interoperability; appchains,TRUE,Interoperability and multi-chain infrastructure exposure.
+ARB,arbitrum,Arbitrum,Layer 2,DeFi,TRUE,Major Ethereum optimistic rollup.
+OP,optimism,Optimism,Layer 2,Superchain; DeFi,TRUE,Major Ethereum scaling ecosystem.
+MNT,mantle,Mantle,Layer 2,DeFi; modular infrastructure,TRUE,Liquid L2 token with Ethereum scaling exposure.
+POL,polygon-ecosystem-token,POL (ex-MATIC),Layer 2,DeFi; Gaming / GameFi; infrastructure,TRUE,CoinGecko page slug differs from API ID; use polygon-ecosystem-token for API calls.
+STRK,starknet,Starknet,Layer 2,ZK rollups; DeFi,TRUE,ZK-based Ethereum scaling exposure.
+ZK,zksync,ZKsync,Layer 2,ZK rollups; DeFi,TRUE,ZK-rollup ecosystem token.
+METIS,metis-token,Metis,Layer 2,DeFi,TRUE,Smaller L2 but useful for breadth inside scaling basket.
+SKL,skale,SKALE,Layer 2,Gaming / GameFi; appchains,TRUE,Verify CoinGecko ID before first API run.
+LRC,loopring,Loopring,Layer 2,DEX infrastructure,TRUE,Older Ethereum scaling / exchange infrastructure proxy.
+BOBA,boba-network,Boba Network,Layer 2,DeFi,TRUE,Verify CoinGecko ID before first API run.
+UNI,uniswap,Uniswap,DeFi,Exchange Tokens; DEX,TRUE,Core DEX governance token.
+AAVE,aave,Aave,DeFi,Lending,TRUE,Blue-chip DeFi lending protocol.
+LDO,lido-dao,Lido DAO,DeFi,Liquid staking,TRUE,Liquid staking and staking market structure proxy.
+CRV,curve-dao-token,Curve DAO,DeFi,Stablecoin liquidity; DEX,TRUE,Verify long CoinGecko ID before first API run.
+PENDLE,pendle,Pendle,DeFi,Yield trading,TRUE,Yield and rate-market proxy.
+COMP,compound-governance-token,Compound,DeFi,Lending,TRUE,Verify long CoinGecko ID before first API run.
+SNX,havven,Synthetix,DeFi,Derivatives; synthetic assets,TRUE,CoinGecko uses legacy slug `havven`; verify before first API run.
+ENA,ethena,Ethena,DeFi,Stablecoin infrastructure; yield,TRUE,Synthetic dollar / stablecoin infrastructure exposure.
+MORPHO,morpho,Morpho,DeFi,Lending,TRUE,Modern lending-market structure proxy.
+RUNE,thorchain,THORChain,DeFi,Cross-chain liquidity; DEX,TRUE,Verify CoinGecko ID before first API run.
+LINK,chainlink,Chainlink,RWA,DeFi; oracle infrastructure,TRUE,Assigned to RWA because oracle infrastructure is central to off-chain asset data and settlement links.
+ONDO,ondo-finance,Ondo,RWA,Tokenized treasuries,TRUE,Direct tokenized finance / RWA protocol proxy.
+XLM,stellar,Stellar,RWA,Payments; settlement,TRUE,Payment and asset-issuance network.
+QNT,quant-network,Quant,RWA,Interoperability; enterprise infrastructure,TRUE,Enterprise interoperability / institutional rails proxy.
+POLYX,polymesh,Polymesh,RWA,Security tokens; regulated assets,TRUE,Purpose-built chain for regulated assets.
+CFG,centrifuge-2,Centrifuge,RWA,Credit; asset tokenization,TRUE,Use current active Centrifuge listing centrifuge-2; old centrifuge ID may map to legacy listing.
+RSR,reserve-rights-token,Reserve Rights,RWA,Stable assets; collateral baskets,TRUE,Verify CoinGecko ID before first API run.
+SYRUP,syrup,Maple Finance,RWA,DeFi; private credit,TRUE,Maple Finance display name; CoinGecko API ID is syrup.
+GFI,goldfinch,Goldfinch,RWA,Private credit,TRUE,RWA credit protocol proxy.
+TRU,truefi,TrueFi,RWA,Credit; DeFi lending,TRUE,RWA/private-credit style lending exposure.
+TAO,bittensor,Bittensor,AI,Decentralized compute; DePIN,TRUE,Core decentralized AI network token.
+FET,fetch-ai,"Artificial Superintelligence Alliance",AI,Agents; data; machine intelligence,TRUE,Artificial Superintelligence Alliance display name; CoinGecko API ID remains fetch-ai.
+RENDER,render-token,Render,AI,DePIN; compute,TRUE,Render display name; CoinGecko API ID is render-token.
+VIRTUAL,virtual-protocol,Virtuals Protocol,AI,AI agents; consumer apps,TRUE,AI-agent narrative proxy.
+GRT,the-graph,The Graph,AI,Data indexing; DePIN,TRUE,Data infrastructure useful for AI/data narrative.
+ARKM,arkham,Arkham,AI,Data analytics; intelligence,TRUE,On-chain intelligence and data analytics proxy.
+GRASS,grass,Grass,AI,DePIN; data network,TRUE,AI data-network exposure.
+WLD,worldcoin-wld,Worldcoin,AI,Identity; consumer crypto,TRUE,Verify CoinGecko ID because of naming/symbol ambiguity.
+NOS,nosana,Nosana,AI,DePIN; compute,TRUE,GPU / compute marketplace proxy.
+ORAI,oraichain-token,Oraichain,AI,Oracle infrastructure; Layer 1,TRUE,Verify CoinGecko ID before first API run.
+FIL,filecoin,Filecoin,DePIN,Storage,TRUE,Decentralized storage infrastructure.
+AR,arweave,Arweave,DePIN,Storage; permanent data,TRUE,Permanent storage / data availability proxy.
+HNT,helium,Helium,DePIN,Wireless networks,TRUE,Physical wireless infrastructure network.
+AKT,akash-network,Akash Network,DePIN,AI; compute,TRUE,Decentralized compute marketplace.
+IOTX,iotex,IoTeX,DePIN,IoT infrastructure,TRUE,Machine / IoT infrastructure exposure.
+AIOZ,aioz-network,AIOZ Network,DePIN,AI; content delivery,TRUE,Decentralized CDN / compute infrastructure.
+LPT,livepeer,Livepeer,DePIN,Video infrastructure; AI,TRUE,Decentralized video processing network.
+GLM,golem,Golem,DePIN,Compute; AI,TRUE,Verify CoinGecko ID before first API run.
+HONEY,hivemapper,Hivemapper,DePIN,Mapping,TRUE,Decentralized mapping network.
+PEAQ,peaq-2,peaq,DePIN,Machine economy,TRUE,peaq display name; CoinGecko API ID is peaq-2.
+IMX,immutable-x,Immutable,Gaming / GameFi,Layer 2,TRUE,Gaming-focused scaling infrastructure.
+RON,ronin,Ronin,Gaming / GameFi,Layer 1; appchain,TRUE,Gaming chain linked to Axie/Ronin ecosystem.
+GALA,gala,Gala,Gaming / GameFi,Entertainment,TRUE,Recognizable gaming ecosystem token.
+SAND,the-sandbox,The Sandbox,Gaming / GameFi,Metaverse,TRUE,Metaverse/game economy proxy.
+AXS,axie-infinity,Axie Infinity,Gaming / GameFi,Play-to-earn,TRUE,Legacy GameFi benchmark.
+MANA,decentraland,Decentraland,Gaming / GameFi,Metaverse,TRUE,Metaverse land/economy proxy.
+ILV,illuvium,Illuvium,Gaming / GameFi,Game studio ecosystem,TRUE,Higher-quality gaming project proxy.
+YGG,yield-guild-games,Yield Guild Games,Gaming / GameFi,Gaming guilds,TRUE,Gaming guild / player economy exposure.
+MAGIC,magic,Treasure,Gaming / GameFi,Gaming infrastructure,TRUE,Verify CoinGecko ID because `magic` is a generic slug.
+PIXEL,pixels,Pixels,Gaming / GameFi,Social gaming,TRUE,Verify CoinGecko ID before first API run.
+BNB,binancecoin,BNB,Exchange Tokens,Layer 1,TRUE,Assigned to Exchange Tokens because exchange ecosystem is the cleaner primary narrative.
+OKB,okb,OKB,Exchange Tokens,CEX utility,TRUE,Centralized exchange ecosystem token.
+LEO,leo-token,UNUS SED LEO,Exchange Tokens,CEX utility,TRUE,Keep leo-token. CoinGecko name is LEO Token; classified as Exchange Tokens.
+CRO,crypto-com-chain,Cronos,Exchange Tokens,Layer 1; exchange ecosystem,TRUE,Cronos display name; CoinGecko API ID is crypto-com-chain.
+KCS,kucoin-shares,KuCoin Token,Exchange Tokens,CEX utility,TRUE,Keep kucoin-shares. CoinGecko name is KuCoin; symbol KCS identifies the exchange token.
+GT,gatechain-token,GateToken,Exchange Tokens,CEX utility; Layer 1,TRUE,Keep gatechain-token. CoinGecko name is Gate; API ID remains gatechain-token.
+MX,mx-token,MX Token,Exchange Tokens,CEX utility,TRUE,Keep mx-token. CoinGecko name is MX; classified as MEXC exchange token.
+BGB,bitget-token,Bitget Token,Exchange Tokens,CEX utility,TRUE,Exchange ecosystem proxy.
+WBT,whitebit,WhiteBIT Coin,Exchange Tokens,CEX utility,TRUE,CoinGecko slug verified as `whitebit`.
+HYPE,hyperliquid,Hyperliquid,Exchange Tokens,DeFi; Layer 1; derivatives,TRUE,Assigned to Exchange Tokens because venue/derivatives activity is the main market-structure signal.

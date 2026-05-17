@@ -21,6 +21,7 @@ REQUIRED_COLUMNS = [
     "include_in_score",
     "notes",
 ]
+VALID_INCLUDE_VALUES = {"true", "false"}
 
 
 def _is_blank(value: object) -> bool:
@@ -57,6 +58,15 @@ def validate_taxonomy() -> list[str]:
             + ", ".join(sorted(set(str(symbol) for symbol in duplicate_symbols)))
         )
 
+    duplicate_ids = taxonomy[
+        taxonomy["coingecko_id"].astype(str).str.lower().duplicated(keep=False)
+    ]["coingecko_id"].tolist()
+    if duplicate_ids:
+        errors.append(
+            "Duplicate CoinGecko IDs found: "
+            + ", ".join(sorted(set(str(coingecko_id) for coingecko_id in duplicate_ids)))
+        )
+
     multiple_primary = taxonomy[
         taxonomy["primary_narrative"].astype(str).str.contains(r"[,;|]", na=False)
     ]
@@ -65,6 +75,19 @@ def validate_taxonomy() -> list[str]:
         errors.append(
             "primary_narrative should contain only one narrative per token: "
             + symbols
+        )
+
+    invalid_include_values = sorted(
+        {
+            str(value)
+            for value in taxonomy["include_in_score"].dropna().unique()
+            if str(value).strip().lower() not in VALID_INCLUDE_VALUES
+        }
+    )
+    if invalid_include_values:
+        errors.append(
+            "include_in_score contains invalid value(s): "
+            + ", ".join(invalid_include_values)
         )
 
     return errors
