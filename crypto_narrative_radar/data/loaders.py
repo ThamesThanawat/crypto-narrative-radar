@@ -10,6 +10,9 @@ from crypto_narrative_radar.config import DATA_DIR
 TAXONOMY_PATH = DATA_DIR / "reference" / "taxonomy.csv"
 
 
-def load_taxonomy(path: Path = TAXONOMY_PATH) -> pd.DataFrame:
+def load_taxonomy(path: Path | None = None) -> pd.DataFrame:
     """Load the crypto narrative taxonomy CSV."""
-    return pd.read_csv(path)
+    taxonomy_path = path or TAXONOMY_PATH
+    if not taxonomy_path.exists():
+        raise FileNotFoundError(f"Taxonomy CSV not found: {taxonomy_path}")
+    return pd.read_csv(taxonomy_path)
