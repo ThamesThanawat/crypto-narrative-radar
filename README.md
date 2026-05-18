@@ -55,3 +55,10 @@ tests/
 ## Status
 
 Early development: repository scaffold and foundational modules are being set up.
+
+## Milestone 4.5: SQL Analytics Layer
+
+- Uses DuckDB as an in-memory analytical SQL engine.
+- Reads processed CSV outputs from `data/processed/YYYY-MM-DD/`.
+- Produces SQL-derived research outputs for narrative summaries, top token contributors, and concentration review.
+- Demonstrates SQL analytics skills without adding a production database.
