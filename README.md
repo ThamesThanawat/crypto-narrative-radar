@@ -62,3 +62,9 @@ Early development: repository scaffold and foundational modules are being set up
 - Reads processed CSV outputs from `data/processed/YYYY-MM-DD/`.
 - Produces SQL-derived research outputs for narrative summaries, top token contributors, and concentration review.
 - Demonstrates SQL analytics skills without adding a production database.
+
+## Daily Snapshot Automation
+
+- Local command: `python scripts/run_daily_pipeline.py`
+- GitHub Actions workflow: `Daily Crypto Narrative Snapshot`
+- Processed outputs are uploaded as GitHub Actions artifacts and are not committed back to the repository.

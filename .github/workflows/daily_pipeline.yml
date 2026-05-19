@@ -1,0 +1,40 @@
+name: Daily Crypto Narrative Snapshot
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Runs daily in UTC.
+    - cron: "15 1 * * *"
+
+jobs:
+  daily-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run daily pipeline
+        run: |
+          python scripts/run_daily_pipeline.py
+
+      - name: Run tests
+        run: |
+          python -m pytest tests
+
+      - name: Upload processed outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: processed-snapshot
+          path: data/processed/
+          if-no-files-found: error
