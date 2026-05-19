@@ -256,7 +256,7 @@ def main() -> None:
         "scoring_note",
     ]
     ranking_table = select_table_columns(filtered_ranking, ranking_columns)
-    st.dataframe(style_table(ranking_table), use_container_width=True, hide_index=True)
+    st.dataframe(style_table(ranking_table), width="stretch", hide_index=True)
 
     st.subheader("Narrative Momentum Score")
     if score_col:
@@ -269,7 +269,7 @@ def main() -> None:
             title="Narrative Momentum Score",
             labels={score_col: "Score", "primary_narrative": "Narrative"},
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     else:
         st.warning("Momentum score column is unavailable.")
 
@@ -290,7 +290,7 @@ def main() -> None:
             title="7D vs 30D Average Return by Narrative",
             labels={"average_return": "Average return (%)", "primary_narrative": "Narrative"},
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     else:
         st.warning("7D and 30D average return columns are unavailable.")
 
@@ -310,7 +310,7 @@ def main() -> None:
             },
         )
         st.caption("This chart provides market context for research support.")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     else:
         st.warning("Return, volume, or token count columns are unavailable.")
 
@@ -339,7 +339,7 @@ def main() -> None:
             "market_cap_rank_within_narrative",
         ]
         contributor_table = select_table_columns(contributor_view, contributor_columns)
-        st.dataframe(style_table(contributor_table), use_container_width=True, hide_index=True)
+        st.dataframe(style_table(contributor_table), width="stretch", hide_index=True)
 
     st.subheader("Concentration Review")
     concentration_df = filter_by_narrative(data["concentration"], selected_narrative)
