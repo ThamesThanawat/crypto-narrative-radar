@@ -400,3 +400,103 @@ This project may use AI-assisted coding tools for implementation speed, debuggin
 However, the research framework, narrative taxonomy, scoring logic, project positioning, and market interpretation should remain manually reviewed and explainable by the project owner.
 
 The final project should demonstrate understanding, not just generated code.
+
+## Lightweight Agent Workflows
+
+This repository uses three lightweight agent workflows only. Keep them practical and scoped to the current milestone.
+
+### 1. Context and Shared Language
+
+Use `CONTEXT.md` as the source of truth for project language, domain vocabulary, and project boundaries.
+
+Before planning, debugging, documenting, or explaining the project, use the canonical terms from `CONTEXT.md`, especially:
+
+- Narrative Momentum Score
+- Narrative Metrics
+- Narrative Ranking
+- Relative Strength
+- Volume Confirmation
+- Breadth of Participation
+- Concentration Review
+- Token Contributors
+- Market Snapshot
+
+Crypto Narrative Radar is a market intelligence and research support tool.
+
+It is not:
+
+- a trading bot
+- a price prediction model
+- a buy/sell signal generator
+- a portfolio optimizer
+- an alpha strategy
+
+Use `CONTEXT.md` for canonical domain vocabulary and project framing.
+
+If additional agent docs exist under `docs/agents/`, they should reference `CONTEXT.md` instead of redefining the project vocabulary from scratch.
+
+### 2. Diagnose
+
+Use the diagnose workflow when tests, scripts, validation, pipeline runs, GitHub Actions, HTML report generation, or Streamlit dashboard behavior fails.
+
+Follow:
+
+```text
+Reproduce → minimize → hypothesize → instrument → fix → regression-test
+```
+
+Diagnose workflow:
+
+1. Reproduce the issue with the exact command that failed.
+2. Minimize the problem to the smallest relevant file, function, input, or test.
+3. Hypothesize the likely cause before editing.
+4. Instrument with small prints, assertions, or focused tests if needed.
+5. Apply the smallest safe fix.
+6. Run the relevant validation or regression test.
+
+Do not rewrite large parts of the project during diagnosis unless explicitly requested.
+
+### 3. Handoff
+
+Use the handoff workflow when finishing a milestone, transferring work between ChatGPT project chats, or preparing Codex to continue from an existing repo state.
+
+A handoff should include:
+
+- current milestone
+- status
+- files created or edited
+- commands run
+- validation results
+- generated outputs
+- known limitations
+- next recommended step
+
+Preferred handoff format:
+
+```text
+Milestone:
+-
+
+Status:
+-
+
+Files changed:
+-
+
+Commands run:
+-
+
+Validation:
+-
+
+Generated outputs:
+-
+
+Limitations:
+-
+
+Next step:
+-
+```
+
+Keep handoffs short, factual, and implementation-focused.
