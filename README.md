@@ -68,3 +68,11 @@ Early development: repository scaffold and foundational modules are being set up
 - Local command: `python scripts/run_daily_pipeline.py`
 - GitHub Actions workflow: `Daily Crypto Narrative Snapshot`
 - Processed outputs are uploaded as GitHub Actions artifacts and are not committed back to the repository.
+
+## Running the Streamlit Dashboard
+
+```bash
+streamlit run dashboard/streamlit_app.py
+```
+
+Run `python scripts/run_daily_pipeline.py` first if no processed data exists. The dashboard defaults to the latest processed snapshot folder and is for market intelligence and research support, not trading signals.
