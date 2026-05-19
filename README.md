@@ -11,14 +11,23 @@ The project focuses on research support by analyzing narrative strength, sector 
 - Produce explainable outputs for research and decision support
 - Practice clean data analysis and reporting patterns suitable for portfolio and interview discussions
 
-## Planned Features
+## Features
 
-- Narrative-to-token mapping for core crypto sectors
-- Data collection pipeline using public market data sources
-- Narrative-level metrics (returns, volume trends, participation breadth)
-- Relative-strength comparisons between narratives
-- Streamlit dashboard for interactive exploration
-- CSV and HTML report generation for weekly or ad hoc reviews
+- Curated narrative-to-token taxonomy for core crypto sectors
+- CoinGecko market data pipeline
+- Raw and processed CSV snapshot outputs
+- Narrative-level metrics and ranking
+- Narrative Momentum Score based on price momentum, relative strength, volume confirmation, and breadth
+- DuckDB SQL analytics for narrative summaries, token contributors, and concentration review
+- Daily GitHub Actions automation with processed-output artifacts
+- Streamlit dashboard for interactive research exploration
+
+## Planned Improvements
+
+- Historical backfill V1
+- Static HTML research report
+- Dashboard polish and recruiter-ready screenshots
+- README case study and interview explanation
 
 ## Tech Stack
 
@@ -54,14 +63,24 @@ tests/
 
 ## Status
 
-Early development: repository scaffold and foundational modules are being set up.
+Active portfolio build: core data pipeline, narrative scoring, SQL analytics, daily automation, and Streamlit Dashboard V1 are implemented.
 
-## Milestone 4.5: SQL Analytics Layer
+Completed:
+- MVP narrative taxonomy with 80 validated tokens
+- CoinGecko market data pipeline
+- Token-level market snapshot generation
+- Narrative metrics and ranking
+- Narrative Momentum Score
+- DuckDB SQL analytics layer
+- Daily GitHub Actions snapshot automation
+- Streamlit Dashboard V1
 
-- Uses DuckDB as an in-memory analytical SQL engine.
-- Reads processed CSV outputs from `data/processed/YYYY-MM-DD/`.
-- Produces SQL-derived research outputs for narrative summaries, top token contributors, and concentration review.
-- Demonstrates SQL analytics skills without adding a production database.
+Next:
+- Research UX / finance framing review
+- Dashboard polish for recruiter demo
+- Historical backfill V1
+- Static HTML research report
+- README and portfolio polish
 
 ## Daily Snapshot Automation
 

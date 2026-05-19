@@ -406,15 +406,17 @@ Milestone 2: MVP narrative taxonomy
 Milestone 3: CoinGecko market data pipeline V1
 Milestone 4: Narrative metrics and scoring V1
 Milestone 4.5: DuckDB SQL analytics layer
+Milestone 4.6: CONTEXT.md and workflow documentation
 ```
 
 Next:
 
 ```text
-Milestone 4.6: CONTEXT.md and workflow documentation
-Milestone 5: HTML research report
-Milestone 6: Streamlit dashboard
-Milestone 7: README, portfolio polish, resume, and interview prep
+Milestone 5.1: Research UX Review / Finance Framing
+Milestone 5.2: Dashboard Polish for recruiter demo
+Milestone 5.8: Historical Backfill V1
+Milestone 6: Static HTML Research Report
+Milestone 7: README / Portfolio / Resume / Interview
 ```
 
 ## Agent Instructions
