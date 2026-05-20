@@ -119,42 +119,54 @@ def display_kpis(ranking_df: pd.DataFrame) -> None:
     columns = st.columns(4)
 
     if score_col:
-        top_row = ranking_df.sort_values(score_col, ascending=False).iloc[0]
-        weakest_row = ranking_df.sort_values(score_col, ascending=True).iloc[0]
+        leadership_row = ranking_df.sort_values(score_col, ascending=False).iloc[0]
         columns[0].metric(
-            "Top Narrative",
-            top_row["primary_narrative"],
-            format_score(top_row[score_col]),
-        )
-        columns[3].metric(
-            "Lowest Momentum",
-            weakest_row["primary_narrative"],
-            format_score(weakest_row[score_col]),
+            "Narrative Leadership",
+            leadership_row["primary_narrative"],
+            f"Score {format_score(leadership_row[score_col])}",
         )
     else:
-        columns[0].metric("Top Narrative", "N/A")
-        columns[3].metric("Lowest Momentum", "N/A")
+        columns[0].metric("Narrative Leadership", "N/A")
 
-    if "avg_return_7d" in ranking_df.columns:
-        strongest_7d = ranking_df.sort_values("avg_return_7d", ascending=False).iloc[0]
+    if "relative_strength_7d" in ranking_df.columns:
+        relative_strength_row = ranking_df.sort_values("relative_strength_7d", ascending=False).iloc[0]
         columns[1].metric(
-            "Strongest 7D Return",
-            strongest_7d["primary_narrative"],
-            format_pct(strongest_7d["avg_return_7d"]),
+            "Benchmark-Relative Strength",
+            relative_strength_row["primary_narrative"],
+            format_pct(relative_strength_row["relative_strength_7d"]),
         )
     else:
-        columns[1].metric("Strongest 7D Return", "N/A")
+        columns[1].metric("Benchmark-Relative Strength", "N/A")
 
     breadth_col = "positive_breadth_pct" if "positive_breadth_pct" in ranking_df.columns else "breadth_7d"
     if breadth_col in ranking_df.columns:
         breadth_row = ranking_df.sort_values(breadth_col, ascending=False).iloc[0]
         columns[2].metric(
-            "Highest Breadth",
+            "Participation Breadth",
             breadth_row["primary_narrative"],
             format_ratio_pct(breadth_row[breadth_col]),
         )
     else:
-        columns[2].metric("Highest Breadth", "N/A")
+        columns[2].metric("Participation Breadth", "N/A")
+
+    if "top_token_market_cap_share" in ranking_df.columns:
+        concentration_row = ranking_df.sort_values(
+            "top_token_market_cap_share", ascending=False
+        ).iloc[0]
+        columns[3].metric(
+            "Concentration Watch",
+            concentration_row["primary_narrative"],
+            format_ratio_pct(concentration_row["top_token_market_cap_share"]),
+        )
+    elif score_col:
+        weakest_row = ranking_df.sort_values(score_col, ascending=True).iloc[0]
+        columns[3].metric(
+            "Lowest Momentum",
+            weakest_row["primary_narrative"],
+            f"Score {format_score(weakest_row[score_col])}",
+        )
+    else:
+        columns[3].metric("Concentration Watch", "N/A")
 
 
 def select_table_columns(df: pd.DataFrame, preferred_columns: list[str]) -> pd.DataFrame:
@@ -184,8 +196,8 @@ def main() -> None:
 
     st.title("Crypto Narrative Radar")
     st.caption(
-        "A market intelligence dashboard for tracking crypto narrative momentum "
-        "using CoinGecko market data."
+        "Market intelligence for crypto sector rotation, narrative leadership, "
+        "benchmark-relative strength, volume confirmation, and participation breadth."
     )
 
     available_dates = find_processed_snapshots()
@@ -194,7 +206,7 @@ def main() -> None:
         return
 
     with st.sidebar:
-        st.header("Filters")
+        st.header("Research Filters")
         selected_date = st.selectbox("Snapshot date", available_dates, index=0)
 
     data = load_snapshot_data(selected_date)
@@ -205,8 +217,8 @@ def main() -> None:
 
     st.write(f"Snapshot date: `{selected_date}`")
     st.info(
-        "Market intelligence only. This dashboard is not investment advice, "
-        "does not predict prices, and does not provide buy/sell signals."
+        "Research support only. This dashboard describes market structure and relative "
+        "narrative conditions; it is not investment advice and does not forecast prices."
     )
 
     narratives = sorted(ranking_df["primary_narrative"].dropna().unique().tolist())
@@ -229,7 +241,7 @@ def main() -> None:
         selected_narrative = st.selectbox("Narrative", ["All"] + narratives)
         top_n = st.selectbox("Top narratives", ["5", "8", "10", "All"], index=1)
         sort_metric = st.selectbox(
-            "Token contributor sort metric",
+            "Token contributor lens",
             contributor_sort_options or ["N/A"],
         )
 
@@ -241,7 +253,12 @@ def main() -> None:
 
     display_kpis(ranking_df)
 
-    st.subheader("Narrative Ranking")
+    st.subheader("Narrative Leadership Table")
+    st.caption(
+        "What is happening: narratives are ranked by the descriptive Narrative Momentum "
+        "Score, with returns, benchmark-relative strength, volume confirmation, breadth, "
+        "and concentration shown side by side."
+    )
     ranking_columns = [
         "rank",
         "primary_narrative",
@@ -258,7 +275,11 @@ def main() -> None:
     ranking_table = select_table_columns(filtered_ranking, ranking_columns)
     st.dataframe(style_table(ranking_table), width="stretch", hide_index=True)
 
-    st.subheader("Narrative Momentum Score")
+    st.subheader("Narrative Momentum Score by Sector")
+    st.caption(
+        "A higher score indicates stronger recent narrative momentum across price action, "
+        "relative strength, volume confirmation, and participation breadth."
+    )
     if score_col:
         chart_df = filtered_ranking.sort_values(score_col, ascending=True)
         fig = px.bar(
@@ -266,14 +287,18 @@ def main() -> None:
             x=score_col,
             y="primary_narrative",
             orientation="h",
-            title="Narrative Momentum Score",
-            labels={score_col: "Score", "primary_narrative": "Narrative"},
+            title="Narrative Momentum Score by Sector",
+            labels={score_col: "Research score", "primary_narrative": "Narrative"},
         )
         st.plotly_chart(fig, width="stretch")
     else:
         st.warning("Momentum score column is unavailable.")
 
-    st.subheader("7D vs 30D Average Return by Narrative")
+    st.subheader("7D vs 30D Sector Rotation")
+    st.caption(
+        "Why it may be happening: comparing short-term and medium-term returns helps "
+        "separate fresh leadership from narratives that are cooling or still recovering."
+    )
     if {"avg_return_7d", "avg_return_30d", "primary_narrative"} <= set(filtered_ranking.columns):
         returns_df = filtered_ranking.melt(
             id_vars="primary_narrative",
@@ -295,6 +320,10 @@ def main() -> None:
         st.warning("7D and 30D average return columns are unavailable.")
 
     st.subheader("Return vs Volume Confirmation")
+    st.caption(
+        "What to validate next: stronger return profiles are more useful for research when "
+        "they are supported by meaningful trading volume."
+    )
     if {"avg_return_7d", "total_volume", "token_count", "primary_narrative"} <= set(filtered_ranking.columns):
         fig = px.scatter(
             filtered_ranking,
@@ -302,19 +331,22 @@ def main() -> None:
             y="total_volume",
             size="token_count",
             color="primary_narrative",
-            title="Return vs Volume Confirmation",
+            title="7D Return vs Volume Confirmation",
             labels={
                 "avg_return_7d": "Average 7D return (%)",
                 "total_volume": "Total volume",
                 "primary_narrative": "Narrative",
             },
         )
-        st.caption("This chart provides market context for research support.")
         st.plotly_chart(fig, width="stretch")
     else:
         st.warning("Return, volume, or token count columns are unavailable.")
 
-    st.subheader("Token Contributors")
+    st.subheader("Token Contributors: What Is Driving the Move?")
+    st.caption(
+        "Token contributors help identify whether narrative leadership is being driven by "
+        "large-cap constituents, high-volume tokens, or broader participation across the basket."
+    )
     if data["contributors"] is None:
         st.warning("SQL contributor output is unavailable. Falling back to token market snapshot.")
     if contributor_df is None or contributor_df.empty:
@@ -341,11 +373,11 @@ def main() -> None:
         contributor_table = select_table_columns(contributor_view, contributor_columns)
         st.dataframe(style_table(contributor_table), width="stretch", hide_index=True)
 
-    st.subheader("Concentration Review")
+    st.subheader("Concentration Review: Broad vs Concentrated Participation")
     concentration_df = filter_by_narrative(data["concentration"], selected_narrative)
     st.caption(
-        "Concentration review helps show whether narrative-level metrics are broad "
-        "or driven by a small number of large tokens."
+        "Concentration review shows whether narrative-level market cap and volume are "
+        "distributed across the basket or dominated by a small number of token contributors."
     )
     if concentration_df is None or concentration_df.empty:
         st.warning("SQL concentration review output is unavailable.")
@@ -364,32 +396,43 @@ def main() -> None:
         concentration_table = select_table_columns(concentration_df, concentration_columns)
         st.dataframe(style_table(concentration_table), use_container_width=True, hide_index=True)
 
-    with st.expander("Methodology"):
+    with st.expander("Methodology and Interpretation Guide"):
         st.markdown(
             """
-            **Narrative taxonomy:** Tokens are grouped into one primary narrative to avoid
-            double-counting, while secondary narratives preserve research context.
+            **Narrative taxonomy:** Tokens are grouped into one primary narrative so sector
+            rotation can be compared without double-counting. Secondary narratives preserve
+            research context for tokens that span multiple themes.
 
-            **CoinGecko market data:** The dashboard uses market data such as price returns,
-            market cap, volume, and last updated timestamps.
+            **Market snapshot:** CoinGecko market data provides point-in-time returns,
+            market cap, trading volume, and last updated timestamps for the curated token universe.
 
-            **Narrative-level aggregation:** Token-level data is grouped by
-            `primary_narrative`.
+            **Narrative-level aggregation:** Token-level observations are grouped by
+            `primary_narrative` to create a sector-level research view.
 
-            **Momentum score:** The Narrative Momentum Score is a descriptive score combining
-            price momentum, relative strength, volume confirmation, and breadth.
+            **Narrative Momentum Score:** The score is a descriptive research ranking from
+            0 to 100. It combines price momentum, benchmark-relative strength, volume
+            confirmation, and participation breadth. It helps compare current narrative
+            leadership across sectors.
 
-            **Breadth:** Breadth shows how widely participation is distributed across tokens
-            within a narrative.
+            **Benchmark-relative strength:** Relative strength compares narrative performance
+            against BTC and ETH over the selected window. It helps distinguish sector-specific
+            leadership from broad crypto market movement.
 
-            **Volume confirmation:** Volume confirmation helps evaluate whether narrative
-            movement is supported by trading activity.
+            **Volume confirmation:** Volume confirmation uses trading activity as a liquidity
+            and attention proxy. Higher confirmation suggests the move is supported by market
+            activity, but it is not proof of fundamental adoption.
 
-            **Concentration review:** Concentration review shows whether a narrative is
-            dominated by a small number of tokens.
+            **Participation breadth:** Breadth measures the share of tokens in a narrative
+            with positive returns. Broad participation is generally more informative than a
+            move concentrated in one or two constituents.
 
-            **Limitation:** The dashboard is descriptive, not predictive. It does not provide
-            investment advice, trading signals, or price forecasts.
+            **Concentration review:** Concentration review shows whether market cap or volume
+            is dominated by a small number of token contributors. It is used for interpretation
+            and is separate from the Narrative Momentum Score.
+
+            **Research use:** The dashboard is descriptive market intelligence. It is designed
+            to help identify what is happening, why a narrative may be leading or lagging, and
+            which token contributors may warrant deeper review.
             """
         )
 
