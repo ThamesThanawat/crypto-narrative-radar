@@ -14,6 +14,37 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PROCESSED_DATA_DIR = PROJECT_ROOT / "data" / "processed"
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
+DISPLAY_COLUMN_LABELS = {
+    "rank": "Rank",
+    "primary_narrative": "Narrative",
+    "narrative_momentum_score": "Momentum Score",
+    "avg_return_7d": "Avg 7D Return",
+    "avg_return_30d": "Avg 30D Return",
+    "relative_strength_7d": "Benchmark-Relative Strength",
+    "avg_volume_to_market_cap": "Volume / Market Cap",
+    "breadth_7d": "7D Participation Breadth",
+    "token_count": "Token Count",
+    "concentration_flag": "Concentration",
+    "symbol": "Symbol",
+    "name": "Name",
+    "coingecko_id": "CoinGecko ID",
+    "market_cap": "Market Cap",
+    "total_market_cap": "Total Market Cap",
+    "total_volume": "Total Volume",
+    "price_change_percentage_24h": "24H Return",
+    "price_change_percentage_7d_in_currency": "7D Return",
+    "price_change_percentage_30d_in_currency": "30D Return",
+    "volume_share_within_narrative": "Volume Share",
+    "market_cap_share_within_narrative": "Market Cap Share",
+    "volume_rank_within_narrative": "Volume Rank",
+    "market_cap_rank_within_narrative": "Market Cap Rank",
+    "top_1_market_cap_share": "Top Token Market Cap Share",
+    "top_3_market_cap_share": "Top 3 Market Cap Share",
+    "top_1_volume_share": "Top Token Volume Share",
+    "top_3_volume_share": "Top 3 Volume Share",
+    "concentration_comment": "Concentration Comment",
+}
+
 
 def find_processed_snapshots(base_dir: Path = PROCESSED_DATA_DIR) -> list[str]:
     """Return available processed snapshot date folders, newest first."""
@@ -156,7 +187,9 @@ def display_kpis(ranking_df: pd.DataFrame) -> None:
         columns[3].metric(
             "Concentration Watch",
             concentration_row["primary_narrative"],
-            format_ratio_pct(concentration_row["top_token_market_cap_share"]),
+        )
+        columns[3].caption(
+            f"Top token share: {format_ratio_pct(concentration_row['top_token_market_cap_share'])}"
         )
     elif score_col:
         weakest_row = ranking_df.sort_values(score_col, ascending=True).iloc[0]
@@ -175,17 +208,44 @@ def select_table_columns(df: pd.DataFrame, preferred_columns: list[str]) -> pd.D
     return df[columns].copy()
 
 
+def rename_for_display(df: pd.DataFrame) -> pd.DataFrame:
+    """Apply human-readable labels for Streamlit display tables."""
+    return df.rename(columns=DISPLAY_COLUMN_LABELS)
+
+
 def style_table(df: pd.DataFrame) -> pd.io.formats.style.Styler:
     """Apply readable table formatting."""
     formatters = {}
     for column in df.columns:
-        if column.endswith("_score"):
+        if column.endswith("_score") or column == "Momentum Score":
             formatters[column] = format_score
-        elif "share" in column or column.startswith("breadth"):
+        elif (
+            "share" in column
+            or "Share" in column
+            or column.startswith("breadth")
+            or "Participation Breadth" in column
+            or column == "Volume / Market Cap"
+        ):
             formatters[column] = format_ratio_pct
-        elif "return" in column or "percentage" in column:
+        elif (
+            "return" in column
+            or "Return" in column
+            or "percentage" in column
+            or column == "Benchmark-Relative Strength"
+        ):
             formatters[column] = format_pct
-        elif column in {"market_cap", "total_market_cap", "total_volume", "top_1_market_cap", "top_3_market_cap", "top_1_volume", "top_3_volume"}:
+        elif column in {
+            "market_cap",
+            "total_market_cap",
+            "total_volume",
+            "top_1_market_cap",
+            "top_3_market_cap",
+            "top_1_volume",
+            "top_3_volume",
+            "Market Cap",
+            "Total Market Cap",
+            "Total Volume",
+        }:
             formatters[column] = format_large_number
     return df.style.format(formatters)
 
@@ -218,7 +278,7 @@ def main() -> None:
     st.write(f"Snapshot date: `{selected_date}`")
     st.info(
         "Research support only. This dashboard describes market structure and relative "
-        "narrative conditions; it is not investment advice and does not forecast prices."
+        "narrative conditions; it is not investment advice and does not estimate future prices."
     )
 
     narratives = sorted(ranking_df["primary_narrative"].dropna().unique().tolist())
@@ -270,10 +330,13 @@ def main() -> None:
         "breadth_7d",
         "token_count",
         "concentration_flag",
-        "scoring_note",
     ]
     ranking_table = select_table_columns(filtered_ranking, ranking_columns)
-    st.dataframe(style_table(ranking_table), width="stretch", hide_index=True)
+    st.dataframe(
+        style_table(rename_for_display(ranking_table)),
+        width="stretch",
+        hide_index=True,
+    )
 
     st.subheader("Narrative Momentum Score by Sector")
     st.caption(
@@ -296,7 +359,7 @@ def main() -> None:
 
     st.subheader("7D vs 30D Sector Rotation")
     st.caption(
-        "Why it may be happening: comparing short-term and medium-term returns helps "
+        "Why it may be happening: comparing recent and medium-term returns helps "
         "separate fresh leadership from narratives that are cooling or still recovering."
     )
     if {"avg_return_7d", "avg_return_30d", "primary_narrative"} <= set(filtered_ranking.columns):
@@ -322,7 +385,8 @@ def main() -> None:
     st.subheader("Return vs Volume Confirmation")
     st.caption(
         "What to validate next: stronger return profiles are more useful for research when "
-        "they are supported by meaningful trading volume."
+        "they are supported by meaningful trading volume. The volume axis uses a log scale "
+        "so large-cap narratives do not compress the rest of the market map."
     )
     if {"avg_return_7d", "total_volume", "token_count", "primary_narrative"} <= set(filtered_ranking.columns):
         fig = px.scatter(
@@ -337,6 +401,7 @@ def main() -> None:
                 "total_volume": "Total volume",
                 "primary_narrative": "Narrative",
             },
+            log_y=True,
         )
         st.plotly_chart(fig, width="stretch")
     else:
@@ -371,7 +436,11 @@ def main() -> None:
             "market_cap_rank_within_narrative",
         ]
         contributor_table = select_table_columns(contributor_view, contributor_columns)
-        st.dataframe(style_table(contributor_table), width="stretch", hide_index=True)
+        st.dataframe(
+            style_table(rename_for_display(contributor_table)),
+            width="stretch",
+            hide_index=True,
+        )
 
     st.subheader("Concentration Review: Broad vs Concentrated Participation")
     concentration_df = filter_by_narrative(data["concentration"], selected_narrative)
@@ -394,7 +463,11 @@ def main() -> None:
             "concentration_comment",
         ]
         concentration_table = select_table_columns(concentration_df, concentration_columns)
-        st.dataframe(style_table(concentration_table), use_container_width=True, hide_index=True)
+        st.dataframe(
+            style_table(rename_for_display(concentration_table)),
+            use_container_width=True,
+            hide_index=True,
+        )
 
     with st.expander("Methodology and Interpretation Guide"):
         st.markdown(
@@ -412,7 +485,8 @@ def main() -> None:
             **Narrative Momentum Score:** The score is a descriptive research ranking from
             0 to 100. It combines price momentum, benchmark-relative strength, volume
             confirmation, and participation breadth. It helps compare current narrative
-            leadership across sectors.
+            leadership across sectors. The current snapshot uses the full V1 scoring weights
+            when BTC and ETH benchmark data is available.
 
             **Benchmark-relative strength:** Relative strength compares narrative performance
             against BTC and ETH over the selected window. It helps distinguish sector-specific
