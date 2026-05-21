@@ -465,7 +465,7 @@ def main() -> None:
         concentration_table = select_table_columns(concentration_df, concentration_columns)
         st.dataframe(
             style_table(rename_for_display(concentration_table)),
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
         )
 
