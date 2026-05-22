@@ -524,3 +524,29 @@ Milestone 5.8B does not add historical scoring, dashboard charts, SQL changes, H
 Next possible milestone:
 - Milestone 5.9: Historical Dashboard View
 - Milestone 6.0: Static HTML Research Report
+
+## Milestone 5.9 Summary
+
+Historical Dashboard View adds a new Streamlit section named `Historical Narrative Trends`.
+
+Input:
+- `data/processed/historical/narrative_market_history_90d.csv`
+
+The historical dashboard view includes:
+- historical narrative return trend
+- breadth of participation over time
+- BTC/ETH relative strength over time
+- concentration over time
+- market activity over time
+
+Validation:
+- compileall passed
+- py_compile passed
+- pytest passed: 56 passed
+- Streamlit rendered locally without traceback
+
+Scope note:
+Milestone 5.9 does not add historical scoring, historical ranking, new API calls, SQL changes, HTML report generation, trading logic, prediction, forecasting, or backtesting.
+
+Next milestone:
+Milestone 6.0: Static HTML Research Report
