@@ -487,3 +487,40 @@ Milestone 5.8A does not add narrative historical metrics, historical scoring, da
 
 Next milestone:
 Milestone 5.8B: Historical Narrative Metrics V1
+
+## Milestone 5.8B Summary
+
+Historical Narrative Metrics V1 aggregates token-level historical market data into daily narrative-level research metrics.
+
+Input:
+- `data/processed/historical/token_market_history_90d.csv`
+
+Output:
+- `data/processed/historical/narrative_market_history_90d.csv`
+
+The output has:
+- 720 rows
+- 90 dates
+- 8 narratives
+- one row per `date + primary_narrative`
+
+Metrics include:
+- narrative-level 1D / 7D / 30D returns
+- total market cap
+- total volume
+- volume-to-market-cap metrics
+- breadth of participation
+- BTC / ETH relative strength
+- concentration context
+- data quality / coverage context
+
+Validation:
+- `scripts/validate_historical_narrative_metrics.py` passed
+- full test suite passed: 49 passed
+
+Scope note:
+Milestone 5.8B does not add historical scoring, dashboard charts, SQL changes, HTML report, trading signals, prediction logic, or backtesting.
+
+Next possible milestone:
+- Milestone 5.9: Historical Dashboard View
+- Milestone 6.0: Static HTML Research Report
