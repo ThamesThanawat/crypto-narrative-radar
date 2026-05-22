@@ -12,6 +12,9 @@ import streamlit as st
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 PROCESSED_DATA_DIR = PROJECT_ROOT / "data" / "processed"
+HISTORICAL_NARRATIVE_PATH = (
+    PROCESSED_DATA_DIR / "historical" / "narrative_market_history_90d.csv"
+)
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 DISPLAY_COLUMN_LABELS = {
@@ -43,6 +46,16 @@ DISPLAY_COLUMN_LABELS = {
     "top_1_volume_share": "Top Token Volume Share",
     "top_3_volume_share": "Top 3 Volume Share",
     "concentration_comment": "Concentration Comment",
+    "avg_return_1d": "Avg 1D Return",
+    "median_return_1d": "Median 1D Return",
+    "median_return_7d": "Median 7D Return",
+    "median_return_30d": "Median 30D Return",
+    "total_market_cap_usd": "Total Market Cap",
+    "total_volume_usd": "Total Volume",
+    "breadth_1d": "1D Participation Breadth",
+    "breadth_30d": "30D Participation Breadth",
+    "rs_vs_btc_7d": "Relative Strength vs BTC",
+    "rs_vs_eth_7d": "Relative Strength vs ETH",
 }
 
 
@@ -82,6 +95,64 @@ def load_snapshot_data(snapshot_date: str) -> dict[str, pd.DataFrame | None]:
         "contributors": load_csv_if_exists(snapshot_dir / "sql_top_token_contributors.csv"),
         "concentration": load_csv_if_exists(snapshot_dir / "sql_concentration_review.csv"),
     }
+
+
+def load_historical_narrative_data(
+    path: Path = HISTORICAL_NARRATIVE_PATH,
+) -> pd.DataFrame | None:
+    """Load historical narrative metrics if the CSV exists."""
+    if not path.exists():
+        return None
+    historical_df = pd.read_csv(path)
+    if "date" in historical_df.columns:
+        historical_df["date"] = pd.to_datetime(historical_df["date"], errors="coerce")
+    return historical_df
+
+
+def validate_historical_data(df: pd.DataFrame | None) -> list[str]:
+    """Return validation warnings for historical narrative data."""
+    if df is None:
+        return [f"Historical narrative data file not found: {HISTORICAL_NARRATIVE_PATH}"]
+    missing_columns = [
+        column for column in ["date", "primary_narrative"] if column not in df.columns
+    ]
+    if missing_columns:
+        return [
+            "Historical narrative data is missing required column(s): "
+            + ", ".join(missing_columns)
+        ]
+    if df["date"].isna().any():
+        return ["Historical narrative data contains invalid date values."]
+    if df.empty:
+        return ["Historical narrative data is empty."]
+    return []
+
+
+def filter_historical_data(
+    df: pd.DataFrame,
+    selected_narratives: list[str],
+    date_range: object,
+) -> pd.DataFrame:
+    """Filter historical narrative data by narrative and date range."""
+    filtered = df.copy()
+    if selected_narratives:
+        filtered = filtered[filtered["primary_narrative"].isin(selected_narratives)]
+
+    if isinstance(date_range, (tuple, list)) and len(date_range) == 2:
+        start_date = pd.to_datetime(date_range[0])
+        end_date = pd.to_datetime(date_range[1])
+        filtered = filtered[
+            (filtered["date"] >= start_date) & (filtered["date"] <= end_date)
+        ]
+    return filtered.copy()
+
+
+def choose_return_metric(df: pd.DataFrame) -> str | None:
+    """Choose the preferred historical return metric."""
+    for column in ["avg_return_7d", "avg_return_30d"]:
+        if column in df.columns:
+            return column
+    return None
 
 
 def score_column(df: pd.DataFrame) -> str | None:
@@ -242,12 +313,235 @@ def style_table(df: pd.DataFrame) -> pd.io.formats.style.Styler:
             "top_3_market_cap",
             "top_1_volume",
             "top_3_volume",
+            "total_market_cap_usd",
+            "total_volume_usd",
+            "Total Market Cap",
+            "Total Volume",
             "Market Cap",
             "Total Market Cap",
             "Total Volume",
         }:
             formatters[column] = format_large_number
     return df.style.format(formatters)
+
+
+def _line_chart(
+    df: pd.DataFrame,
+    y_column: str,
+    title: str,
+    y_label: str,
+) -> None:
+    fig = px.line(
+        df.sort_values("date"),
+        x="date",
+        y=y_column,
+        color="primary_narrative",
+        title=title,
+        labels={
+            "date": "Date",
+            y_column: y_label,
+            "primary_narrative": "Narrative",
+        },
+    )
+    st.plotly_chart(fig, width="stretch")
+
+
+def render_historical_narrative_trends() -> None:
+    """Render the historical narrative trends dashboard section."""
+    st.header("Historical Narrative Trends")
+    st.caption(
+        "Historical Narrative Trends provides a descriptive view of how "
+        "narrative-level market metrics evolved over the available historical "
+        "window. It is intended for research context and market intelligence."
+    )
+
+    historical_df = load_historical_narrative_data()
+    warnings = validate_historical_data(historical_df)
+    if warnings:
+        for warning in warnings:
+            st.warning(warning)
+        return
+
+    assert historical_df is not None
+    narratives = sorted(historical_df["primary_narrative"].dropna().unique().tolist())
+    min_date = historical_df["date"].min().date()
+    max_date = historical_df["date"].max().date()
+
+    filter_columns = st.columns([2, 1])
+    selected_narratives = filter_columns[0].multiselect(
+        "Historical narratives",
+        narratives,
+        default=narratives,
+    )
+    selected_date_range = filter_columns[1].date_input(
+        "Historical date range",
+        value=(min_date, max_date),
+        min_value=min_date,
+        max_value=max_date,
+    )
+
+    filtered_history = filter_historical_data(
+        historical_df,
+        selected_narratives,
+        selected_date_range,
+    )
+    if filtered_history.empty:
+        st.warning("No historical narrative rows match the selected filters.")
+        return
+
+    return_metric = choose_return_metric(filtered_history)
+    st.subheader("Historical Narrative Return Trend")
+    st.caption(
+        "Tracks how average narrative-level returns evolved over time across "
+        "selected narratives."
+    )
+    if return_metric:
+        _line_chart(
+            filtered_history,
+            return_metric,
+            "Historical Narrative Return Trend",
+            DISPLAY_COLUMN_LABELS.get(return_metric, return_metric),
+        )
+    else:
+        st.warning(
+            "Historical return columns are unavailable. Expected avg_return_7d "
+            "or avg_return_30d."
+        )
+
+    st.subheader("Breadth of Participation Over Time")
+    st.caption(
+        "Shows the share of tokens within each narrative with positive performance."
+    )
+    breadth_column = next(
+        (
+            column
+            for column in ["positive_breadth_pct", "breadth_7d"]
+            if column in filtered_history.columns
+        ),
+        None,
+    )
+    if breadth_column:
+        _line_chart(
+            filtered_history,
+            breadth_column,
+            "Breadth of Participation Over Time",
+            DISPLAY_COLUMN_LABELS.get(breadth_column, breadth_column),
+        )
+    else:
+        st.info(
+            "Historical breadth columns are unavailable, so the breadth view is skipped."
+        )
+
+    st.subheader("Relative Strength vs BTC/ETH")
+    st.caption(
+        "Compares narrative-level performance against BTC or ETH as major crypto "
+        "benchmarks."
+    )
+    benchmark_columns = {
+        "BTC": next(
+            (
+                column
+                for column in ["btc_relative_strength_7d", "rs_vs_btc_7d"]
+                if column in filtered_history.columns
+            ),
+            None,
+        ),
+        "ETH": next(
+            (
+                column
+                for column in ["eth_relative_strength_7d", "rs_vs_eth_7d"]
+                if column in filtered_history.columns
+            ),
+            None,
+        ),
+    }
+    available_benchmarks = {
+        label: column for label, column in benchmark_columns.items() if column
+    }
+    if available_benchmarks:
+        if len(available_benchmarks) > 1:
+            selected_benchmark = st.selectbox(
+                "Relative strength benchmark",
+                list(available_benchmarks),
+            )
+        else:
+            selected_benchmark = next(iter(available_benchmarks))
+        relative_strength_column = available_benchmarks[selected_benchmark]
+        _line_chart(
+            filtered_history,
+            relative_strength_column,
+            "Relative Strength vs BTC/ETH",
+            f"Relative Strength vs {selected_benchmark}",
+        )
+    else:
+        st.info(
+            "Historical BTC/ETH relative strength columns are unavailable, so this "
+            "view is skipped."
+        )
+
+    st.subheader("Narrative Concentration Over Time")
+    st.caption(
+        "Shows whether narrative market cap became more concentrated or broadly "
+        "distributed over time."
+    )
+    concentration_options = [
+        column
+        for column in ["top_3_market_cap_share", "top_token_market_cap_share"]
+        if column in filtered_history.columns
+    ]
+    if concentration_options:
+        default_index = (
+            concentration_options.index("top_3_market_cap_share")
+            if "top_3_market_cap_share" in concentration_options
+            else 0
+        )
+        concentration_column = st.selectbox(
+            "Concentration metric",
+            concentration_options,
+            index=default_index,
+            format_func=lambda column: DISPLAY_COLUMN_LABELS.get(column, column),
+        )
+        _line_chart(
+            filtered_history,
+            concentration_column,
+            "Narrative Concentration Over Time",
+            DISPLAY_COLUMN_LABELS.get(concentration_column, concentration_column),
+        )
+    else:
+        st.info(
+            "Historical concentration columns are unavailable, so the concentration "
+            "context view is skipped."
+        )
+
+    st.subheader("Market Activity Over Time")
+    st.caption("Shows descriptive market activity context for selected narratives.")
+    activity_options = [
+        column
+        for column in [
+            "total_volume",
+            "total_volume_usd",
+            "total_market_cap",
+            "total_market_cap_usd",
+        ]
+        if column in filtered_history.columns
+    ]
+    if activity_options:
+        activity_column = st.selectbox(
+            "Market activity metric",
+            activity_options,
+            format_func=lambda column: DISPLAY_COLUMN_LABELS.get(column, column),
+        )
+        _line_chart(
+            filtered_history,
+            activity_column,
+            "Market Activity Over Time",
+            DISPLAY_COLUMN_LABELS.get(activity_column, activity_column),
+        )
+    else:
+        st.info(
+            "Historical market activity columns are unavailable, so this context "
+            "view is skipped."
+        )
 
 
 def main() -> None:
@@ -278,7 +572,7 @@ def main() -> None:
     st.write(f"Snapshot date: `{selected_date}`")
     st.info(
         "Research support only. This dashboard describes market structure and relative "
-        "narrative conditions; it is not investment advice and does not estimate future prices."
+        "narrative conditions; it is not investment advice or a recommendation tool."
     )
 
     narratives = sorted(ranking_df["primary_narrative"].dropna().unique().tolist())
@@ -468,6 +762,8 @@ def main() -> None:
             width="stretch",
             hide_index=True,
         )
+
+    render_historical_narrative_trends()
 
     with st.expander("Methodology and Interpretation Guide"):
         st.markdown(

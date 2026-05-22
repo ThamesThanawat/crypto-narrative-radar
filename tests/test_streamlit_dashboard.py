@@ -1,10 +1,17 @@
 from pathlib import Path
 
+import pandas as pd
+
 from dashboard import streamlit_app
 from dashboard.streamlit_app import (
+    HISTORICAL_NARRATIVE_PATH,
+    choose_return_metric,
+    filter_historical_data,
     find_processed_snapshots,
     load_csv_if_exists,
+    load_historical_narrative_data,
     load_snapshot_data,
+    validate_historical_data,
 )
 
 
@@ -45,3 +52,74 @@ def test_load_snapshot_data_allows_missing_optional_files(tmp_path: Path, monkey
     assert data["ranking"] is not None
     assert data["contributors"] is None
     assert data["concentration"] is None
+
+
+def test_historical_csv_path_points_to_processed_historical_output() -> None:
+    assert HISTORICAL_NARRATIVE_PATH.as_posix().endswith(
+        "data/processed/historical/narrative_market_history_90d.csv"
+    )
+
+
+def test_validate_historical_data_passes_with_required_columns() -> None:
+    df = pd.DataFrame(
+        {
+            "date": pd.to_datetime(["2026-05-21"]),
+            "primary_narrative": ["Layer 1"],
+        }
+    )
+
+    assert validate_historical_data(df) == []
+
+
+def test_validate_historical_data_fails_gracefully_when_required_columns_missing() -> None:
+    df = pd.DataFrame({"date": pd.to_datetime(["2026-05-21"])})
+
+    warnings = validate_historical_data(df)
+
+    assert warnings
+    assert "primary_narrative" in warnings[0]
+
+
+def test_validate_historical_data_warns_when_file_is_missing() -> None:
+    warnings = validate_historical_data(None)
+
+    assert warnings
+    assert "narrative_market_history_90d.csv" in warnings[0]
+
+
+def test_choose_return_metric_prefers_7d_then_falls_back_to_30d() -> None:
+    assert choose_return_metric(pd.DataFrame(columns=["avg_return_7d", "avg_return_30d"])) == "avg_return_7d"
+    assert choose_return_metric(pd.DataFrame(columns=["avg_return_30d"])) == "avg_return_30d"
+    assert choose_return_metric(pd.DataFrame(columns=["median_return_7d"])) is None
+
+
+def test_filter_historical_data_applies_narrative_and_date_range() -> None:
+    df = pd.DataFrame(
+        {
+            "date": pd.to_datetime(["2026-05-20", "2026-05-21", "2026-05-22"]),
+            "primary_narrative": ["Layer 1", "DeFi", "Layer 1"],
+            "avg_return_7d": [0.1, 0.2, 0.3],
+        }
+    )
+
+    filtered = filter_historical_data(
+        df,
+        selected_narratives=["Layer 1"],
+        date_range=(pd.Timestamp("2026-05-21").date(), pd.Timestamp("2026-05-22").date()),
+    )
+
+    assert filtered["primary_narrative"].tolist() == ["Layer 1"]
+    assert filtered["date"].dt.strftime("%Y-%m-%d").tolist() == ["2026-05-22"]
+
+
+def test_load_historical_narrative_data_parses_date(tmp_path: Path) -> None:
+    csv_path = tmp_path / "narrative_market_history_90d.csv"
+    csv_path.write_text(
+        "date,primary_narrative,avg_return_7d\n2026-05-22,Layer 1,0.1\n",
+        encoding="utf-8",
+    )
+
+    df = load_historical_narrative_data(csv_path)
+
+    assert df is not None
+    assert pd.api.types.is_datetime64_any_dtype(df["date"])
