@@ -99,7 +99,7 @@ The token universe is defined in:
 data/reference/taxonomy.csv
 ```
 
-The current workflow is snapshot-based. Each run creates a point-in-time market snapshot for the selected run date. Historical trend analysis is not implemented yet.
+The current narrative workflow is snapshot-based. Each daily run creates a point-in-time market snapshot for the selected run date. Token-level historical backfill is available as a separate foundation for future narrative trend analysis.
 
 ## Methodology
 
@@ -186,10 +186,12 @@ dashboard/
   streamlit_app.py
 
 scripts/
+  backfill_coingecko_history.py
   fetch_coingecko_markets.py
   calculate_narrative_metrics.py
   run_daily_pipeline.py
   run_sql_analytics.py
+  validate_historical_market_data.py
   validate_market_snapshot.py
   validate_narrative_metrics.py
   validate_sql_outputs.py
@@ -227,6 +229,15 @@ Run the Streamlit dashboard:
 streamlit run dashboard/streamlit_app.py
 ```
 
+Run the historical token backfill:
+
+```bash
+python scripts/backfill_coingecko_history.py --days 90
+python scripts/validate_historical_market_data.py
+```
+
+This creates token-level historical market data. Narrative-level historical metrics are a separate future milestone.
+
 Run the test suite:
 
 ```bash
@@ -260,7 +271,7 @@ On Windows, if Python is not available directly on `PATH`, use the virtual envir
 
 ## Future Improvements
 
-- Historical backfill for trend analysis.
+- Historical narrative metrics for trend analysis.
 - Static HTML research report.
 - DeFiLlama fundamentals overlay, including TVL, fees, DEX volume, and stablecoin flows.
 - More robust benchmark analysis.
