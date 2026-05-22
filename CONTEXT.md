@@ -454,3 +454,36 @@ A good project output should be:
 - cautious in interpretation
 - clearly not a trading recommendation
 - supported by validation or tests where appropriate
+
+## Completed Milestones
+
+- Milestone 5.8A: Historical Token Backfill V1
+
+### Milestone 5.8A Summary
+
+Historical Token Backfill V1 adds a token-level historical market data foundation using CoinGecko `/coins/{id}/market_chart`.
+
+The pipeline:
+- reads validated CoinGecko IDs from `data/reference/taxonomy.csv`
+- fetches 90-day daily historical market data
+- saves raw JSON responses under `data/raw/coingecko/historical/YYYY-MM-DD/`
+- logs failed tokens in `backfill_failures.csv`
+- normalizes data into `data/processed/historical/token_market_history_90d.csv`
+- calculates token-level calendar-lag returns: `return_1d`, `return_7d`, and `return_30d`
+- adds `data_quality_flag`
+- validates the historical token output
+
+Latest run:
+- requested tokens: 80
+- successful tokens: 77
+- failed tokens: 3
+- failed due to CoinGecko 429 rate limits: `curve-dao-token`, `ondo-finance`, `render-token`
+- processed rows: 6,930
+- date range: 2026-02-22 to 2026-05-22
+- tests passed: 44 passed
+
+Scope note:
+Milestone 5.8A does not add narrative historical metrics, historical scoring, dashboard charts, SQL changes, backtesting, prediction logic, or trading signals.
+
+Next milestone:
+Milestone 5.8B: Historical Narrative Metrics V1
