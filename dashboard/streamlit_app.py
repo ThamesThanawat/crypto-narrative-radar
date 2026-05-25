@@ -15,7 +15,20 @@ PROCESSED_DATA_DIR = PROJECT_ROOT / "data" / "processed"
 HISTORICAL_NARRATIVE_PATH = (
     PROCESSED_DATA_DIR / "historical" / "narrative_market_history_90d.csv"
 )
+WATCHLIST_INDICATORS_PATH = (
+    PROCESSED_DATA_DIR / "historical" / "narrative_watchlist_indicators_90d.csv"
+)
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+WATCHLIST_REQUIRED_COLUMNS = [
+    "date",
+    "primary_narrative",
+    "watchlist_score",
+    "watch_volume_accel",
+    "watch_breadth_expand",
+    "watch_quiet_rs",
+    "watch_momentum_pickup",
+    "watchlist_label",
+]
 
 DISPLAY_COLUMN_LABELS = {
     "rank": "Rank",
@@ -56,6 +69,12 @@ DISPLAY_COLUMN_LABELS = {
     "breadth_30d": "30D Participation Breadth",
     "rs_vs_btc_7d": "Relative Strength vs BTC",
     "rs_vs_eth_7d": "Relative Strength vs ETH",
+    "watchlist_score": "Watchlist Score",
+    "watch_volume_accel": "Vol Accel",
+    "watch_breadth_expand": "Breadth Expand",
+    "watch_quiet_rs": "Quiet RS",
+    "watch_momentum_pickup": "Mom Pickup",
+    "watchlist_label": "Research Label",
 }
 
 
@@ -109,6 +128,18 @@ def load_historical_narrative_data(
     return historical_df
 
 
+def load_watchlist_data(
+    path: Path = WATCHLIST_INDICATORS_PATH,
+) -> pd.DataFrame | None:
+    """Load narrative watchlist indicators if the CSV exists."""
+    if not path.exists():
+        return None
+    watchlist_df = pd.read_csv(path)
+    if "date" in watchlist_df.columns:
+        watchlist_df["date"] = pd.to_datetime(watchlist_df["date"], errors="coerce")
+    return watchlist_df
+
+
 def validate_historical_data(df: pd.DataFrame | None) -> list[str]:
     """Return validation warnings for historical narrative data."""
     if df is None:
@@ -125,6 +156,29 @@ def validate_historical_data(df: pd.DataFrame | None) -> list[str]:
         return ["Historical narrative data contains invalid date values."]
     if df.empty:
         return ["Historical narrative data is empty."]
+    return []
+
+
+def validate_watchlist_data(df: pd.DataFrame | None) -> list[str]:
+    """Return validation warnings for narrative watchlist data."""
+    if df is None:
+        return [
+            "Narrative Watchlist data is not available yet.\n\n"
+            f"Expected file: `{WATCHLIST_INDICATORS_PATH.as_posix()}`\n\n"
+            "Run the watchlist indicator pipeline to generate this research screening view."
+        ]
+    missing_columns = [
+        column for column in WATCHLIST_REQUIRED_COLUMNS if column not in df.columns
+    ]
+    if missing_columns:
+        return [
+            "Narrative Watchlist data is missing required column(s): "
+            + ", ".join(missing_columns)
+        ]
+    if df["date"].isna().any():
+        return ["Narrative Watchlist data contains invalid date values."]
+    if df.empty:
+        return ["Narrative Watchlist data is empty."]
     return []
 
 
@@ -145,6 +199,34 @@ def filter_historical_data(
             (filtered["date"] >= start_date) & (filtered["date"] <= end_date)
         ]
     return filtered.copy()
+
+
+def prepare_latest_watchlist_table(df: pd.DataFrame) -> pd.DataFrame:
+    """Return the latest watchlist rows sorted for research review."""
+    latest_date = df["date"].max()
+    latest = df[df["date"] == latest_date].copy()
+    table_columns = [
+        "primary_narrative",
+        "watchlist_score",
+        "watch_volume_accel",
+        "watch_breadth_expand",
+        "watch_quiet_rs",
+        "watch_momentum_pickup",
+        "watchlist_label",
+    ]
+    latest = latest[table_columns].sort_values(
+        ["watchlist_score", "primary_narrative"],
+        ascending=[False, True],
+    )
+    bool_columns = [
+        "watch_volume_accel",
+        "watch_breadth_expand",
+        "watch_quiet_rs",
+        "watch_momentum_pickup",
+    ]
+    for column in bool_columns:
+        latest[column] = latest[column].map(lambda value: "Yes" if bool(value) else "No")
+    return rename_for_display(latest)
 
 
 def choose_return_metric(df: pd.DataFrame) -> str | None:
@@ -544,6 +626,73 @@ def render_historical_narrative_trends() -> None:
         )
 
 
+def render_narrative_watchlist() -> None:
+    """Render the narrative watchlist research screening section."""
+    st.header("Narrative Watchlist")
+    st.caption(
+        "The Narrative Watchlist is designed to prioritize narratives for further "
+        "research review. It flags narratives showing volume expansion, breadth "
+        "improvement, relative strength versus BTC, and recent momentum pickup. "
+        "These indicators are descriptive screening tools and do not indicate future "
+        "price direction or investment guidance."
+    )
+
+    watchlist_df = load_watchlist_data()
+    warnings = validate_watchlist_data(watchlist_df)
+    if warnings:
+        for warning in warnings:
+            st.warning(warning)
+        return
+
+    assert watchlist_df is not None
+    latest_table = prepare_latest_watchlist_table(watchlist_df)
+    st.subheader("Latest Watchlist Table")
+    st.caption(
+        "Shows the latest available watchlist indicators for each narrative, sorted "
+        "by Watchlist Score. Higher scores indicate more research conditions are "
+        "present, not stronger expected returns."
+    )
+    st.dataframe(
+        latest_table,
+        width="stretch",
+        hide_index=True,
+    )
+
+    st.subheader("Narrative Watchlist Score — 90 Day History")
+    st.caption(
+        "Tracks how narrative-level research conditions evolved over the 90-day "
+        "window. The score reflects the number of active watchlist indicators and "
+        "should not be interpreted as an estimate of future price direction or "
+        "investment guidance."
+    )
+    narratives = sorted(watchlist_df["primary_narrative"].dropna().unique().tolist())
+    selected_narratives = st.multiselect(
+        "Watchlist narratives",
+        narratives,
+        default=narratives,
+    )
+    chart_df = watchlist_df.copy()
+    if selected_narratives:
+        chart_df = chart_df[chart_df["primary_narrative"].isin(selected_narratives)]
+    if chart_df.empty:
+        st.warning("No watchlist rows match the selected narratives.")
+        return
+
+    fig = px.line(
+        chart_df.sort_values("date"),
+        x="date",
+        y="watchlist_score",
+        color="primary_narrative",
+        title="Narrative Watchlist Score — 90 Day History",
+        labels={
+            "date": "Date",
+            "watchlist_score": "Watchlist Score",
+            "primary_narrative": "Narrative",
+        },
+    )
+    st.plotly_chart(fig, width="stretch")
+
+
 def main() -> None:
     """Render the Streamlit dashboard."""
     st.set_page_config(page_title="Crypto Narrative Radar", layout="wide")
@@ -572,7 +721,7 @@ def main() -> None:
     st.write(f"Snapshot date: `{selected_date}`")
     st.info(
         "Research support only. This dashboard describes market structure and relative "
-        "narrative conditions; it is not investment advice or a recommendation tool."
+        "narrative conditions; it is not investment advice or investment guidance."
     )
 
     narratives = sorted(ranking_df["primary_narrative"].dropna().unique().tolist())
@@ -764,6 +913,7 @@ def main() -> None:
         )
 
     render_historical_narrative_trends()
+    render_narrative_watchlist()
 
     with st.expander("Methodology and Interpretation Guide"):
         st.markdown(

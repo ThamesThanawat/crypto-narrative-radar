@@ -5,13 +5,17 @@ import pandas as pd
 from dashboard import streamlit_app
 from dashboard.streamlit_app import (
     HISTORICAL_NARRATIVE_PATH,
+    WATCHLIST_INDICATORS_PATH,
     choose_return_metric,
     filter_historical_data,
     find_processed_snapshots,
     load_csv_if_exists,
     load_historical_narrative_data,
     load_snapshot_data,
+    load_watchlist_data,
+    prepare_latest_watchlist_table,
     validate_historical_data,
+    validate_watchlist_data,
 )
 
 
@@ -57,6 +61,12 @@ def test_load_snapshot_data_allows_missing_optional_files(tmp_path: Path, monkey
 def test_historical_csv_path_points_to_processed_historical_output() -> None:
     assert HISTORICAL_NARRATIVE_PATH.as_posix().endswith(
         "data/processed/historical/narrative_market_history_90d.csv"
+    )
+
+
+def test_watchlist_csv_path_points_to_processed_historical_output() -> None:
+    assert WATCHLIST_INDICATORS_PATH.as_posix().endswith(
+        "data/processed/historical/narrative_watchlist_indicators_90d.csv"
     )
 
 
@@ -123,3 +133,92 @@ def test_load_historical_narrative_data_parses_date(tmp_path: Path) -> None:
 
     assert df is not None
     assert pd.api.types.is_datetime64_any_dtype(df["date"])
+
+
+def test_load_watchlist_data_returns_none_when_file_is_missing(tmp_path: Path) -> None:
+    assert load_watchlist_data(tmp_path / "missing_watchlist.csv") is None
+
+
+def test_load_watchlist_data_parses_date(tmp_path: Path) -> None:
+    csv_path = tmp_path / "narrative_watchlist_indicators_90d.csv"
+    csv_path.write_text(
+        "date,primary_narrative,watchlist_score,watch_volume_accel,"
+        "watch_breadth_expand,watch_quiet_rs,watch_momentum_pickup,watchlist_label\n"
+        "2026-05-22,Layer 1,2,True,False,True,False,Monitor\n",
+        encoding="utf-8",
+    )
+
+    df = load_watchlist_data(csv_path)
+
+    assert df is not None
+    assert pd.api.types.is_datetime64_any_dtype(df["date"])
+
+
+def test_validate_watchlist_data_warns_when_file_is_missing() -> None:
+    warnings = validate_watchlist_data(None)
+
+    assert warnings
+    assert "Narrative Watchlist data is not available yet" in warnings[0]
+    assert "narrative_watchlist_indicators_90d.csv" in warnings[0]
+
+
+def test_validate_watchlist_data_warns_when_required_columns_missing() -> None:
+    df = pd.DataFrame(
+        {
+            "date": pd.to_datetime(["2026-05-21"]),
+            "primary_narrative": ["Layer 1"],
+            "watchlist_score": [1],
+        }
+    )
+
+    warnings = validate_watchlist_data(df)
+
+    assert warnings
+    assert "watch_volume_accel" in warnings[0]
+    assert "watchlist_label" in warnings[0]
+
+
+def test_validate_watchlist_data_passes_with_required_columns() -> None:
+    df = pd.DataFrame(
+        {
+            "date": pd.to_datetime(["2026-05-21"]),
+            "primary_narrative": ["Layer 1"],
+            "watchlist_score": [1],
+            "watch_volume_accel": [False],
+            "watch_breadth_expand": [False],
+            "watch_quiet_rs": [True],
+            "watch_momentum_pickup": [False],
+            "watchlist_label": ["Low Research Interest"],
+        }
+    )
+
+    assert validate_watchlist_data(df) == []
+
+
+def test_prepare_latest_watchlist_table_sorts_and_formats_booleans() -> None:
+    df = pd.DataFrame(
+        {
+            "date": pd.to_datetime(
+                ["2026-05-20", "2026-05-21", "2026-05-21"]
+            ),
+            "primary_narrative": ["AI", "AI", "DeFi"],
+            "watchlist_score": [1, 2, 3],
+            "watch_volume_accel": [False, True, False],
+            "watch_breadth_expand": [False, False, True],
+            "watch_quiet_rs": [True, True, True],
+            "watch_momentum_pickup": [False, False, True],
+            "watchlist_label": [
+                "Low Research Interest",
+                "Monitor",
+                "Review Closely",
+            ],
+        }
+    )
+
+    table = prepare_latest_watchlist_table(df)
+
+    assert table["Narrative"].tolist() == ["DeFi", "AI"]
+    assert table["Watchlist Score"].tolist() == [3, 2]
+    assert table["Vol Accel"].tolist() == ["No", "Yes"]
+    assert table["Breadth Expand"].tolist() == ["Yes", "No"]
+    assert table["Research Label"].tolist() == ["Review Closely", "Monitor"]
