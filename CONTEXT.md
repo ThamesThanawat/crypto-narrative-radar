@@ -614,5 +614,11 @@ Verified environment:
 - DuckDB installed: 1.5.3
 - `python -m pytest tests` passed: 56 passed
 
-Next milestone:
 Milestone 6.0: Static HTML Research Report
+
+- generates reports/html/crypto_narrative_report_YYYY-MM-DD.html
+- updates reports/html/latest.html
+- uses existing processed outputs only
+- includes executive summary, narrative ranking, contributors, concentration review, historical context, methodology, and limitations
+- no API calls, scoring changes, prediction, backtesting, or trading logic added
+- pytest passed: 63 passed
