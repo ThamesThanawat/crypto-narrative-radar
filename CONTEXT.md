@@ -645,3 +645,26 @@ Validation:
 
 Scope note:
 No scoring, API, dashboard, SQL, taxonomy, or historical calculation logic was changed.
+
+### Milestone 6.2 Summary
+
+README Final Portfolio Polish updated the project README into a recruiter-facing portfolio landing page.
+
+The README now covers:
+
+- project overview and positioning
+- narrative-level market intelligence rationale
+- current dashboard and static HTML report outputs
+- research methodology and Narrative Momentum Score V1
+- data outputs and repository structure
+- local run commands
+- skills demonstrated
+- limitations and future improvements
+- AI-assisted development disclosure
+
+Validation:
+
+- `.venv/bin/python -m pytest tests` passed: 71 passed
+
+Scope note:
+Milestone 6.2 changed documentation only. No implementation files, scoring formulas, report logic, dashboard logic, SQL, taxonomy, tests, or GitHub Actions were modified.
