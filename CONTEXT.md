@@ -668,3 +668,36 @@ Validation:
 
 Scope note:
 Milestone 6.2 changed documentation only. No implementation files, scoring formulas, report logic, dashboard logic, SQL, taxonomy, tests, or GitHub Actions were modified.
+
+### Milestone 6.3 Summary
+
+Narrative Watchlist Indicators V1 adds a research screening layer using historical narrative metrics.
+
+6.3A created the watchlist indicator pipeline:
+
+- input: `data/processed/historical/narrative_market_history_90d.csv`
+- output: `data/processed/historical/narrative_watchlist_indicators_90d.csv`
+- flags:
+  - `watch_volume_accel`
+  - `watch_breadth_expand`
+  - `watch_quiet_rs`
+  - `watch_momentum_pickup`
+- composite:
+  - `watchlist_score`
+  - `watchlist_label`
+
+  6.3B added the Streamlit `Narrative Watchlist` section:
+
+- latest watchlist table
+- watchlist score history chart
+- narrative multiselect
+- friendly missing-file handling
+- friendly missing-column warning
+
+Validation:
+
+- `.venv/bin/python -m pytest tests` passed: 87 passed
+- Streamlit rendered locally with current snapshot, Historical Narrative Trends, and Narrative Watchlist sections
+
+Scope note:
+This is a research screening layer only. It does not add trading signals, price prediction, backtesting, buy/sell recommendations, new APIs, DeFiLlama logic, or Narrative Momentum Score formula changes.
