@@ -6,6 +6,9 @@ import pytest
 from crypto_narrative_radar.reports.html_report import (
     detect_score_column,
     find_latest_processed_date,
+    format_percent_point,
+    format_ratio_pct,
+    format_value,
     generate_report,
     load_required_csv,
     prepare_executive_summary,
@@ -93,6 +96,38 @@ def test_score_column_detection_supports_expected_names() -> None:
     )
 
 
+def test_percent_point_formatter_does_not_rescale_returns() -> None:
+    assert format_percent_point(-0.891) == "-0.9%"
+    assert format_percent_point(0.947) == "0.9%"
+    assert format_percent_point(-0.78) == "-0.8%"
+
+
+def test_ratio_percentage_formatter_rescales_fractions() -> None:
+    assert format_ratio_pct(0.625) == "62.5%"
+    assert format_ratio_pct(1.0) == "100.0%"
+
+
+def test_percentage_formatters_handle_missing_values() -> None:
+    assert format_percent_point(None) == "N/A"
+    assert format_percent_point(float("nan")) == "N/A"
+    assert format_ratio_pct(None) == "N/A"
+    assert format_ratio_pct(float("nan")) == "N/A"
+
+
+def test_column_based_formatter_uses_explicit_percentage_scales() -> None:
+    assert format_value(-0.891, "avg_return_7d") == "-0.9%"
+    assert format_value(0.947, "price_change_percentage_7d_in_currency") == "0.9%"
+    assert format_value(0.625, "positive_breadth_pct") == "62.5%"
+    assert format_value(0.8, "top_3_market_cap_share") == "80.0%"
+
+
+def test_column_based_formatter_allows_historical_ratio_overrides() -> None:
+    assert format_value(0.174, "avg_return_7d", "ratio_pct") == "17.4%"
+    assert format_value(0.132, "relative_strength_7d", "ratio_pct") == "13.2%"
+    assert format_value(0.90, "breadth_7d", "ratio_pct") == "90.0%"
+    assert format_value(0.946, "top_3_market_cap_share") == "94.6%"
+
+
 def test_executive_summary_identifies_top_and_weakest_narratives() -> None:
     ranking = pd.DataFrame(
         {
@@ -146,3 +181,109 @@ def test_generated_content_avoids_trading_framing(tmp_path: Path) -> None:
 
     assert "trading signal" not in html
     assert "alpha guarantee" not in html
+
+
+def test_rendered_report_uses_correct_percentage_scales(tmp_path: Path) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-25"
+    processed_dir.mkdir(parents=True)
+    pd.DataFrame(
+        [
+            {
+                "rank": 1,
+                "primary_narrative": "Layer 1",
+                "narrative_momentum_score": 80,
+                "avg_return_7d": -0.891,
+                "avg_return_30d": 2,
+                "breadth_7d": 0.625,
+                "total_market_cap": 1000,
+                "total_volume": 100,
+                "relative_strength_7d": -0.5,
+            }
+        ]
+    ).to_csv(processed_dir / "narrative_ranking.csv", index=False)
+    pd.DataFrame(
+        [
+            {
+                "primary_narrative": "Layer 1",
+                "symbol": "ETH",
+                "name": "Ethereum",
+                "market_cap": 1000,
+                "total_volume": 100,
+                "price_change_percentage_7d_in_currency": -0.891,
+                "volume_share_within_narrative": 0.625,
+                "market_cap_share_within_narrative": 1.0,
+            }
+        ]
+    ).to_csv(processed_dir / "sql_top_token_contributors.csv", index=False)
+
+    output_path = generate_report(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+    )
+    html = output_path.read_text(encoding="utf-8")
+
+    assert "-0.9%" in html
+    assert "-89.1%" not in html
+    assert "62.5%" in html
+
+
+def test_rendered_historical_context_uses_ratio_percentage_scale(tmp_path: Path) -> None:
+    processed_root = tmp_path / "processed"
+    processed_dir = processed_root / "2026-05-25"
+    historical_dir = processed_root / "historical"
+    processed_dir.mkdir(parents=True)
+    historical_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+    pd.DataFrame(
+        [
+            {
+                "date": "2026-05-25",
+                "primary_narrative": "AI",
+                "avg_return_7d": 0.174,
+                "avg_return_30d": 0.1119,
+                "breadth_7d": 0.90,
+                "relative_strength_7d": 0.132,
+                "relative_strength_30d": 0.1526,
+                "total_market_cap_usd": 1000,
+                "total_volume_usd": 100,
+            }
+        ]
+    ).to_csv(historical_dir / "narrative_market_history_90d.csv", index=False)
+
+    output_path = generate_report(
+        processed_root=processed_root,
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+    )
+    html = output_path.read_text(encoding="utf-8")
+
+    assert "17.4%" in html
+    assert "11.2%" in html
+    assert "90.0%" in html
+    assert "13.2%" in html
+    assert "15.3%" in html
+    assert "0.2%" not in html
+
+
+def test_rendered_report_uses_research_friendly_section_titles_and_headers(
+    tmp_path: Path,
+) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-25"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+
+    output_path = generate_report(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+    )
+    html = output_path.read_text(encoding="utf-8")
+
+    assert "Top 5 by Narrative Momentum Score" in html
+    assert "Lowest 5 by Narrative Momentum Score" in html
+    assert "<th>Narrative</th>" in html
+    assert "<th>Avg 7D Return</th>" in html
+    assert "<th>Narrative Momentum Score</th>" in html
+    assert "Top 5 Outperforming Narratives" not in html
+    assert "Top 5 Weakening Narratives" not in html

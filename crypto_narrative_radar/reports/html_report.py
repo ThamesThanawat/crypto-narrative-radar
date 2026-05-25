@@ -23,32 +23,54 @@ DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 REPORT_FILENAME_TEMPLATE = "crypto_narrative_report_{snapshot_date}.html"
 TOKEN_SNAPSHOT_TEMPLATE = "token_market_snapshot_{snapshot_date}.csv"
 TEMPLATE_NAME = "research_report.html.j2"
-PERCENT_COLUMNS = {
+PERCENT_POINT_COLUMNS = {
     "avg_return_24h",
     "median_return_24h",
     "avg_return_7d",
     "median_return_7d",
     "avg_return_30d",
     "median_return_30d",
+    "avg_return_1d",
+    "median_return_1d",
+    "btc_return_1d",
+    "btc_return_7d",
+    "btc_return_30d",
+    "eth_return_1d",
+    "eth_return_7d",
+    "eth_return_30d",
+    "btc_relative_strength_7d",
+    "eth_relative_strength_7d",
+    "rs_vs_btc_1d",
+    "rs_vs_btc_7d",
+    "rs_vs_btc_30d",
+    "rs_vs_eth_1d",
+    "rs_vs_eth_7d",
+    "rs_vs_eth_30d",
+    "relative_strength_1d",
+    "relative_strength_7d",
+    "relative_strength_30d",
+    "price_change_percentage_24h",
+    "price_change_percentage_7d_in_currency",
+    "price_change_percentage_30d_in_currency",
+}
+RATIO_PERCENT_COLUMNS = {
     "breadth_24h",
     "breadth_7d",
     "breadth_30d",
+    "breadth_1d",
     "positive_breadth_pct",
     "positive_24h_share",
     "top_token_market_cap_share",
     "top_1_market_cap_share",
     "top_3_market_cap_share",
+    "top_1_volume_share",
+    "top_3_volume_share",
     "volume_share_within_narrative",
     "market_cap_share_within_narrative",
+    "market_cap_share_pct",
     "volume_to_market_cap",
     "avg_volume_to_market_cap",
-    "price_change_percentage_24h",
-    "price_change_percentage_7d_in_currency",
-    "price_change_percentage_30d_in_currency",
     "volume_share_pct",
-    "rs_vs_btc_7d",
-    "rs_vs_eth_7d",
-    "relative_strength_7d",
 }
 MONEY_COLUMNS = {
     "market_cap",
@@ -61,6 +83,37 @@ MONEY_COLUMNS = {
     "top_1_market_cap",
     "top_3_market_cap",
 }
+
+COLUMN_LABELS = {
+    "rank": "Rank",
+    "primary_narrative": "Narrative",
+    "token_count": "Token Count",
+    "narrative_momentum_score": "Narrative Momentum Score",
+    "momentum_score": "Narrative Momentum Score",
+    "avg_return_7d": "Avg 7D Return",
+    "avg_return_30d": "Avg 30D Return",
+    "total_market_cap": "Total Market Cap",
+    "total_market_cap_usd": "Total Market Cap",
+    "total_volume": "Total Volume",
+    "total_volume_usd": "Total Volume",
+    "breadth_7d": "7D Breadth",
+    "positive_breadth_pct": "Positive Breadth",
+    "relative_strength_7d": "Relative Strength 7D",
+    "relative_strength_30d": "Relative Strength 30D",
+    "concentration_flag": "Concentration",
+    "symbol": "Symbol",
+    "name": "Name",
+    "market_cap": "Market Cap",
+    "price_change_percentage_7d_in_currency": "7D Return",
+    "volume_share_within_narrative": "Volume Share",
+    "market_cap_share_within_narrative": "Market Cap Share",
+    "top_1_market_cap_share": "Top 1 Market Cap Share",
+    "top_3_market_cap_share": "Top 3 Market Cap Share",
+    "concentration_comment": "Concentration Comment",
+    "volume_share_pct": "Volume Share",
+}
+
+
 def find_latest_processed_date(processed_root: Path = PROCESSED_DATA_DIR) -> str:
     """Return the latest date-like processed folder."""
     if not processed_root.exists():
@@ -250,20 +303,32 @@ def _select_columns(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
     return df[available].copy() if available else pd.DataFrame()
 
 
-def _records(df: pd.DataFrame, max_rows: int | None = None) -> dict[str, Any] | None:
+def _records(
+    df: pd.DataFrame,
+    max_rows: int | None = None,
+    column_formats: dict[str, str] | None = None,
+) -> dict[str, Any] | None:
     if df.empty:
         return None
     if max_rows is not None:
         df = df.head(max_rows)
+    columns = list(df.columns)
     return {
-        "columns": list(df.columns),
+        "columns": columns,
+        "labels": {column: COLUMN_LABELS.get(column, column.replace("_", " ").title()) for column in columns},
+        "formats": column_formats or {},
         "rows": df.to_dict(orient="records"),
     }
 
 
-def _table_from_df(df: pd.DataFrame, columns: list[str], max_rows: int | None = None) -> dict[str, Any] | None:
+def _table_from_df(
+    df: pd.DataFrame,
+    columns: list[str],
+    max_rows: int | None = None,
+    column_formats: dict[str, str] | None = None,
+) -> dict[str, Any] | None:
     selected = _select_columns(df, columns)
-    return _records(selected, max_rows=max_rows)
+    return _records(selected, max_rows=max_rows, column_formats=column_formats)
 
 
 def _sort_by_score(df: pd.DataFrame, score_column: str, ascending: bool) -> pd.DataFrame:
@@ -288,6 +353,13 @@ def _prepare_historical_context(history_df: pd.DataFrame | None) -> dict[str, An
         }
     latest_date = working["date"].max()
     latest_rows = working.loc[working["date"] == latest_date].copy()
+    historical_ratio_columns = {
+        "avg_return_7d": "ratio_pct",
+        "avg_return_30d": "ratio_pct",
+        "breadth_7d": "ratio_pct",
+        "relative_strength_7d": "ratio_pct",
+        "relative_strength_30d": "ratio_pct",
+    }
     table = _table_from_df(
         latest_rows.sort_values("primary_narrative"),
         [
@@ -300,6 +372,7 @@ def _prepare_historical_context(history_df: pd.DataFrame | None) -> dict[str, An
             "total_market_cap_usd",
             "total_volume_usd",
         ],
+        column_formats=historical_ratio_columns,
     )
     return {
         "available": True,
@@ -312,18 +385,52 @@ def _prepare_historical_context(history_df: pd.DataFrame | None) -> dict[str, An
     }
 
 
-def format_value(value: Any, column: str | None = None) -> str:
-    """Format report values for readable static tables."""
+def _numeric_value(value: Any) -> float | None:
     if value is None or pd.isna(value):
-        return "n/a"
-    if isinstance(value, str):
-        return value
+        return None
     numeric = pd.to_numeric(pd.Series([value]), errors="coerce").iloc[0]
     if pd.isna(numeric):
+        return None
+    return float(numeric)
+
+
+def format_percent_point(value: Any) -> str:
+    """Format a percent-point value without rescaling it."""
+    numeric = _numeric_value(value)
+    if numeric is None:
+        return "N/A"
+    return f"{numeric:,.1f}%"
+
+
+def format_ratio_pct(value: Any) -> str:
+    """Format a ratio value as a percentage."""
+    numeric = _numeric_value(value)
+    if numeric is None:
+        return "N/A"
+    return f"{numeric * 100:,.1f}%"
+
+
+def format_value(
+    value: Any,
+    column: str | None = None,
+    scale: str | None = None,
+) -> str:
+    """Format report values for readable static tables."""
+    if value is None or pd.isna(value):
+        return "N/A"
+    if isinstance(value, str):
+        return value
+    numeric = _numeric_value(value)
+    if numeric is None:
         return str(value)
-    if column in PERCENT_COLUMNS:
-        display_value = numeric * 100 if abs(numeric) <= 1 else numeric
-        return f"{display_value:,.1f}%"
+    if scale == "percent_point":
+        return format_percent_point(numeric)
+    if scale == "ratio_pct":
+        return format_ratio_pct(numeric)
+    if column in PERCENT_POINT_COLUMNS:
+        return format_percent_point(numeric)
+    if column in RATIO_PERCENT_COLUMNS:
+        return format_ratio_pct(numeric)
     if column in MONEY_COLUMNS:
         return f"${numeric:,.0f}"
     if column and "score" in column:

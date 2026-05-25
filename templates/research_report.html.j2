@@ -228,7 +228,7 @@
     </section>
 
     <section>
-      <h2>Top 5 Outperforming Narratives</h2>
+      <h2>Top 5 by Narrative Momentum Score</h2>
       <p class="section-note">Leading narratives are ranked by the current Narrative Momentum Score and describe current narrative leadership.</p>
       {% set table_data = top_narratives %}
       {% if table_data %}
@@ -237,7 +237,7 @@
           <thead>
             <tr>
               {% for column in table_data.columns %}
-              <th>{{ column.replace('_', ' ') }}</th>
+              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
               {% endfor %}
             </tr>
           </thead>
@@ -245,7 +245,7 @@
             {% for row in table_data.rows %}
             <tr>
               {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column) }}</td>
+              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
               {% endfor %}
             </tr>
             {% endfor %}
@@ -256,7 +256,7 @@
     </section>
 
     <section>
-      <h2>Top 5 Weakening Narratives</h2>
+      <h2>Lowest 5 by Narrative Momentum Score</h2>
       <p class="section-note">Lagging narratives show softer relative momentum in this snapshot. This is descriptive research context.</p>
       {% set table_data = weakening_narratives %}
       {% if table_data %}
@@ -265,7 +265,7 @@
           <thead>
             <tr>
               {% for column in table_data.columns %}
-              <th>{{ column.replace('_', ' ') }}</th>
+              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
               {% endfor %}
             </tr>
           </thead>
@@ -273,7 +273,7 @@
             {% for row in table_data.rows %}
             <tr>
               {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column) }}</td>
+              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
               {% endfor %}
             </tr>
             {% endfor %}
@@ -293,7 +293,7 @@
           <thead>
             <tr>
               {% for column in table_data.columns %}
-              <th>{{ column.replace('_', ' ') }}</th>
+              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
               {% endfor %}
             </tr>
           </thead>
@@ -301,7 +301,7 @@
             {% for row in table_data.rows %}
             <tr>
               {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column) }}</td>
+              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
               {% endfor %}
             </tr>
             {% endfor %}
@@ -323,7 +323,7 @@
           <thead>
             <tr>
               {% for column in table_data.columns %}
-              <th>{{ column.replace('_', ' ') }}</th>
+              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
               {% endfor %}
             </tr>
           </thead>
@@ -331,7 +331,7 @@
             {% for row in table_data.rows %}
             <tr>
               {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column) }}</td>
+              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
               {% endfor %}
             </tr>
             {% endfor %}
@@ -354,7 +354,7 @@
           <thead>
             <tr>
               {% for column in table_data.columns %}
-              <th>{{ column.replace('_', ' ') }}</th>
+              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
               {% endfor %}
             </tr>
           </thead>
@@ -362,7 +362,7 @@
             {% for row in table_data.rows %}
             <tr>
               {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column) }}</td>
+              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
               {% endfor %}
             </tr>
             {% endfor %}
@@ -385,7 +385,7 @@
           <thead>
             <tr>
               {% for column in table_data.columns %}
-              <th>{{ column.replace('_', ' ') }}</th>
+              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
               {% endfor %}
             </tr>
           </thead>
@@ -393,7 +393,7 @@
             {% for row in table_data.rows %}
             <tr>
               {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column) }}</td>
+              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
               {% endfor %}
             </tr>
             {% endfor %}
@@ -416,7 +416,7 @@
           <thead>
             <tr>
               {% for column in table_data.columns %}
-              <th>{{ column.replace('_', ' ') }}</th>
+              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
               {% endfor %}
             </tr>
           </thead>
@@ -424,7 +424,7 @@
             {% for row in table_data.rows %}
             <tr>
               {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column) }}</td>
+              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
               {% endfor %}
             </tr>
             {% endfor %}
