@@ -229,6 +229,28 @@ Run the Streamlit dashboard:
 streamlit run dashboard/streamlit_app.py
 ```
 
+### Static HTML Research Report
+
+Generate the latest static report:
+
+```bash
+python scripts/generate_html_report.py
+```
+
+Generate a report for a specific snapshot date:
+
+```bash
+python scripts/generate_html_report.py --date YYYY-MM-DD
+```
+
+Output:
+
+```text
+reports/html/latest.html
+```
+
+The report uses existing processed outputs and provides a static market intelligence view. It does not provide investment advice, price prediction, or trading signals.
+
 Run the historical token backfill:
 
 ```bash

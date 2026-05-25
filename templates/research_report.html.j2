@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Crypto Narrative Radar - {{ snapshot_date }}</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #5e6b78;
+      --line: #d9dee5;
+      --accent: #1d6f78;
+      --accent-soft: #e7f3f4;
+      --warn-soft: #fff4df;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.55;
+    }
+
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+    }
+
+    header {
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 24px;
+      padding-bottom: 22px;
+    }
+
+    h1 {
+      font-size: 34px;
+      margin: 0 0 6px;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      font-size: 22px;
+      margin: 34px 0 12px;
+      letter-spacing: 0;
+    }
+
+    h3 {
+      font-size: 16px;
+      margin: 0 0 8px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 12px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 16px;
+      margin-bottom: 14px;
+    }
+
+    .meta {
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 13px;
+    }
+
+    .notice {
+      background: var(--warn-soft);
+      border: 1px solid #ead5aa;
+      border-radius: 6px;
+      color: #514222;
+      padding: 14px 16px;
+    }
+
+    .cards {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
+      margin-top: 14px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 14px;
+    }
+
+    .card .label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .card .value {
+      color: var(--accent);
+      font-size: 24px;
+      font-weight: 700;
+      margin: 4px 0;
+    }
+
+    .card .note {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    ul {
+      margin: 0 0 12px 22px;
+      padding: 0;
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    .table-wrap {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow-x: auto;
+    }
+
+    table {
+      border-collapse: collapse;
+      min-width: 760px;
+      width: 100%;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid var(--line);
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: top;
+      white-space: nowrap;
+    }
+
+    th {
+      background: var(--accent-soft);
+      color: #143d43;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    td {
+      font-size: 13px;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .section-note {
+      color: var(--muted);
+      max-width: 880px;
+    }
+
+    .method-box {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 16px;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 34px;
+      padding-top: 16px;
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>Crypto Narrative Radar</h1>
+      <p class="subtitle">Static market intelligence research report using narrative-level crypto market data.</p>
+      <div class="meta">
+        <span>Snapshot date: {{ snapshot_date }}</span>
+        <span>Generated: {{ generated_at }}</span>
+      </div>
+    </header>
+
+    <section class="notice">
+      <strong>Research disclaimer:</strong>
+      This report is market intelligence only. It is not investment advice, contains no buy/sell recommendations,
+      does not provide price prediction, does not include backtesting, and does not provide portfolio allocation guidance.
+    </section>
+
+    <section>
+      <h2>Executive Summary</h2>
+      {% if summary.bullets %}
+      <ul>
+        {% for bullet in summary.bullets %}
+        <li>{{ bullet }}</li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="section-note">Executive summary metrics were not available for this snapshot.</p>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2>Market Snapshot</h2>
+      <div class="cards">
+        {% for card in summary.cards %}
+        <article class="card">
+          <div class="label">{{ card.title }}</div>
+          <h3>{{ card.narrative }}</h3>
+          <div class="value">{{ card.value }}</div>
+          <div class="note">{{ card.note }}</div>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section>
+      <h2>Top 5 Outperforming Narratives</h2>
+      <p class="section-note">Leading narratives are ranked by the current Narrative Momentum Score and describe current narrative leadership.</p>
+      {% set table_data = top_narratives %}
+      {% if table_data %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              {% for column in table_data.columns %}
+              <th>{{ column.replace('_', ' ') }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table_data.rows %}
+            <tr>
+              {% for column in table_data.columns %}
+              <td>{{ row[column]|format_value(column) }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2>Top 5 Weakening Narratives</h2>
+      <p class="section-note">Lagging narratives show softer relative momentum in this snapshot. This is descriptive research context.</p>
+      {% set table_data = weakening_narratives %}
+      {% if table_data %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              {% for column in table_data.columns %}
+              <th>{{ column.replace('_', ' ') }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table_data.rows %}
+            <tr>
+              {% for column in table_data.columns %}
+              <td>{{ row[column]|format_value(column) }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2>Narrative Ranking</h2>
+      <p class="section-note">The ranking table compares narrative-level analysis across momentum, relative strength, volume confirmation, breadth of participation, and concentration context.</p>
+      {% set table_data = ranking_table %}
+      {% if table_data %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              {% for column in table_data.columns %}
+              <th>{{ column.replace('_', ' ') }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table_data.rows %}
+            <tr>
+              {% for column in table_data.columns %}
+              <td>{{ row[column]|format_value(column) }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2>Return, Volume, and Breadth Review</h2>
+      <p class="section-note">
+        Breadth helps show whether participation is broad across a narrative. Volume confirmation helps contextualize whether market movement is supported by trading activity. These are descriptive research metrics.
+      </p>
+      {% set table_data = review_table %}
+      {% if table_data %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              {% for column in table_data.columns %}
+              <th>{{ column.replace('_', ' ') }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table_data.rows %}
+            <tr>
+              {% for column in table_data.columns %}
+              <td>{{ row[column]|format_value(column) }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2>Token-Level Contributors</h2>
+      <p class="section-note">Token-level contributors show which assets are contributing most to narrative-level market activity.</p>
+      {% if token_contributor_note %}
+      <p class="section-note">{{ token_contributor_note }}</p>
+      {% endif %}
+      {% set table_data = token_contributors %}
+      {% if table_data %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              {% for column in table_data.columns %}
+              <th>{{ column.replace('_', ' ') }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table_data.rows %}
+            <tr>
+              {% for column in table_data.columns %}
+              <td>{{ row[column]|format_value(column) }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2>Concentration Review</h2>
+      <p class="section-note">Concentration review shows whether narrative-level metrics are broadly distributed or driven by a small number of large tokens.</p>
+      {% if concentration_note %}
+      <p class="section-note">{{ concentration_note }}</p>
+      {% endif %}
+      {% set table_data = concentration_review %}
+      {% if table_data %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              {% for column in table_data.columns %}
+              <th>{{ column.replace('_', ' ') }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table_data.rows %}
+            <tr>
+              {% for column in table_data.columns %}
+              <td>{{ row[column]|format_value(column) }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2>90-Day Historical Context</h2>
+      {% if historical.available %}
+      <p class="section-note">
+        Historical narrative data covers {{ historical.narrative_count }} narratives from {{ historical.start_date }} to {{ historical.end_date }}. This view is descriptive trend context only.
+      </p>
+      {% set table_data = historical.latest_table %}
+      {% if table_data %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              {% for column in table_data.columns %}
+              <th>{{ column.replace('_', ' ') }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table_data.rows %}
+            <tr>
+              {% for column in table_data.columns %}
+              <td>{{ row[column]|format_value(column) }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+      {% else %}
+      <p class="section-note">{{ historical.note }}</p>
+      {% endif %}
+    </section>
+
+    <section>
+      <h2>Methodology</h2>
+      <div class="method-box">
+        <p>Crypto Narrative Radar uses a manually reviewed narrative taxonomy, CoinGecko market data, token-level market snapshots, and narrative-level aggregation to create a descriptive research view.</p>
+        <p>The Narrative Momentum Score uses the current V1 framework: 40% price momentum, 25% relative strength, 20% volume confirmation, and 15% breadth of participation.</p>
+        <p>DuckDB SQL analytics outputs support narrative summaries, token-level contributors, and concentration context. Historical narrative data, when available, is used only as descriptive trend context.</p>
+        <p>The score is a research ranking tool for market intelligence. It does not imply future returns.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Limitations</h2>
+      <ul>
+        <li>This report is not investment advice.</li>
+        <li>It includes no buy/sell recommendations.</li>
+        <li>It includes no price prediction.</li>
+        <li>It includes no backtesting.</li>
+        <li>It includes no portfolio allocation guidance.</li>
+        <li>Snapshot and 90-day historical views are descriptive.</li>
+        <li>CoinGecko data availability and API limits may affect data quality.</li>
+        <li>Taxonomy design involves judgment and should be reviewed over time.</li>
+        <li>No DeFiLlama fundamentals overlay is included yet.</li>
+      </ul>
+    </section>
+
+    <footer>
+      Crypto Narrative Radar static market intelligence report. Generated from existing processed outputs.
+    </footer>
+  </main>
+</body>
+</html>

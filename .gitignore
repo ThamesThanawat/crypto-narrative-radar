@@ -7,10 +7,15 @@ venv/
 
 data/raw/
 data/processed/
-reports/
+reports/*
 
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !reports/.gitkeep
+!reports/html/
+reports/html/*
+!reports/html/.gitkeep
+!crypto_narrative_radar/reports/
+!crypto_narrative_radar/reports/*.py
 
 .scratch/
