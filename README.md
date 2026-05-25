@@ -2,126 +2,167 @@
 
 ## Project Overview
 
-Crypto Narrative Radar is a Python-based crypto market intelligence project for tracking sector-level narrative momentum using CoinGecko market data and a custom token taxonomy.
+Crypto Narrative Radar is a Python-based crypto market intelligence project that tracks narrative-level momentum across major digital asset sectors such as DeFi, Layer 1, Layer 2, RWA, AI, DePIN, Gaming / GameFi, and Exchange Tokens.
 
-The project compares major crypto narratives such as DeFi, Layer 1, Layer 2, RWA, AI, DePIN, Gaming / GameFi, and Exchange Tokens. It turns token-level market data into narrative-level research views for sector rotation, benchmark-relative strength, volume confirmation, breadth of participation, token contributors, and concentration review.
+The project transforms CoinGecko token market data into structured research outputs, including narrative rankings, relative strength metrics, volume confirmation, breadth of participation, concentration review, historical trend views, SQL analytics tables, a Streamlit dashboard, and a static HTML research report.
 
-This is a research support project, not a trading system, price-forecasting tool, or investment advice product.
+It is designed as a research support workflow for monitoring crypto narrative rotation and market structure. It is not a trading bot, price prediction model, investment advice product, or buy/sell signal generator.
 
-## Why This Project Exists
+## Why Narrative-Level Market Intelligence Matters
 
-Crypto markets often rotate by narrative rather than by isolated token movement. A single token can move sharply, but analysts usually need to understand whether the broader narrative is also strengthening, whether participation is broad, and whether the move is supported by market activity.
+Crypto markets often move by narrative rather than by isolated token performance. Analysts may need to know whether AI tokens are broadly strengthening, whether Layer 2 participation is narrowing, whether DeFi volume confirmation is improving, or whether a move is concentrated in only a few large assets.
 
-Crypto Narrative Radar creates a repeatable workflow for comparing narrative momentum across sectors. It is designed to support crypto research, digital asset analysis, exchange and token monitoring, VC market mapping, and portfolio research workflows.
-
-The core research problem:
+Crypto Narrative Radar creates a repeatable way to compare narrative-level market conditions across sectors. The project helps answer research questions such as:
 
 - Which narratives are leading current market activity?
-- Is leadership broad across many tokens or concentrated in a few large constituents?
-- Are narratives outperforming BTC and ETH benchmarks?
-- Is price movement supported by volume confirmation?
-- Which tokens are driving each narrative view?
+- Are narratives showing relative strength versus BTC and ETH?
+- Is participation broad across tokens or concentrated in a few constituents?
+- Is market movement supported by trading volume?
+- Which tokens are contributing most to each narrative view?
+- How have narrative-level metrics changed across recent historical conditions?
 
-## What the Project Does
+## What This Project Does
+
+Crypto Narrative Radar follows a taxonomy-driven market intelligence workflow:
+
+```text
+taxonomy -> CoinGecko data -> token snapshots -> narrative metrics -> scoring -> dashboard/report outputs
+```
+
+The project:
 
 - Maintains a curated token-to-narrative taxonomy.
-- Fetches token market data from CoinGecko.
-- Produces daily token-level market snapshots.
+- Fetches token-level market data from CoinGecko.
+- Produces current token market snapshots.
 - Aggregates token data into narrative-level metrics.
-- Calculates a transparent Narrative Momentum Score.
-- Uses DuckDB SQL for narrative summaries, token contributor analysis, and concentration review.
-- Runs a daily snapshot pipeline locally or through GitHub Actions.
-- Presents the outputs in a Streamlit research dashboard.
+- Calculates a transparent Narrative Momentum Score V1.
+- Reviews relative strength versus BTC and ETH.
+- Measures volume confirmation and breadth of participation.
+- Uses DuckDB SQL for narrative summaries, token contributors, and concentration review.
+- Builds historical token and narrative datasets.
+- Presents outputs through a Streamlit dashboard and static HTML research report.
+- Runs the current snapshot pipeline locally or through GitHub Actions.
 
-## Key Research Questions
+## Current Outputs
 
-- Which crypto narratives are showing the strongest current momentum?
-- Which narratives are outperforming BTC and ETH over the selected market window?
-- Is narrative momentum broad across many tokens or concentrated in a few leaders?
-- Is price movement supported by volume confirmation?
-- Which tokens contribute most to each narrative's market cap, volume, and return profile?
-- Which narratives appear more concentrated or broadly distributed?
-- What should an analyst investigate next?
+Crypto Narrative Radar currently produces both interactive and static research outputs.
 
-## Key Features
+### Streamlit Dashboard
 
-### Narrative Taxonomy
+The Streamlit dashboard provides an interactive research interface for exploring:
 
-The project uses a curated taxonomy that maps tokens to one primary narrative. This allows sector-level comparisons while avoiding double-counting in the scoring framework.
+- Current narrative rankings
+- Narrative Momentum Score V1
+- 24H, 7D, and 30D performance comparisons
+- Relative strength versus BTC and ETH
+- Volume confirmation
+- Breadth of positive token participation
+- Concentration review
+- Token-level contributors
+- Historical Narrative Trends
 
-### CoinGecko Market Data Pipeline
+The dashboard is designed for exploratory research, allowing users to filter, compare, and review narrative-level market conditions.
 
-The pipeline fetches token market data using CoinGecko IDs from the taxonomy and writes raw and processed CSV snapshots.
+Run it with:
 
-### Narrative Metrics and Scoring
+```bash
+streamlit run dashboard/streamlit_app.py
+```
 
-Token-level observations are aggregated into narrative-level metrics such as returns, market cap, volume, relative strength, and breadth.
+### Static HTML Research Report
 
-### Relative Strength vs BTC/ETH
+The static HTML report provides an analyst-readable market summary.
 
-Narrative returns are compared against BTC and ETH benchmark returns to identify sector-specific strength or weakness.
+Current report path:
 
-### Breadth of Participation
+```text
+reports/html/latest.html
+```
 
-Breadth measures how widely participation is distributed across tokens within a narrative.
+Generate it with:
 
-### Volume Confirmation
+```bash
+python scripts/generate_html_report.py
+```
 
-Volume confirmation helps evaluate whether narrative movement is supported by trading activity and liquidity.
+The report is designed for research communication. It summarizes narrative rankings, current market context, token-level contributors, concentration review, historical context, methodology notes, and limitations in a format that can be reviewed without running the dashboard.
 
-### Token Contributor Analysis
+### CSV and SQL Outputs
 
-Token contributor outputs show which assets are driving market cap, volume, and return behavior within each narrative.
+The project also generates structured data outputs, including:
 
-### Concentration Review
+- Current token market snapshots
+- Current narrative metrics
+- Current narrative rankings
+- DuckDB SQL analytics outputs
+- Historical token market history
+- Historical narrative metrics
 
-Concentration review shows whether a narrative is broadly distributed or dominated by a small number of large tokens.
+These outputs support repeatable research review, dashboard visualizations, static reporting, and future portfolio extensions.
 
-### DuckDB SQL Analytics Layer
+## Dashboard and Report Preview
 
-DuckDB queries generate transparent analytical outputs for narrative summaries, top token contributors, and concentration review.
+The dashboard is built for market research workflows rather than trade execution. It emphasizes narrative rankings, relative momentum, volume confirmation, breadth of participation, concentration context, token contributors, and historical narrative trends.
 
-### Daily Snapshot Automation
+![Dashboard overview](docs/assets/dashboard_overview.png)
 
-GitHub Actions runs the daily pipeline and uploads processed outputs as workflow artifacts. The same pipeline can also be run locally.
+![Dashboard research charts](docs/assets/dashboard_research_charts.png)
 
-### Streamlit Research Dashboard
+The static HTML report complements the dashboard by turning the latest processed outputs into a recruiter-friendly research note that can be opened locally at:
 
-The Streamlit dashboard provides an interactive research view for narrative leadership, sector rotation, volume confirmation, token contributors, and concentration review.
+```text
+reports/html/latest.html
+```
 
-## Data Source
+## Research Methodology
 
-Crypto Narrative Radar uses CoinGecko market data for fields such as price, market cap, trading volume, and recent return windows.
+Crypto Narrative Radar follows a taxonomy-driven market intelligence workflow.
 
-The token universe is defined in:
+### 1. Define the Token Universe
+
+A curated taxonomy maps each token to one primary crypto narrative, such as DeFi, Layer 1, Layer 2, RWA, AI, DePIN, Gaming / GameFi, or Exchange Tokens.
+
+The taxonomy file is:
 
 ```text
 data/reference/taxonomy.csv
 ```
 
-The current narrative workflow is snapshot-based. Each daily run creates a point-in-time market snapshot for the selected run date. Token-level historical backfill is available as a separate foundation for future narrative trend analysis.
+Secondary narrative tags preserve research context for tokens that sit across multiple themes, but the MVP scoring framework avoids double-counting by using one primary narrative per token.
 
-## Methodology
+### 2. Collect CoinGecko Market Data
 
-Tokens are assigned one primary narrative so each token contributes to one scoring basket. Secondary narratives preserve research context for tokens that sit across multiple themes, but they are not double-counted in the MVP scoring framework.
+The current snapshot pipeline fetches token-level market data from CoinGecko, including price, market capitalization, trading volume, and percentage returns across multiple timeframes.
 
-The workflow is:
+### 3. Create Token-Level Market Snapshots
 
-```text
-taxonomy.csv
-  -> CoinGecko market data
-  -> token market snapshot
-  -> narrative metrics
-  -> narrative ranking
-  -> SQL analytics outputs
-  -> Streamlit dashboard
-```
+Raw market data is cleaned and saved into structured token-level CSV outputs for validation, analysis, and reuse.
 
-The outputs are descriptive market intelligence. They are intended to help analysts compare current narrative conditions and decide where deeper research may be useful.
+### 4. Aggregate Metrics by Narrative
 
-## Narrative Scoring Framework
+Tokens are grouped by primary narrative to calculate narrative-level metrics such as average returns, median returns, total market cap, total volume, volume-to-market-cap, relative strength, and breadth of positive participation.
 
-The Narrative Momentum Score is a descriptive research ranking score from 0 to 100. It compares narrative-level market conditions using a transparent weighting framework:
+### 5. Calculate Narrative Momentum Score V1
+
+The project ranks narratives using an explainable scoring framework based on price momentum, relative strength, volume confirmation, and breadth of participation.
+
+### 6. Add SQL Analytics and Concentration Review
+
+DuckDB SQL outputs provide additional research views for narrative summaries, token-level contributors, and concentration context.
+
+### 7. Add Historical Context
+
+Historical token and narrative datasets allow the dashboard to show how narrative-level metrics evolved across recent market conditions.
+
+### 8. Communicate Research Outputs
+
+The final outputs are presented through both an interactive Streamlit dashboard and a static HTML research report.
+
+## Narrative Momentum Score V1
+
+The Narrative Momentum Score V1 is designed to compare current market momentum across crypto narratives.
+
+The score uses the current V1 weighting framework:
 
 ```text
 40% price momentum
@@ -130,42 +171,69 @@ The Narrative Momentum Score is a descriptive research ranking score from 0 to 1
 15% breadth of participation
 ```
 
-Component interpretation:
+The score considers research dimensions such as:
 
-- Price momentum: recent average return behavior at the narrative level.
-- Relative strength: narrative performance compared with benchmark assets such as BTC and ETH.
-- Volume confirmation: whether movement is supported by trading activity.
-- Breadth of participation: whether participation is distributed across multiple tokens in the narrative.
+- Short-term and medium-term narrative performance
+- Relative strength versus BTC and ETH
+- Volume confirmation
+- Breadth of positive token participation
+- Token-level contributors and concentration context
 
-The score is designed for research ranking and interpretation. It does not forecast future returns or provide investment advice.
+The score is intended to help identify narratives that may deserve further research. It does not predict future returns, generate trading signals, or recommend portfolio decisions.
 
-## Dashboard / Outputs
+## Data Outputs
 
-Processed outputs are written under date-stamped folders:
+The project generates several layers of research-ready outputs.
+
+### Current Snapshot Outputs
+
+Processed current snapshot outputs are written under date-stamped folders:
 
 ```text
-data/processed/YYYY-MM-DD/
+data/processed/YYYY-MM-DD/token_market_snapshot_YYYY-MM-DD.csv
+data/processed/YYYY-MM-DD/narrative_metrics.csv
+data/processed/YYYY-MM-DD/narrative_ranking.csv
 ```
 
-Current processed outputs include:
+### SQL Analytics Outputs
 
-- `token_market_snapshot_YYYY-MM-DD.csv`
-- `narrative_metrics.csv`
-- `narrative_ranking.csv`
-- `sql_narrative_summary.csv`
-- `sql_top_token_contributors.csv`
-- `sql_concentration_review.csv`
+DuckDB SQL analytics outputs are written to the same processed snapshot folder:
 
-The Streamlit dashboard includes:
+```text
+data/processed/YYYY-MM-DD/sql_narrative_summary.csv
+data/processed/YYYY-MM-DD/sql_top_token_contributors.csv
+data/processed/YYYY-MM-DD/sql_concentration_review.csv
+```
 
-- KPI cards for narrative leadership, benchmark-relative strength, participation breadth, and concentration watch.
-- Narrative ranking table.
-- Narrative Momentum Score bar chart.
-- 7D vs 30D sector rotation view.
-- Return vs volume confirmation scatter plot.
-- Token contributor table.
-- Concentration review.
-- Methodology and interpretation guide.
+The SQL query files are:
+
+```text
+sql/01_narrative_summary.sql
+sql/02_top_token_contributors.sql
+sql/03_concentration_review.sql
+```
+
+### Historical Outputs
+
+Historical outputs are written under:
+
+```text
+data/processed/historical/token_market_history_90d.csv
+data/processed/historical/narrative_market_history_90d.csv
+```
+
+Historical outputs support the dashboard's Historical Narrative Trends view and allow users to review how narrative-level metrics changed over time.
+
+### Report Outputs
+
+Static HTML report outputs are written under:
+
+```text
+reports/html/crypto_narrative_report_YYYY-MM-DD.html
+reports/html/latest.html
+```
+
+Generated processed data and reports are local outputs and are generally not committed unless intentionally included as small portfolio examples.
 
 ## Repository Structure
 
@@ -175,23 +243,30 @@ crypto_narrative_radar/
   data/
   dashboard/
   metrics/
+  reports/
   config.py
+
+dashboard/
+  streamlit_app.py
 
 data/
   reference/
   raw/
   processed/
 
-dashboard/
-  streamlit_app.py
+reports/
+  html/
 
 scripts/
   backfill_coingecko_history.py
-  fetch_coingecko_markets.py
+  calculate_historical_narrative_metrics.py
   calculate_narrative_metrics.py
+  fetch_coingecko_markets.py
+  generate_html_report.py
   run_daily_pipeline.py
   run_sql_analytics.py
   validate_historical_market_data.py
+  validate_historical_narrative_metrics.py
   validate_market_snapshot.py
   validate_narrative_metrics.py
   validate_sql_outputs.py
@@ -202,6 +277,9 @@ sql/
   02_top_token_contributors.sql
   03_concentration_review.sql
 
+templates/
+  research_report.html.j2
+
 tests/
 
 .github/
@@ -209,27 +287,54 @@ tests/
     daily_pipeline.yml
 ```
 
-## How to Run
+## How to Run Locally
 
-Install dependencies:
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/crypto-narrative-radar.git
+cd crypto-narrative-radar
+```
+
+### 2. Create and activate a virtual environment
+
+```bash
+python -m venv .venv
+```
+
+macOS / Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+Windows:
+
+```bash
+.venv\Scripts\activate
+```
+
+### 3. Install dependencies
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-Run the full daily pipeline:
+### 4. Run the current snapshot pipeline
 
 ```bash
 python scripts/run_daily_pipeline.py
 ```
 
-Run the Streamlit dashboard:
+This validates the taxonomy, fetches CoinGecko market data, validates the current market snapshot, calculates narrative metrics, runs DuckDB SQL analytics, and validates SQL outputs.
+
+### 5. Launch the Streamlit dashboard
 
 ```bash
 streamlit run dashboard/streamlit_app.py
 ```
 
-### Static HTML Research Report
+### 6. Generate the static HTML report
 
 Generate the latest static report:
 
@@ -243,86 +348,113 @@ Generate a report for a specific snapshot date:
 python scripts/generate_html_report.py --date YYYY-MM-DD
 ```
 
-Output:
+Latest report output:
 
 ```text
 reports/html/latest.html
 ```
 
-The report uses existing processed outputs and provides a static market intelligence view. It does not provide investment advice, price prediction, or trading signals.
+### 7. Build historical datasets
 
-Run the historical token backfill:
+Backfill token-level historical market data:
 
 ```bash
 python scripts/backfill_coingecko_history.py --days 90
 python scripts/validate_historical_market_data.py
 ```
 
-This creates token-level historical market data. Narrative-level historical metrics are a separate future milestone.
+Calculate and validate historical narrative metrics:
 
-Run the test suite:
+```bash
+python scripts/calculate_historical_narrative_metrics.py
+python scripts/validate_historical_narrative_metrics.py
+```
+
+### 8. Run tests
+
+```bash
+pytest
+```
+
+If Python is not available directly on `PATH`, use:
 
 ```bash
 python -m pytest tests
 ```
 
-Optional validation commands:
+## Skills Demonstrated
 
-```bash
-python scripts/validate_taxonomy.py
-python scripts/validate_market_snapshot.py
-python scripts/validate_narrative_metrics.py
-python scripts/validate_sql_outputs.py
-```
+This project demonstrates:
 
-On Windows, if Python is not available directly on `PATH`, use the virtual environment executable instead:
+### Python and pandas
 
-```powershell
-.venv\Scripts\python.exe scripts\run_daily_pipeline.py
-.venv\Scripts\python.exe -m pytest tests
-```
+- API data ingestion
+- CSV-based data pipeline design
+- Data cleaning and validation
+- Groupby aggregation
+- Time-series data preparation
+- Reusable script structure
+
+### Crypto Market Research
+
+- Narrative taxonomy design
+- Sector-level market analysis
+- Relative strength review
+- Volume confirmation
+- Breadth of participation
+- Concentration analysis
+- Token contributor review
+
+### Analytics and Reporting
+
+- DuckDB SQL analytics
+- Streamlit dashboard development
+- Static HTML report generation with Jinja2
+- Historical trend visualization
+- Research communication for technical and non-technical readers
+
+### Product and Research Workflow
+
+- Turning raw market data into analyst-facing outputs
+- Balancing simplicity, transparency, and usability
+- Documenting assumptions and limitations
+- Using automation for repeatable daily snapshots
+- Keeping outputs explainable for portfolio review and interviews
 
 ## Limitations
 
-- The current workflow is snapshot-based and does not yet provide multi-period trend analysis.
-- CoinGecko data availability, field coverage, and API limits can affect pipeline runs.
-- Taxonomy assignments involve judgment and should be reviewed as narratives evolve.
-- The Narrative Momentum Score is descriptive and not forward-looking.
-- The current methodology does not include fundamentals such as TVL, fees, revenue, stablecoin flows, developer activity, or protocol usage.
-- The project is not investment advice and is not designed for trade execution.
+Crypto Narrative Radar is a research support tool and has several important limitations:
+
+- It does not predict token prices.
+- It does not generate buy, sell, or hold signals.
+- It does not execute trades.
+- It does not claim to produce alpha.
+- It is not investment advice.
+- CoinGecko data may contain missing values, delays, outliers, or API limitations.
+- Narrative classification is manually curated and may involve subjective judgment.
+- Smaller or less liquid tokens can distort equal-weighted narrative metrics.
+- Short-term returns can be noisy during volatile market conditions.
+- Current scoring focuses on market momentum and does not yet include deeper fundamentals such as TVL, fees, revenue, stablecoin flows, or developer activity.
+- Historical analysis is intended for context, not backtested trading strategy validation.
 
 ## Future Improvements
 
-- Historical narrative metrics for trend analysis.
-- Static HTML research report.
-- DeFiLlama fundamentals overlay, including TVL, fees, DEX volume, and stablecoin flows.
-- More robust benchmark analysis.
-- More detailed token contribution decomposition.
-- Better dashboard UX, filters, and recruiter-demo screenshots.
-- Optional hosted demo.
-- More complete research notes per narrative.
+Potential future improvements include:
+
+- Add DeFiLlama fundamentals such as TVL, fees, revenue, DEX volume, and stablecoin metrics.
+- Add market-cap-weighted narrative metrics.
+- Improve liquidity and data quality filters.
+- Expand the narrative taxonomy.
+- Add more historical comparison windows.
+- Add narrative heatmaps for faster sector comparison.
+- Add weekly research report generation.
+- Improve dashboard screenshots and portfolio presentation.
+- Add clearer methodology documentation for non-technical readers.
+
+DeFiLlama would be a future fundamentals overlay, not a replacement for the current CoinGecko-based momentum framework.
 
 ## AI-Assisted Development Disclosure
 
-This project was developed with AI assistance for planning, code drafting, refactoring, documentation, and debugging support.
+This project was developed with AI assistance for planning, code drafting, refactoring, documentation, debugging, and QA support.
 
-The project owner reviewed, tested, and validated the outputs. The goal is to demonstrate practical AI-assisted development while maintaining understanding of the data pipeline, research methodology, scoring framework, and limitations.
-
-## Recruiter / Portfolio Notes
-
-Crypto Narrative Radar demonstrates the ability to turn raw crypto market data into explainable research outputs.
-
-The project highlights:
-
-- Python project structure.
-- pandas data processing.
-- API integration with CoinGecko.
-- CSV-based data pipeline design.
-- Narrative-level market analysis.
-- Transparent scoring methodology.
-- SQL analytics with DuckDB.
-- Streamlit dashboarding for research workflows.
-- GitHub Actions automation.
-- Crypto market structure and narrative rotation thinking.
-
-This project is intended to be interview-explainable for crypto research, data analyst, digital asset analyst, VC analyst, exchange-related, and market intelligence roles.
+The project owner reviewed, tested, and validated the outputs. The goal is to demonstrate practical AI-assisted development while maintaining understanding of the data pipeline, research methodology, scoring framework, market interpretation, and limitations.
