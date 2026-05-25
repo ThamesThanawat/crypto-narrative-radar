@@ -614,11 +614,34 @@ Verified environment:
 - DuckDB installed: 1.5.3
 - `python -m pytest tests` passed: 56 passed
 
-Milestone 6.0: Static HTML Research Report
+### Milestone 6.1 Summary
 
-- generates reports/html/crypto_narrative_report_YYYY-MM-DD.html
-- updates reports/html/latest.html
-- uses existing processed outputs only
-- includes executive summary, narrative ranking, contributors, concentration review, historical context, methodology, and limitations
-- no API calls, scoring changes, prediction, backtesting, or trading logic added
-- pytest passed: 63 passed
+HTML Report QA & Data Sanity Review fixed the static report percentage formatting.
+
+The issue:
+
+- current snapshot return fields are CoinGecko percent-point values
+- historical narrative returns and relative strength fields are decimal ratio values
+
+Fix:
+
+- report formatting is now source-aware
+- current snapshot percent-point fields render without rescaling
+- historical return and relative strength fields render as ratio percentages
+- breadth, share, and concentration fields continue to render as ratio percentages
+
+Additional polish:
+
+- renamed report sections to be more precise
+- improved table display labels
+- regenerated static HTML report
+
+Validation:
+
+- compileall passed
+- report generation passed
+- pytest passed: 71 passed
+- Claude Code review found no blocking issues
+
+Scope note:
+No scoring, API, dashboard, SQL, taxonomy, or historical calculation logic was changed.
