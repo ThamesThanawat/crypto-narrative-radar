@@ -1,0 +1,42 @@
+name: Bug
+description: Track a failing test, broken script, bad output, or dashboard/report issue.
+title: "fix: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use the diagnose workflow: Reproduce -> minimize -> hypothesize -> instrument -> fix -> regression-test.
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed Behavior
+      description: What happened?
+      placeholder: The command failed with...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should have happened?
+      placeholder: The pipeline should write...
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction Command or Steps
+      description: Include the exact command, file, date folder, or dashboard action.
+      placeholder: |
+        python -m pytest
+        python scripts/...
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: Add screenshots, relevant files, sample rows, or suspected cause.
+    validations:
+      required: false

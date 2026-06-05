@@ -1,0 +1,44 @@
+name: Feature
+description: Plan a scoped product or engineering improvement.
+title: "feat: "
+labels: ["feature"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for user-facing improvements, data pipeline additions, report/dashboard changes, and recruiter-ready portfolio polish.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What should change, and why does it matter for Crypto Narrative Radar?
+      placeholder: Add a concise description of the improvement.
+    validations:
+      required: true
+  - type: textarea
+    id: user_value
+    attributes:
+      label: User or Research Value
+      description: Explain how this supports market monitoring, research, screening, or recruiter-facing clarity.
+      placeholder: This helps a research user understand...
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance Criteria
+      description: List the concrete conditions that make this issue done.
+      placeholder: |
+        - [ ] ...
+        - [ ] Tests or validation run
+        - [ ] README/docs updated if needed
+    validations:
+      required: true
+  - type: textarea
+    id: implementation_notes
+    attributes:
+      label: Implementation Notes
+      description: Mention likely files, data schemas, commands, or constraints.
+      placeholder: Likely files: ...
+    validations:
+      required: false

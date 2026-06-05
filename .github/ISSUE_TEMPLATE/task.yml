@@ -1,0 +1,33 @@
+name: Task
+description: Track focused engineering, testing, data, or documentation work.
+title: "chore: "
+labels: ["task"]
+body:
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: What is the smallest useful outcome?
+      placeholder: Complete a focused step toward the current milestone.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What files or behaviors are in scope? What is intentionally out of scope?
+      placeholder: |
+        In scope:
+        Out of scope:
+    validations:
+      required: true
+  - type: textarea
+    id: checklist
+    attributes:
+      label: Checklist
+      description: Add practical steps and verification.
+      placeholder: |
+        - [ ] ...
+        - [ ] Run relevant validation
+    validations:
+      required: true
