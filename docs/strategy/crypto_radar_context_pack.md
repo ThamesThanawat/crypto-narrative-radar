@@ -1,396 +1,135 @@
-# Crypto Radar Context Pack for Codex
+# Crypto Narrative Radar Strategic Context Pack
 
-## Purpose of This File
+## 1. Purpose of This File
 
-This file gives Codex the strategic context for the Crypto Narrative Radar / Crypto Listing Radar project.
+This file gives Codex concise strategic context for future work on Crypto Narrative Radar. Use it to keep implementation choices aligned with the project direction and avoid random feature expansion.
 
-Use this file when working inside this repository so that implementation decisions stay aligned with the project goal.
+This file is public-safe. It is not a journal, not a personal note, and must not include private career plans, company-specific targeting, personal finance, confidential work history, or private system content.
 
-This file is portfolio-safe. It should not contain private journal notes, personal finance information, or unrelated Thames OS content.
+## 2. Project Purpose
 
----
+Crypto Narrative Radar is a market intelligence and research support project for structured crypto narrative research.
 
-## Project Purpose
+The project tracks narrative-level momentum, sector rotation, relative strength, volume confirmation, breadth of participation, token-level contributors, concentration context, and historical market behavior.
 
-This project is evolving from a crypto market intelligence dashboard into a post-listing risk monitoring portfolio project.
+It must not become a trading bot, price prediction model, buy/sell recommendation engine, backtesting system, or portfolio optimizer.
 
-The goal is to demonstrate practical ability relevant to a Binance Post Listing Account Manager role.
+## 3. Current Strengths
 
-The project should not only show charts or market signals. It should produce institutional-style work products that resemble what a post-listing, token risk, or exchange operations team would actually use.
+- Curated narrative taxonomy using CoinGecko IDs.
+- CoinGecko current market snapshot pipeline.
+- Token-level and narrative-level market metrics.
+- Narrative Momentum Score as a transparent research ranking tool.
+- CSV outputs, DuckDB SQL analytics, Streamlit dashboard, and static HTML report generation.
+- Historical market data and historical narrative metrics.
+- Clear research framing around market indicator monitoring, data quality, concentration, and cautious interpretation.
 
----
+## 4. Strategic Shift
 
-## Current Strengths
+The project is shifting from a general dashboard toward a stronger research artifact and review workflow portfolio.
 
-The project already has strength in:
+Future work should emphasize report trust, data sanity, liquidity review, token risk context, event investigation, and evidence standards.
 
-* crypto market intelligence
-* token/listing monitoring
-* off-chain market data analysis
-* CoinGecko-based market data workflow
-* dashboard/report generation
-* signal tracking
-* structured portfolio project development
+Current priority is Milestone 6.1: HTML Report QA & Data Sanity Review.
 
-Current limitation:
+## 5. Professional Relevance
 
-The project currently leans more toward market monitoring than post-listing risk operations.
+The project can be portfolio-relevant for crypto research, digital asset analysis, exchange operations, token monitoring, and post-listing-style review roles.
 
----
+Do not frame the project as built for one specific company, job posting, or application. Keep the language broad, professional, and public-safe.
 
-## Strategic Shift
+## 6. Three Future Institutional Artifacts
 
-Do not keep adding random dashboard features.
+### Incident Investigation Memo
 
-The next phase should focus on creating recruiter-friendly institutional artifacts.
+A concise memo for reviewing a token or narrative event. It should cover the event timeline, observed market behavior, liquidity context, concentration concerns, evidence caveats, possible contributing factors, and recommended follow-up questions.
 
-The key shift is:
+### Post-Listing Operations Packet
 
-From:
+A practical packet for monitoring an asset after listing or after a notable market event. It should cover market activity, liquidity, volume, breadth, concentration, data quality, operational watch items, and escalation questions.
 
-* more indicators
-* more watchlist sections
-* more charts
+### Tokenomics Risk Memo
 
-To:
+A focused memo reviewing supply structure, unlocks, incentives, allocation risks, governance concentration, liquidity constraints, and market structure concerns. It should use cautious research language and avoid investment recommendations.
 
-* incident investigation
-* post-listing operations workflow
-* tokenomics risk review
-* data sanity and QA evidence
-* portfolio-ready documentation
+## 7. Liquidity Review Framework
 
-The project should become a credible post-listing risk monitoring portfolio, not just a crypto dashboard.
+### On-chain Liquidity
 
----
+Future review area for pool depth, pool concentration, LP behavior, bridge flows, large wallet activity, DEX routing, slippage, and liquidity migration.
 
-## Target Role Alignment
+Crypto Narrative Radar does not currently claim completed on-chain integrations.
 
-The target role is Binance Post Listing Account Manager or a similar post-listing / token operations / exchange risk role.
+### Off-chain / CEX Liquidity
 
-Important skill areas to demonstrate:
+Current and future review area for market cap, volume, volume-to-market-cap, token contributors, concentration, stale data, abnormal returns, and missing or zero market fields.
 
-* on-chain analytics awareness
-* root cause analysis
-* token event handling
-* tokenomics risk review
-* stakeholder communication
-* structured operations workflow
-* market and liquidity monitoring
-* data quality judgment
-* SQL / Python / Dune / Flipside / Nansen familiarity where possible
+The goal is operational and research awareness, not trading execution.
 
----
-
-## Three Core Artifacts
-
-### 1. Incident Investigation Memo
-
-Purpose:
-
-Demonstrate the ability to investigate abnormal token behavior using both off-chain and on-chain evidence.
-
-Should include:
-
-* observed anomaly
-* timeline
-* impact
-* off-chain market evidence
-* on-chain evidence if available
-* root cause hypothesis
-* contributing factors
-* corrective actions
-* preventive controls
-* operational recommendation
-
-This should use blameless postmortem language, not trading language.
-
-Avoid framing like:
-
-* signal worked
-* entry point
-* profitable move
-
-Prefer framing like:
-
-* observed anomaly
-* evidence reviewed
-* possible contributing factors
-* root cause hypothesis
-* recommended follow-up
-* control improvement
-
----
-
-### 2. Post-Listing Operations Packet
-
-Purpose:
-
-Demonstrate understanding of post-listing operational workflows.
-
-Should include templates or docs for:
-
-* post-listing request intake
-* token swap review
-* rebrand review
-* mainnet migration workflow
-* stakeholder update
-* escalation matrix
-* legal / compliance / risk handoff points
-* airdrop or token event review
-
-This artifact should show that the project understands token operations beyond market data.
-
----
-
-### 3. Tokenomics Risk Memo
-
-Purpose:
-
-Demonstrate the ability to review token structure and risk beyond price and volume.
-
-Should include:
-
-* circulating supply
-* total supply
-* FDV
-* economically relevant supply
-* locked / vested / treasury / foundation supply
-* unlock schedule
-* cliff vs linear unlock
-* insider allocation
-* governance concentration
-* bridge-adjusted supply
-* DEX/CEX liquidity absorbency
-* holder behavior around unlocks
-
-Important concept:
-
-Tokenomics risk is not only about unlock dates. It is about whether the market can absorb new or controlled supply without creating operational, liquidity, or reputation risk.
-
----
-
-## Liquidity Review Framework
-
-Liquidity review should separate on-chain and off-chain liquidity.
-
-### On-chain liquidity
-
-Review:
-
-* DEX pools
-* DEX routes
-* slippage
-* bridge liquidity
-* pool concentration
-* liquidity migration
-
-### Off-chain / CEX liquidity
-
-Review:
-
-* order book depth
-* spread
-* slippage
-* liquidity evaporation
-* market maker support
-* volume quality
-
-Even if the current project does not yet have CEX order book data, the framework should acknowledge this limitation and describe how the review would work.
-
----
-
-## Evidence Standards
+## 8. Evidence Standards
 
 ### Time-Correct Evidence
 
-When performing historical investigations, avoid hindsight bias.
+Use evidence available at the time of the report or event. Clearly separate what was known then from what was learned later.
 
-Do not blindly use current wallet/entity labels to explain past events.
+### Avoid Hindsight Bias
 
-If a wallet is currently labeled as an exchange wallet, note that the label may not have been known or accurate at the time of the incident.
+Do not write as though later outcomes were obvious. Explain what could reasonably have been reviewed using time-appropriate evidence.
 
-Use evidence caveats where needed.
+### Use Evidence Caveats
 
-Suggested wording:
+Call out missing data, stale data, API limits, incomplete coverage, ambiguous labels, taxonomy judgment, and calculation assumptions. Do not hide suspicious values silently.
 
-> Wallet/entity labels should be interpreted using time-appropriate context where possible. Current labels may not perfectly reflect historical knowledge at the time of the event.
-
----
-
-## Tool Roles
+## 9. Future Tool Roles
 
 ### Crypto Narrative Radar
 
-Role:
-
-Off-chain market intelligence layer.
-
-Used for:
-
-* market data
-* token ranking
-* return analysis
-* volume movement
-* listing-related monitoring
-* anomaly detection candidates
+Primary project tool for market indicator monitoring, narrative-level analysis, data sanity review, static reporting, and research support workflows.
 
 ### Arkham
 
-Role:
+Possible future investigation tool for wallet/entity review and on-chain transaction context. Do not describe it as an implemented integration unless it is actually added.
 
-Entity / wallet intelligence layer.
+### Dune / Flipside
 
-Useful for:
-
-* labeled wallets
-* exchange inflow/outflow clues
-* large transfers
-* suspicious wallet paths
-* entity-level investigation
-
-### Dune or Flipside
-
-Role:
-
-Reproducible SQL-based on-chain evidence layer.
-
-Useful for:
-
-* holder concentration
-* transfer patterns
-* DEX liquidity
-* event-level analysis
-* transparent query artifacts
+Possible future investigation tools for SQL-based on-chain analytics and event-specific query artifacts. Do not describe them as completed capabilities.
 
 ### Nansen
 
-Role:
+Possible future investigation tool for wallet labels, flow context, and holder behavior review. Treat it as external research support unless a real integration is implemented.
 
-Labeled holder and smart money / flow intelligence reference.
-
-Useful for:
-
-* holder behavior
-* entity-labeled flows
-* wallet segmentation
-* token movement interpretation
-
----
-
-## Roadmap
+## 10. Roadmap
 
 ### Milestone 6.1: HTML Report QA & Data Sanity Review
 
-Purpose:
-
-Make the current report credible before adding new artifacts.
-
-Focus areas:
-
-* suspicious 7D / 30D return values
-* missing data
-* zero or null prices
-* stale market data
-* duplicate tokens
-* token symbol mismatches
-* extreme percentage changes
-* calculation assumptions
-
-Expected deliverables:
-
-* data sanity checklist
-* QA notes
-* documented assumptions
-* cleaned report logic where needed
-
----
+Current priority. Improve report trust by reviewing stale data, missing data, zero or null prices, extreme percentage changes, token mismatches, duplicates, calculation assumptions, and historical percentage formatting.
 
 ### Milestone 6.2: Post-Listing Operations & Token Risk Packet
 
-Expected deliverables:
-
-* `docs/operations/post_listing_request_workflow.md`
-* `docs/templates/post_listing_request_intake_template.md`
-* `docs/templates/token_event_risk_review_template.md`
-* `docs/templates/tokenomics_risk_review_template.md`
-* `docs/templates/stakeholder_update_template.md`
-* `docs/templates/escalation_matrix.md`
-
----
+Create the first proof-pack artifact connecting market indicators, liquidity review, token risk context, data quality, and operational follow-up questions.
 
 ### Milestone 6.3: Incident Investigation Memo
 
-Expected deliverables:
-
-* `docs/case_studies/incident_investigation_template.md`
-* `docs/case_studies/example_market_anomaly_investigation.md`
-
----
+Create an investigation memo template or case study using time-correct evidence, cautious interpretation, and clear caveats.
 
 ### Milestone 6.4: On-chain Investigation Mini Case Study
 
-Expected deliverables:
-
-* `docs/case_studies/onchain_investigation_example.md`
-* `docs/research/onchain_data_sources_for_post_listing_review.md`
-
-Use Arkham plus Flipside or Dune if possible.
-
----
+Design a small on-chain investigation case study. Arkham, Dune, Flipside, or Nansen may be considered as possible future investigation tools, but do not overclaim completed integrations.
 
 ### Milestone 6.5: README Final Portfolio Polish
 
-Purpose:
-
-Make the repo understandable to recruiters and hiring managers.
-
-Focus:
-
-* what the project does
-* why it matters
-* screenshots / report examples
-* proof-pack artifacts
-* limitations
-* next steps
-
----
+Update the README to explain the research workflow, report outputs, proof-pack artifacts, limitations, and public-safe professional relevance.
 
 ### Milestone 7.0: Resume / LinkedIn / Interview Prep
 
-Purpose:
+Translate the project into concise professional materials and interview explanations without company-specific targeting language.
 
-Convert project work into career materials.
+## 11. Immediate Next Actions
 
-Focus:
-
-* resume bullets
-* LinkedIn project description
-* interview stories
-* portfolio walkthrough script
-
----
-
-## Priority Guidance
-
-Current priority:
-
-Finish Milestone 6.1 before adding more strategy or features.
-
-Do not prioritize Narrative Watchlist Indicators until after the proof-pack artifacts are started.
-
-Reason:
-
-Narrative Watchlist is useful for market research/data analyst positioning, but the proof-pack artifacts are more aligned with Binance post-listing operations.
-
----
-
-## Immediate Next Actions
-
-1. Inspect the current repo and locate the HTML report generation flow.
-2. Identify where 7D / 30D returns are calculated.
-3. Identify possible causes of suspicious return values.
-4. Create a data sanity checklist.
-5. Document assumptions and limitations in a QA note.
-6. Propose minimal code changes before implementing them.
-7. Only after Milestone 6.1 is credible, proceed to the Post-Listing Operations & Token Risk Packet.
+- Finish Milestone 6.1 before starting new strategic artifacts.
+- Keep the project focused on market intelligence and research support.
+- Start proof-pack artifacts before prioritizing Narrative Watchlist Indicators.
+- Keep all outputs public-safe and recruiter-safe.
+- Do not add trading signals, price prediction, backtesting, buy/sell recommendations, portfolio allocation, or private personal content.
+- Do not add on-chain integrations unless explicitly scoped and implemented.
+- Do not use company-specific targeting language.
