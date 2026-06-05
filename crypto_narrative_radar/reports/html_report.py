@@ -126,6 +126,34 @@ MONEY_COLUMNS = {
     "top_1_market_cap",
     "top_3_market_cap",
 }
+COMPONENT_SCORE_COLUMNS = [
+    "price_momentum_score",
+    "relative_strength_score",
+    "volume_confirmation_score",
+    "breadth_score",
+]
+SCORE_WEIGHT_ROWS = [
+    {
+        "component": "Price momentum",
+        "weight": "40%",
+        "description": "24h, 7D, and 30D median return context.",
+    },
+    {
+        "component": "Relative strength",
+        "weight": "25%",
+        "description": "7D median return compared with BTC and ETH.",
+    },
+    {
+        "component": "Volume confirmation",
+        "weight": "20%",
+        "description": "Volume-to-market-cap activity context.",
+    },
+    {
+        "component": "Breadth of participation",
+        "weight": "15%",
+        "description": "Share of tokens participating across return windows.",
+    },
+]
 
 COLUMN_LABELS = {
     "rank": "Rank",
@@ -133,6 +161,11 @@ COLUMN_LABELS = {
     "token_count": "Token Count",
     "narrative_momentum_score": "Narrative Momentum Score",
     "momentum_score": "Narrative Momentum Score",
+    "price_momentum_score": "Price Momentum Score",
+    "relative_strength_score": "Relative Strength Score",
+    "volume_confirmation_score": "Volume Confirmation Score",
+    "breadth_score": "Breadth Score",
+    "scoring_note": "Scoring Note",
     "avg_return_7d": "Avg 7D Return",
     "avg_return_30d": "Avg 30D Return",
     "median_return_7d": "Median 7D Return",
@@ -147,7 +180,7 @@ COLUMN_LABELS = {
     "rs_vs_eth_7d": "RS vs ETH 7D",
     "rs_vs_btc_30d": "RS vs BTC 30D",
     "rs_vs_eth_30d": "RS vs ETH 30D",
-    "relative_strength_7d": "Relative Strength 7D",
+    "relative_strength_7d": "Avg RS vs BTC/ETH 7D",
     "relative_strength_30d": "Relative Strength 30D",
     "concentration_flag": "Concentration",
     "current_price": "Price",
@@ -766,6 +799,68 @@ def _table_from_df(
     return _records(selected, max_rows=max_rows, column_formats=column_formats)
 
 
+def _component_breakdown_table(
+    ranking_df: pd.DataFrame,
+    score_column: str,
+) -> dict[str, Any] | None:
+    if not all(column in ranking_df.columns for column in COMPONENT_SCORE_COLUMNS):
+        return None
+    columns = [
+        "rank",
+        "primary_narrative",
+        score_column,
+        *COMPONENT_SCORE_COLUMNS,
+        "scoring_note",
+    ]
+    return _table_from_df(ranking_df, columns)
+
+
+def _sanitize_concentration_review(df: pd.DataFrame | None) -> pd.DataFrame | None:
+    if df is None or df.empty or "concentration_comment" not in df.columns:
+        return df
+    working = df.copy()
+    working["concentration_comment"] = (
+        working["concentration_comment"]
+        .astype("string")
+        .str.replace(
+            "Broad participation:",
+            "Lower concentration:",
+            regex=False,
+        )
+    )
+    return working
+
+
+def _methodology_context() -> dict[str, Any]:
+    return {
+        "score_weights": SCORE_WEIGHT_ROWS,
+        "score_note": (
+            "Narrative Momentum Score is a relative research ranking score, "
+            "not statistical confidence."
+        ),
+        "normalization_note": (
+            "Component scores are percentile-rank normalized within the current "
+            "narrative universe using the existing pandas rank percentile method."
+        ),
+        "relative_strength_note": (
+            "Relative Strength 7D averages median narrative 7D return minus BTC "
+            "7D return and median narrative 7D return minus ETH 7D return."
+        ),
+        "concentration_note": (
+            "Concentration labels and comments are judgment-based V1 heuristics, "
+            "not statistically derived cutoffs."
+        ),
+        "token_universe_note": (
+            "The token universe is 80 manually curated tokens: 10 representative "
+            "tokens per narrative, not full sector coverage."
+        ),
+        "taxonomy_note": (
+            "Taxonomy assignments involve judgment and can miss sector breadth "
+            "or token overlap."
+        ),
+    }
+
+
 def _sort_by_score(df: pd.DataFrame, score_column: str, ascending: bool) -> pd.DataFrame:
     working = df.copy()
     working[score_column] = pd.to_numeric(working[score_column], errors="coerce")
@@ -891,6 +986,7 @@ def prepare_report_context(
     token_snapshot_df = load_optional_csv(paths["token_snapshot"])
     contributors_df = load_optional_csv(paths["sql_top_token_contributors"])
     concentration_df = load_optional_csv(paths["sql_concentration_review"])
+    display_concentration_df = _sanitize_concentration_review(concentration_df)
     narrative_summary_df = load_optional_csv(paths["sql_narrative_summary"])
     historical_df = load_optional_csv(paths["historical_narrative"])
     generated_at = datetime.now(timezone.utc)
@@ -942,9 +1038,11 @@ def prepare_report_context(
         "templates_root": templates_root,
         "qa_warnings": qa_warnings,
         "summary": summary,
-        "top_narratives": _records(_select_columns(sorted_desc.head(5), ranking_columns)),
-        "weakening_narratives": _records(_select_columns(sorted_asc.head(5), ranking_columns)),
+        "methodology": _methodology_context(),
+        "top_narratives": _records(_select_columns(sorted_desc.head(3), ranking_columns)),
+        "weakening_narratives": _records(_select_columns(sorted_asc.head(3), ranking_columns)),
         "ranking_table": _table_from_df(sorted_desc, ranking_columns),
+        "score_component_breakdown": _component_breakdown_table(sorted_desc, score_column),
         "review_table": _table_from_df(
             review_source if review_source is not None else ranking_df,
             [
@@ -969,7 +1067,7 @@ def prepare_report_context(
             else None
         ),
         "concentration_review": _table_from_df(
-            concentration_df if concentration_df is not None else pd.DataFrame(),
+            display_concentration_df if display_concentration_df is not None else pd.DataFrame(),
             [
                 "primary_narrative",
                 "top_1_market_cap_share",

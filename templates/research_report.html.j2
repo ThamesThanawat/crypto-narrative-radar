@@ -239,7 +239,7 @@
     </section>
 
     <section>
-      <h2>Top 5 by Narrative Momentum Score</h2>
+      <h2>Top 3 by Narrative Momentum Score</h2>
       <p class="section-note">Leading narratives are ranked by the current Narrative Momentum Score and describe current narrative leadership.</p>
       {% set table_data = top_narratives %}
       {% if table_data %}
@@ -267,7 +267,7 @@
     </section>
 
     <section>
-      <h2>Lowest 5 by Narrative Momentum Score</h2>
+      <h2>Lowest 3 by Narrative Momentum Score</h2>
       <p class="section-note">Lagging narratives show softer relative momentum in this snapshot. This is descriptive research context.</p>
       {% set table_data = weakening_narratives %}
       {% if table_data %}
@@ -321,6 +321,36 @@
       </div>
       {% endif %}
     </section>
+
+    {% if score_component_breakdown %}
+    <section>
+      <h2>Score Component Breakdown</h2>
+      <p class="section-note">
+        Component scores are percentile-rank normalized within the current narrative universe and combined into the Narrative Momentum Score. They are relative research ranking inputs, not statistical confidence.
+      </p>
+      {% set table_data = score_component_breakdown %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              {% for column in table_data.columns %}
+              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table_data.rows %}
+            <tr>
+              {% for column in table_data.columns %}
+              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {% endif %}
 
     <section>
       <h2>Return, Volume, and Breadth Review</h2>
@@ -385,7 +415,7 @@
 
     <section>
       <h2>Concentration Review</h2>
-      <p class="section-note">Concentration review shows whether narrative-level metrics are broadly distributed or driven by a small number of large tokens.</p>
+      <p class="section-note">Concentration review shows whether narrative-level market cap is more distributed or driven by a small number of large tokens. Labels and comments are judgment-based V1 heuristics, not statistically derived cutoffs.</p>
       {% if concentration_note %}
       <p class="section-note">{{ concentration_note }}</p>
       {% endif %}
@@ -452,7 +482,18 @@
       <h2>Methodology</h2>
       <div class="method-box">
         <p>Crypto Narrative Radar uses a manually reviewed narrative taxonomy, CoinGecko market data, token-level market snapshots, and narrative-level aggregation to create a descriptive research view.</p>
+        <p>{{ methodology.score_note }} Small score gaps should be interpreted cautiously.</p>
         <p>The Narrative Momentum Score uses the current V1 framework: 40% price momentum, 25% relative strength, 20% volume confirmation, and 15% breadth of participation.</p>
+        <ul>
+          {% for row in methodology.score_weights %}
+          <li>{{ row.weight }} {{ row.component }}: {{ row.description }}</li>
+          {% endfor %}
+        </ul>
+        <p>{{ methodology.normalization_note }}</p>
+        <p>{{ methodology.relative_strength_note }}</p>
+        <p>{{ methodology.concentration_note }}</p>
+        <p>{{ methodology.token_universe_note }}</p>
+        <p>{{ methodology.taxonomy_note }}</p>
         <p>DuckDB SQL analytics outputs support narrative summaries, token-level contributors, and concentration context. Historical narrative data, when available, is used only as descriptive trend context.</p>
         <p>The score is a research ranking tool for market intelligence. It does not imply future returns.</p>
       </div>

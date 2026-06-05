@@ -61,6 +61,7 @@ def write_ranking(path: Path, score_column: str = "narrative_momentum_score") ->
             {
                 "rank": 1,
                 "primary_narrative": "AI",
+                "token_count": 10,
                 score_column: 92,
                 "avg_return_7d": 12,
                 "avg_return_30d": 20,
@@ -68,10 +69,35 @@ def write_ranking(path: Path, score_column: str = "narrative_momentum_score") ->
                 "total_market_cap": 1000,
                 "total_volume": 100,
                 "relative_strength_7d": 8,
+                "concentration_flag": "Medium",
+                "price_momentum_score": 100,
+                "relative_strength_score": 100,
+                "volume_confirmation_score": 80,
+                "breadth_score": 90,
+                "scoring_note": "Full V1 scoring weights applied.",
             },
             {
                 "rank": 2,
+                "primary_narrative": "Layer 1",
+                "token_count": 10,
+                score_column: 75,
+                "avg_return_7d": 7,
+                "avg_return_30d": 12,
+                "breadth_7d": 0.7,
+                "total_market_cap": 950,
+                "total_volume": 95,
+                "relative_strength_7d": 4,
+                "concentration_flag": "High",
+                "price_momentum_score": 80,
+                "relative_strength_score": 75,
+                "volume_confirmation_score": 60,
+                "breadth_score": 70,
+                "scoring_note": "Full V1 scoring weights applied.",
+            },
+            {
+                "rank": 3,
                 "primary_narrative": "DeFi",
+                "token_count": 10,
                 score_column: 51,
                 "avg_return_7d": 3,
                 "avg_return_30d": 6,
@@ -79,10 +105,35 @@ def write_ranking(path: Path, score_column: str = "narrative_momentum_score") ->
                 "total_market_cap": 800,
                 "total_volume": 80,
                 "relative_strength_7d": 1,
+                "concentration_flag": "Low",
+                "price_momentum_score": 50,
+                "relative_strength_score": 60,
+                "volume_confirmation_score": 55,
+                "breadth_score": 50,
+                "scoring_note": "Full V1 scoring weights applied.",
             },
             {
-                "rank": 3,
+                "rank": 4,
+                "primary_narrative": "RWA",
+                "token_count": 10,
+                score_column: 35,
+                "avg_return_7d": -1,
+                "avg_return_30d": -3,
+                "breadth_7d": 0.4,
+                "total_market_cap": 600,
+                "total_volume": 60,
+                "relative_strength_7d": -2,
+                "concentration_flag": "Medium",
+                "price_momentum_score": 40,
+                "relative_strength_score": 40,
+                "volume_confirmation_score": 30,
+                "breadth_score": 35,
+                "scoring_note": "Full V1 scoring weights applied.",
+            },
+            {
+                "rank": 5,
                 "primary_narrative": "Gaming / GameFi",
+                "token_count": 10,
                 score_column: 20,
                 "avg_return_7d": -2,
                 "avg_return_30d": -8,
@@ -90,6 +141,12 @@ def write_ranking(path: Path, score_column: str = "narrative_momentum_score") ->
                 "total_market_cap": 400,
                 "total_volume": 40,
                 "relative_strength_7d": -4,
+                "concentration_flag": "Medium",
+                "price_momentum_score": 20,
+                "relative_strength_score": 20,
+                "volume_confirmation_score": 20,
+                "breadth_score": 20,
+                "scoring_note": "Full V1 scoring weights applied.",
             },
         ]
     )
@@ -188,6 +245,8 @@ def test_optional_files_missing_do_not_fail_context_preparation(tmp_path: Path) 
     assert context["snapshot_date"] == "2026-05-25"
     assert context["token_contributor_note"]
     assert context["concentration_note"]
+    assert len(context["top_narratives"]["rows"]) == 3
+    assert len(context["weakening_narratives"]["rows"]) == 3
 
 
 def test_score_column_detection_supports_expected_names() -> None:
@@ -454,10 +513,108 @@ def test_rendered_report_uses_research_friendly_section_titles_and_headers(
     )
     html = output_path.read_text(encoding="utf-8")
 
-    assert "Top 5 by Narrative Momentum Score" in html
-    assert "Lowest 5 by Narrative Momentum Score" in html
+    assert "Top 3 by Narrative Momentum Score" in html
+    assert "Lowest 3 by Narrative Momentum Score" in html
+    assert "Score Component Breakdown" in html
     assert "<th>Narrative</th>" in html
     assert "<th>Avg 7D Return</th>" in html
     assert "<th>Narrative Momentum Score</th>" in html
+    assert "<th>Price Momentum Score</th>" in html
+    assert "<th>Relative Strength Score</th>" in html
+    assert "<th>Volume Confirmation Score</th>" in html
+    assert "<th>Breadth Score</th>" in html
+    assert "<th>Scoring Note</th>" in html
+    assert "Avg RS vs BTC/ETH 7D" in html
+    assert "Top 5 by Narrative Momentum Score" not in html
+    assert "Lowest 5 by Narrative Momentum Score" not in html
     assert "Top 5 Outperforming Narratives" not in html
     assert "Top 5 Weakening Narratives" not in html
+
+
+def test_score_component_breakdown_appears_when_component_columns_exist(
+    tmp_path: Path,
+) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-25"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+
+    context = prepare_report_context(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+    )
+
+    component_table = context["score_component_breakdown"]
+    assert component_table is not None
+    assert component_table["columns"] == [
+        "rank",
+        "primary_narrative",
+        "narrative_momentum_score",
+        "price_momentum_score",
+        "relative_strength_score",
+        "volume_confirmation_score",
+        "breadth_score",
+        "scoring_note",
+    ]
+    assert component_table["labels"]["price_momentum_score"] == "Price Momentum Score"
+    assert component_table["labels"]["volume_confirmation_score"] == "Volume Confirmation Score"
+
+
+def test_methodology_explains_score_interpretation_and_limitations(
+    tmp_path: Path,
+) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-25"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+
+    output_path = generate_report(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+    )
+    html = output_path.read_text(encoding="utf-8")
+
+    assert "relative research ranking score" in html
+    assert "not statistical confidence" in html
+    assert "Small score gaps should be interpreted cautiously" in html
+    assert "40% price momentum" in html
+    assert "25% relative strength" in html
+    assert "20% volume confirmation" in html
+    assert "15% breadth of participation" in html
+    assert "percentile-rank normalized within the current narrative universe" in html
+    assert "median narrative 7D return minus BTC 7D return" in html
+    assert "median narrative 7D return minus ETH 7D return" in html
+    assert "judgment-based V1 heuristics" in html
+    assert "not statistically derived cutoffs" in html
+    assert "80 manually curated tokens" in html
+    assert "10 representative tokens per narrative" in html
+    assert "not full sector coverage" in html
+    assert "Taxonomy assignments involve judgment" in html
+
+
+def test_concentration_review_sanitizes_broad_participation_phrase(
+    tmp_path: Path,
+) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-25"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+    pd.DataFrame(
+        [
+            {
+                "primary_narrative": "AI",
+                "top_1_market_cap_share": 0.35,
+                "top_3_market_cap_share": 0.65,
+                "concentration_comment": "Broad participation: market cap is more distributed",
+            }
+        ]
+    ).to_csv(processed_dir / "sql_concentration_review.csv", index=False)
+
+    output_path = generate_report(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+    )
+    html = output_path.read_text(encoding="utf-8")
+
+    assert "Broad participation" not in html
+    assert "Lower concentration: market cap is more distributed" in html
