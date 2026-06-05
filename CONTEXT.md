@@ -73,7 +73,7 @@ historical narrative metrics
         ↓
 historical dashboard view
         ↓
-static HTML research report with QA notes
+static HTML research report with QA notes and methodology clarity
         ->
 public-safe strategic context pack
 ```
@@ -164,12 +164,13 @@ Current implemented project layers:
 - historical dashboard view
 - static HTML report generator
 - HTML report QA layer with Data Quality Notes
+- HTML report methodology clarity layer with Score Component Breakdown
 - public-safe strategic context pack at `docs/strategy/crypto_radar_context_pack.md`
 
 Current next milestone:
 
 ```text
-Milestone 6.2: Post-Listing Operations & Token Risk Packet
+Post-Listing Operations & Token Risk Packet
 ```
 
 ## Core Domain Terms
@@ -251,6 +252,8 @@ Current V1 framework:
 
 The score helps compare narrative-level market momentum. It does not predict future prices.
 
+It is a relative research ranking score, not statistical confidence. Small score gaps should be interpreted cautiously.
+
 ### Price Momentum
 
 A measure of recent token or narrative returns.
@@ -307,6 +310,8 @@ Examples:
 - concentration_comment
 
 Concentration review is not part of the Narrative Momentum Score V1. It is used for interpretation.
+
+Concentration labels and comments are V1 heuristics, not statistically derived cutoffs.
 
 ### Token Contributors
 
@@ -400,15 +405,16 @@ The static HTML report generator is implemented and presents market intelligence
 Current sections include:
 
 - Executive Summary
-- Top narratives by Narrative Momentum Score
-- Lowest narratives by Narrative Momentum Score
+- Top 3 narratives by Narrative Momentum Score
+- Lowest 3 narratives by Narrative Momentum Score
 - Narrative ranking table
+- Score Component Breakdown
 - Token contributors
 - Concentration review
 - Return, volume, and breadth review
 - 90-day historical context
 - Data Quality Notes when QA warnings exist
-- Methodology
+- Methodology with score caveats, component weights, token universe notes, and taxonomy limitations
 - Limitations
 
 The HTML report should read like a research note, not a trading dashboard. Its QA layer should surface data sanity concerns instead of hiding suspicious values silently.
@@ -500,19 +506,21 @@ Milestone 5.9: Historical dashboard view
 Milestone 5.10: Mac environment + context cleanup
 Milestone 6.0: Static HTML Research Report
 Milestone 6.1: HTML Report QA & Data Sanity Review
+Milestone 6.2: Methodology Transparency & Report Clarity
 Strategic context pack: public-safe project roadmap brief
 ```
 
 Next:
-Milestone 6.2: Post-Listing Operations & Token Risk Packet
-Milestone 6.3: Incident Investigation Memo
-Milestone 6.4: On-chain Investigation Mini Case Study
-Milestone 6.5: README Final Portfolio Polish
-Milestone 7.0: Resume / LinkedIn / Interview Prep
+Post-Listing Operations & Token Risk Packet
+Incident Investigation Memo
+On-chain Investigation Mini Case Study
+README Final Portfolio Polish
+Resume / LinkedIn / Interview Prep
 
 Roadmap notes:
 
-- Milestone 6.2 is the current next milestone.
+- Milestone 6.2 is complete; next work should move toward proof-pack artifacts.
+- Post-Listing Operations & Token Risk Packet is the next planned proof-pack artifact.
 - Do not prioritize Narrative Watchlist Indicators until after proof-pack artifacts are started.
 - On-chain investigation tools such as Arkham, Flipside, and Dune are future or optional evidence sources unless explicitly implemented.
 - Do not add price prediction, trading signals, alpha claims, backtesting, portfolio allocation, buy/sell recommendations, or trading logic.
@@ -668,6 +676,32 @@ Validation:
 
 Scope note:
 No scoring formulas, API calls, DeFiLlama, prediction, backtesting, portfolio allocation, dashboard changes, or trading logic were added.
+
+### Milestone 6.2 Summary
+
+Methodology Transparency & Report Clarity is complete.
+
+The static HTML report now includes:
+
+- Score Component Breakdown using existing component score columns
+- Top 3 and Lowest 3 Narrative Momentum Score sections
+- clearer Narrative Momentum Score methodology
+- score interpretation caveat: relative ranking, not statistical confidence
+- small-gap interpretation caution
+- component weights and percentile-rank normalization wording
+- Relative Strength calculation note
+- concentration labels and caveats clarified as V1 heuristics
+- token universe methodology: 80 manually curated tokens, 10 representative tokens per narrative
+- taxonomy limitation note
+
+Validation:
+
+- compileall passed
+- report generation passed
+- pytest passed: 95 passed
+
+Scope note:
+No scoring formulas, taxonomy, API calls, prediction, backtesting, portfolio allocation, dashboard changes, or trading logic were changed.
 
 ### Strategic Context Pack Summary
 
