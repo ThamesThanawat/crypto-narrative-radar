@@ -200,6 +200,17 @@
       does not provide price prediction, does not include backtesting, and does not provide portfolio allocation guidance.
     </section>
 
+    {% if qa_warnings %}
+    <section>
+      <h2>Data Quality Notes</h2>
+      <ul>
+        {% for warning in qa_warnings %}
+        <li>{{ warning }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
     <section>
       <h2>Executive Summary</h2>
       {% if summary.bullets %}

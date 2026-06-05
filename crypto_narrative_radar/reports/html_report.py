@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 import shutil
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +23,49 @@ DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 REPORT_FILENAME_TEMPLATE = "crypto_narrative_report_{snapshot_date}.html"
 TOKEN_SNAPSHOT_TEMPLATE = "token_market_snapshot_{snapshot_date}.csv"
 TEMPLATE_NAME = "research_report.html.j2"
+STALE_MARKET_DATA_DAYS = 2
+CURRENT_RETURN_COLUMNS = (
+    "price_change_percentage_24h",
+    "price_change_percentage_7d_in_currency",
+    "price_change_percentage_30d_in_currency",
+)
+CURRENT_NARRATIVE_RETURN_COLUMNS = (
+    "avg_return_24h",
+    "median_return_24h",
+    "avg_return_7d",
+    "median_return_7d",
+    "avg_return_30d",
+    "median_return_30d",
+    "relative_strength_7d",
+    "rs_vs_btc_7d",
+    "rs_vs_eth_7d",
+)
+HISTORICAL_RATIO_PERCENT_COLUMNS = {
+    "avg_return_1d",
+    "median_return_1d",
+    "avg_return_7d",
+    "median_return_7d",
+    "avg_return_30d",
+    "median_return_30d",
+    "breadth_1d",
+    "breadth_7d",
+    "breadth_30d",
+    "btc_return_1d",
+    "btc_return_7d",
+    "btc_return_30d",
+    "eth_return_1d",
+    "eth_return_7d",
+    "eth_return_30d",
+    "rs_vs_btc_1d",
+    "rs_vs_btc_7d",
+    "rs_vs_btc_30d",
+    "rs_vs_eth_1d",
+    "rs_vs_eth_7d",
+    "rs_vs_eth_30d",
+    "relative_strength_1d",
+    "relative_strength_7d",
+    "relative_strength_30d",
+}
 PERCENT_POINT_COLUMNS = {
     "avg_return_24h",
     "median_return_24h",
@@ -92,19 +135,28 @@ COLUMN_LABELS = {
     "momentum_score": "Narrative Momentum Score",
     "avg_return_7d": "Avg 7D Return",
     "avg_return_30d": "Avg 30D Return",
+    "median_return_7d": "Median 7D Return",
+    "median_return_30d": "Median 30D Return",
     "total_market_cap": "Total Market Cap",
     "total_market_cap_usd": "Total Market Cap",
     "total_volume": "Total Volume",
     "total_volume_usd": "Total Volume",
     "breadth_7d": "7D Breadth",
     "positive_breadth_pct": "Positive Breadth",
+    "rs_vs_btc_7d": "RS vs BTC 7D",
+    "rs_vs_eth_7d": "RS vs ETH 7D",
+    "rs_vs_btc_30d": "RS vs BTC 30D",
+    "rs_vs_eth_30d": "RS vs ETH 30D",
     "relative_strength_7d": "Relative Strength 7D",
     "relative_strength_30d": "Relative Strength 30D",
     "concentration_flag": "Concentration",
+    "current_price": "Price",
     "symbol": "Symbol",
     "name": "Name",
     "market_cap": "Market Cap",
+    "price_change_percentage_24h": "24H Return",
     "price_change_percentage_7d_in_currency": "7D Return",
+    "price_change_percentage_30d_in_currency": "30D Return",
     "volume_share_within_narrative": "Volume Share",
     "market_cap_share_within_narrative": "Market Cap Share",
     "top_1_market_cap_share": "Top 1 Market Cap Share",
@@ -166,6 +218,389 @@ def detect_score_column(df: pd.DataFrame) -> str:
         "Narrative ranking missing score column: expected momentum_score or "
         "narrative_momentum_score."
     )
+
+
+def _is_blank(series: pd.Series) -> pd.Series:
+    return series.isna() | (series.astype(str).str.strip() == "")
+
+
+def _numeric_series(df: pd.DataFrame, column: str) -> pd.Series:
+    return pd.to_numeric(df[column], errors="coerce")
+
+
+def _unparseable_count(df: pd.DataFrame, column: str, numeric: pd.Series) -> int:
+    raw = df[column]
+    non_blank = ~_is_blank(raw)
+    return int((non_blank & numeric.isna()).sum())
+
+
+def _sample_values(series: pd.Series, limit: int = 5) -> str:
+    values = series.dropna().astype(str).drop_duplicates().head(limit).tolist()
+    return ", ".join(values)
+
+
+def _append_unique(warnings: list[str], warning: str) -> None:
+    if warning not in warnings:
+        warnings.append(warning)
+
+
+def _warn_missing_or_nonpositive_numeric(
+    warnings: list[str],
+    df: pd.DataFrame,
+    dataset_label: str,
+    column: str,
+    display_label: str,
+    warn_nonpositive: bool = True,
+) -> None:
+    if column not in df.columns:
+        _append_unique(
+            warnings,
+            f"{dataset_label} is missing {column}; {display_label} QA could not be completed.",
+        )
+        return
+
+    numeric = _numeric_series(df, column)
+    unparseable_count = _unparseable_count(df, column, numeric)
+    missing_count = int(numeric.isna().sum())
+    if missing_count:
+        _append_unique(
+            warnings,
+            f"{dataset_label} has {missing_count} missing or unparseable {display_label} value(s).",
+        )
+
+    if warn_nonpositive:
+        nonpositive_count = int((numeric <= 0).sum())
+        if nonpositive_count:
+            _append_unique(
+                warnings,
+                f"{dataset_label} has {nonpositive_count} nonpositive {display_label} value(s).",
+            )
+
+
+def _warn_extreme_percent_point_columns(
+    warnings: list[str],
+    df: pd.DataFrame,
+    dataset_label: str,
+    columns: tuple[str, ...],
+    threshold: float = 100.0,
+) -> None:
+    for column in columns:
+        if column not in df.columns:
+            continue
+        numeric = _numeric_series(df, column)
+        unparseable_count = _unparseable_count(df, column, numeric)
+        if unparseable_count:
+            _append_unique(
+                warnings,
+                f"{dataset_label} has {unparseable_count} unparseable {COLUMN_LABELS.get(column, column)} value(s).",
+            )
+        extreme = numeric.abs() > threshold
+        if bool(extreme.any()):
+            max_abs = numeric.loc[extreme].abs().max()
+            _append_unique(
+                warnings,
+                f"{dataset_label} has {int(extreme.sum())} {COLUMN_LABELS.get(column, column)} value(s) above {threshold:.0f}% absolute; max absolute value is {max_abs:,.1f}%. Review for data sanity.",
+            )
+
+
+def _warn_missing_values(
+    warnings: list[str],
+    df: pd.DataFrame,
+    dataset_label: str,
+    columns: list[str],
+) -> None:
+    for column in columns:
+        if column not in df.columns:
+            continue
+        missing_count = int(_is_blank(df[column]).sum())
+        if missing_count:
+            _append_unique(
+                warnings,
+                f"{dataset_label} has {missing_count} missing {COLUMN_LABELS.get(column, column)} value(s).",
+            )
+
+
+def _validate_required_ranking_structure(ranking_df: pd.DataFrame) -> None:
+    if ranking_df.empty:
+        raise ValueError("Narrative ranking is empty.")
+    if "primary_narrative" not in ranking_df.columns:
+        raise ValueError("Narrative ranking missing required column: primary_narrative.")
+    detect_score_column(ranking_df)
+
+
+def _qa_token_snapshot(
+    token_snapshot_df: pd.DataFrame | None,
+    generated_at: datetime,
+) -> list[str]:
+    warnings: list[str] = []
+    if token_snapshot_df is None:
+        return warnings
+    if token_snapshot_df.empty:
+        return ["Token snapshot is empty; token-level QA could not be completed."]
+
+    dataset_label = "Token snapshot"
+    if "coingecko_id" in token_snapshot_df.columns:
+        ids = token_snapshot_df["coingecko_id"].dropna().astype(str).str.strip().str.lower()
+        duplicated_ids = ids[ids.duplicated(keep=False)]
+        if not duplicated_ids.empty:
+            _append_unique(
+                warnings,
+                f"{dataset_label} has {duplicated_ids.nunique()} duplicate CoinGecko ID(s): {_sample_values(duplicated_ids)}.",
+            )
+    else:
+        _append_unique(warnings, f"{dataset_label} is missing coingecko_id; duplicate-token QA could not be completed.")
+
+    if "symbol" in token_snapshot_df.columns:
+        blank_symbol_count = int(_is_blank(token_snapshot_df["symbol"]).sum())
+        if blank_symbol_count:
+            _append_unique(
+                warnings,
+                f"{dataset_label} has {blank_symbol_count} missing or blank symbol value(s).",
+            )
+    else:
+        _append_unique(warnings, f"{dataset_label} is missing symbol.")
+
+    _warn_missing_or_nonpositive_numeric(
+        warnings,
+        token_snapshot_df,
+        dataset_label,
+        "current_price",
+        "price",
+    )
+    _warn_missing_or_nonpositive_numeric(
+        warnings,
+        token_snapshot_df,
+        dataset_label,
+        "market_cap",
+        "market cap",
+    )
+    _warn_missing_or_nonpositive_numeric(
+        warnings,
+        token_snapshot_df,
+        dataset_label,
+        "total_volume",
+        "total volume",
+        warn_nonpositive=False,
+    )
+
+    if "last_updated" in token_snapshot_df.columns:
+        parsed_dates = pd.to_datetime(
+            token_snapshot_df["last_updated"],
+            errors="coerce",
+            utc=True,
+        )
+        invalid_count = int(parsed_dates.isna().sum())
+        if invalid_count:
+            _append_unique(
+                warnings,
+                f"{dataset_label} has {invalid_count} missing or invalid last_updated value(s).",
+            )
+        valid_dates = parsed_dates.dropna()
+        if not valid_dates.empty:
+            latest_updated = valid_dates.max().to_pydatetime()
+            report_time = generated_at if generated_at.tzinfo else generated_at.replace(tzinfo=timezone.utc)
+            age = report_time - latest_updated
+            if age > timedelta(days=STALE_MARKET_DATA_DAYS):
+                _append_unique(
+                    warnings,
+                    f"{dataset_label} last_updated appears stale: latest market row updated {latest_updated.date().isoformat()}, {age.days} day(s) before report generation.",
+                )
+
+    _warn_extreme_percent_point_columns(
+        warnings,
+        token_snapshot_df,
+        dataset_label,
+        CURRENT_RETURN_COLUMNS,
+    )
+    return warnings
+
+
+def _qa_narrative_outputs(
+    ranking_df: pd.DataFrame,
+    narrative_metrics_df: pd.DataFrame | None,
+    concentration_df: pd.DataFrame | None,
+) -> list[str]:
+    warnings: list[str] = []
+    _validate_required_ranking_structure(ranking_df)
+
+    for dataset_label, df in [
+        ("Narrative ranking", ranking_df),
+        ("Narrative metrics", narrative_metrics_df),
+    ]:
+        if df is None:
+            continue
+        if "primary_narrative" in df.columns:
+            blank_narratives = int(_is_blank(df["primary_narrative"]).sum())
+            if blank_narratives:
+                _append_unique(
+                    warnings,
+                    f"{dataset_label} has {blank_narratives} missing narrative value(s).",
+                )
+        else:
+            _append_unique(warnings, f"{dataset_label} is missing primary_narrative.")
+
+        _warn_extreme_percent_point_columns(
+            warnings,
+            df,
+            dataset_label,
+            CURRENT_NARRATIVE_RETURN_COLUMNS,
+        )
+
+        breadth_columns = [
+            column for column in ["breadth_7d", "positive_breadth_pct"] if column in df.columns
+        ]
+        if not breadth_columns:
+            _append_unique(
+                warnings,
+                f"{dataset_label} is missing breadth fields used for participation review.",
+            )
+        else:
+            _warn_missing_values(warnings, df, dataset_label, breadth_columns)
+
+    if concentration_df is not None:
+        required_concentration_columns = [
+            "primary_narrative",
+            "top_1_market_cap_share",
+            "top_3_market_cap_share",
+            "concentration_comment",
+        ]
+        missing_columns = [
+            column for column in required_concentration_columns if column not in concentration_df.columns
+        ]
+        if missing_columns:
+            _append_unique(
+                warnings,
+                "Concentration review is missing expected column(s): "
+                + ", ".join(missing_columns)
+                + ".",
+            )
+        else:
+            _warn_missing_values(
+                warnings,
+                concentration_df,
+                "Concentration review",
+                required_concentration_columns,
+            )
+    elif "concentration_flag" not in ranking_df.columns:
+        _append_unique(
+            warnings,
+            "Concentration values are not available in ranking or concentration review outputs.",
+        )
+
+    return warnings
+
+
+def _qa_historical_narrative(
+    historical_df: pd.DataFrame | None,
+    expected_narratives: set[str],
+) -> list[str]:
+    warnings: list[str] = []
+    if historical_df is None:
+        return warnings
+    if historical_df.empty:
+        return ["Historical narrative data is empty; 90-day context QA could not be completed."]
+
+    dataset_label = "Historical narrative data"
+    if "date" not in historical_df.columns:
+        _append_unique(warnings, f"{dataset_label} is missing date.")
+        return warnings
+    if "primary_narrative" not in historical_df.columns:
+        _append_unique(warnings, f"{dataset_label} is missing primary_narrative.")
+        return warnings
+
+    parsed_dates = pd.to_datetime(historical_df["date"], errors="coerce")
+    invalid_date_count = int(parsed_dates.isna().sum())
+    if invalid_date_count:
+        _append_unique(
+            warnings,
+            f"{dataset_label} has {invalid_date_count} missing or invalid date value(s).",
+        )
+    blank_narrative_count = int(_is_blank(historical_df["primary_narrative"]).sum())
+    if blank_narrative_count:
+        _append_unique(
+            warnings,
+            f"{dataset_label} has {blank_narrative_count} missing narrative value(s).",
+        )
+
+    working = historical_df.copy()
+    working["_parsed_date"] = parsed_dates
+    working = working.dropna(subset=["_parsed_date"])
+    if working.empty:
+        _append_unique(
+            warnings,
+            f"{dataset_label} has no valid dated rows for coverage checks.",
+        )
+    else:
+        latest_date = working["_parsed_date"].max()
+        latest_rows = working.loc[working["_parsed_date"] == latest_date]
+        latest_narratives = set(
+            latest_rows["primary_narrative"].dropna().astype(str).str.strip()
+        )
+        missing_narratives = sorted(expected_narratives - latest_narratives)
+        if missing_narratives:
+            _append_unique(
+                warnings,
+                f"{dataset_label} latest date is missing expected narrative(s): {', '.join(missing_narratives)}.",
+            )
+
+    for column in HISTORICAL_RATIO_PERCENT_COLUMNS:
+        if column not in historical_df.columns:
+            continue
+        numeric = _numeric_series(historical_df, column)
+        unparseable_count = _unparseable_count(historical_df, column, numeric)
+        if unparseable_count:
+            _append_unique(
+                warnings,
+                f"{dataset_label} has {unparseable_count} unparseable {COLUMN_LABELS.get(column, column)} value(s).",
+            )
+        valid_numeric = numeric.dropna()
+        if valid_numeric.empty:
+            continue
+        if column.startswith("breadth"):
+            outside_ratio = (valid_numeric < 0) | (valid_numeric > 1)
+            if bool(outside_ratio.any()):
+                _append_unique(
+                    warnings,
+                    f"{dataset_label} has {int(outside_ratio.sum())} {COLUMN_LABELS.get(column, column)} value(s) outside the expected 0 to 1 ratio range.",
+                )
+        else:
+            percent_scaled = valid_numeric.abs() > 1
+            if bool(percent_scaled.any()):
+                _append_unique(
+                    warnings,
+                    f"{dataset_label} has {int(percent_scaled.sum())} {COLUMN_LABELS.get(column, column)} value(s) above 100% on a decimal-ratio scale; confirm historical fields were not percent-point scaled.",
+                )
+
+    return warnings
+
+
+def collect_report_qa_warnings(
+    snapshot_date: str,
+    ranking_df: pd.DataFrame,
+    narrative_metrics_df: pd.DataFrame | None = None,
+    token_snapshot_df: pd.DataFrame | None = None,
+    concentration_df: pd.DataFrame | None = None,
+    historical_df: pd.DataFrame | None = None,
+    generated_at: datetime | None = None,
+) -> list[str]:
+    """Collect data sanity warnings for CSV inputs used by the HTML report."""
+    report_time = generated_at or datetime.now(timezone.utc)
+    _validate_required_ranking_structure(ranking_df)
+    expected_narratives = set(
+        ranking_df["primary_narrative"].dropna().astype(str).str.strip()
+    )
+    warnings: list[str] = []
+    warnings.extend(_qa_token_snapshot(token_snapshot_df, report_time))
+    warnings.extend(
+        _qa_narrative_outputs(ranking_df, narrative_metrics_df, concentration_df)
+    )
+    warnings.extend(_qa_historical_narrative(historical_df, expected_narratives))
+    if snapshot_date and not DATE_PATTERN.match(str(snapshot_date)):
+        _append_unique(
+            warnings,
+            f"Snapshot date {snapshot_date} is not in YYYY-MM-DD format.",
+        )
+    return warnings
 
 
 def _row_for_extreme(df: pd.DataFrame, column: str, ascending: bool) -> dict[str, Any] | None:
@@ -354,19 +789,21 @@ def _prepare_historical_context(history_df: pd.DataFrame | None) -> dict[str, An
     latest_date = working["date"].max()
     latest_rows = working.loc[working["date"] == latest_date].copy()
     historical_ratio_columns = {
-        "avg_return_7d": "ratio_pct",
-        "avg_return_30d": "ratio_pct",
-        "breadth_7d": "ratio_pct",
-        "relative_strength_7d": "ratio_pct",
-        "relative_strength_30d": "ratio_pct",
+        column: "ratio_pct" for column in HISTORICAL_RATIO_PERCENT_COLUMNS
     }
     table = _table_from_df(
         latest_rows.sort_values("primary_narrative"),
         [
             "primary_narrative",
             "avg_return_7d",
+            "median_return_7d",
             "avg_return_30d",
+            "median_return_30d",
             "breadth_7d",
+            "rs_vs_btc_7d",
+            "rs_vs_eth_7d",
+            "rs_vs_btc_30d",
+            "rs_vs_eth_30d",
             "relative_strength_7d",
             "relative_strength_30d",
             "total_market_cap_usd",
@@ -456,6 +893,16 @@ def prepare_report_context(
     concentration_df = load_optional_csv(paths["sql_concentration_review"])
     narrative_summary_df = load_optional_csv(paths["sql_narrative_summary"])
     historical_df = load_optional_csv(paths["historical_narrative"])
+    generated_at = datetime.now(timezone.utc)
+    qa_warnings = collect_report_qa_warnings(
+        snapshot_date=selected_date,
+        ranking_df=ranking_df,
+        narrative_metrics_df=narrative_metrics_df,
+        token_snapshot_df=token_snapshot_df,
+        concentration_df=concentration_df,
+        historical_df=historical_df,
+        generated_at=generated_at,
+    )
 
     summary = prepare_executive_summary(ranking_df, concentration_df)
     score_column = summary["score_column"]
@@ -489,10 +936,11 @@ def prepare_report_context(
     review_source = narrative_summary_df if narrative_summary_df is not None else narrative_metrics_df
     return {
         "snapshot_date": selected_date,
-        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+        "generated_at": generated_at.strftime("%Y-%m-%d %H:%M UTC"),
         "project_root": PROJECT_ROOT,
         "reports_root": reports_root,
         "templates_root": templates_root,
+        "qa_warnings": qa_warnings,
         "summary": summary,
         "top_narratives": _records(_select_columns(sorted_desc.head(5), ranking_columns)),
         "weakening_narratives": _records(_select_columns(sorted_asc.head(5), ranking_columns)),
