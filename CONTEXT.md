@@ -73,7 +73,9 @@ historical narrative metrics
         ↓
 historical dashboard view
         ↓
-future static HTML research report
+static HTML research report with QA notes
+        ->
+public-safe strategic context pack
 ```
 
 ## Core Files
@@ -149,6 +151,26 @@ The current verified historical outputs are:
 - `narrative_market_history_90d.csv`: 720 rows, 8 narratives, date range 2026-02-25 to 2026-05-25
 
 Generated raw and processed data files are local/generated outputs and generally should not be committed unless explicitly intended.
+
+## Current Project Status
+
+Current implemented project layers:
+
+- CoinGecko current market snapshot pipeline
+- narrative metrics and Narrative Momentum Score V1
+- DuckDB SQL analytics outputs
+- Streamlit dashboard
+- historical token and narrative data layers
+- historical dashboard view
+- static HTML report generator
+- HTML report QA layer with Data Quality Notes
+- public-safe strategic context pack at `docs/strategy/crypto_radar_context_pack.md`
+
+Current next milestone:
+
+```text
+Milestone 6.2: Post-Listing Operations & Token Risk Packet
+```
 
 ## Core Domain Terms
 
@@ -373,21 +395,23 @@ Do not add:
 
 ## HTML Report Role
 
-The future HTML report should present market intelligence in a readable research format.
+The static HTML report generator is implemented and presents market intelligence in a readable research format.
 
-Expected sections:
+Current sections include:
 
 - Executive Summary
-- Top narratives
-- Weakening narratives
+- Top narratives by Narrative Momentum Score
+- Lowest narratives by Narrative Momentum Score
 - Narrative ranking table
 - Token contributors
 - Concentration review
-- Volume and breadth notes
+- Return, volume, and breadth review
+- 90-day historical context
+- Data Quality Notes when QA warnings exist
 - Methodology
 - Limitations
 
-The HTML report should read like a research note, not a trading dashboard.
+The HTML report should read like a research note, not a trading dashboard. Its QA layer should surface data sanity concerns instead of hiding suspicious values silently.
 
 ## Streamlit Dashboard Role
 
@@ -474,21 +498,24 @@ Milestone 5.8A: Historical token backfill V1
 Milestone 5.8B: Historical narrative metrics V1
 Milestone 5.9: Historical dashboard view
 Milestone 5.10: Mac environment + context cleanup
+Milestone 6.0: Static HTML Research Report
+Milestone 6.1: HTML Report QA & Data Sanity Review
+Strategic context pack: public-safe project roadmap brief
 ```
 
 Next:
-Milestone 6.0: Static HTML Research Report
-Milestone 6.1: README final portfolio polish
-Milestone 6.2: Narrative Watchlist Indicators V1 as a research screening layer, not a signal engine
-Milestone 6.3: DeFiLlama Fundamentals Overlay Design
+Milestone 6.2: Post-Listing Operations & Token Risk Packet
+Milestone 6.3: Incident Investigation Memo
+Milestone 6.4: On-chain Investigation Mini Case Study
+Milestone 6.5: README Final Portfolio Polish
 Milestone 7.0: Resume / LinkedIn / Interview Prep
 
 Roadmap notes:
 
-- Static HTML Research Report is future work.
-- Narrative Watchlist Indicators V1 is future work and should be framed as research screening, not a signal engine.
-- DeFiLlama Fundamentals Overlay is future/design-only and is not implemented.
-- Do not add price prediction, trading signals, alpha claims, backtesting, or portfolio optimization.
+- Milestone 6.2 is the current next milestone.
+- Do not prioritize Narrative Watchlist Indicators until after proof-pack artifacts are started.
+- On-chain investigation tools such as Arkham, Flipside, and Dune are future or optional evidence sources unless explicitly implemented.
+- Do not add price prediction, trading signals, alpha claims, backtesting, portfolio allocation, buy/sell recommendations, or trading logic.
 
 ## Agent Instructions
 
@@ -616,88 +643,38 @@ Verified environment:
 
 ### Milestone 6.1 Summary
 
-HTML Report QA & Data Sanity Review fixed the static report percentage formatting.
+HTML Report QA & Data Sanity Review is complete.
 
-The issue:
+The static HTML report now includes a QA preflight layer. QA warnings are included in report context, printed by the report generation script, and rendered in a Data Quality Notes section when warnings exist.
 
-- current snapshot return fields are CoinGecko percent-point values
-- historical narrative returns and relative strength fields are decimal ratio values
+QA checks include:
 
-Fix:
+- duplicate token IDs
+- blank symbols
+- missing or nonpositive prices and market caps
+- missing volume
+- stale `last_updated`
+- extreme current CoinGecko percent-point returns
+- missing breadth and concentration fields
+- historical ratio-scale issues
 
-- report formatting is now source-aware
-- current snapshot percent-point fields render without rescaling
-- historical return and relative strength fields render as ratio percentages
-- breadth, share, and concentration fields continue to render as ratio percentages
-
-Additional polish:
-
-- renamed report sections to be more precise
-- improved table display labels
-- regenerated static HTML report
+Historical percentage formatting was improved for median returns and BTC/ETH relative strength fields.
 
 Validation:
 
 - compileall passed
 - report generation passed
-- pytest passed: 71 passed
-- Claude Code review found no blocking issues
+- pytest passed: 92 passed
 
 Scope note:
-No scoring, API, dashboard, SQL, taxonomy, or historical calculation logic was changed.
+No scoring formulas, API calls, DeFiLlama, prediction, backtesting, portfolio allocation, dashboard changes, or trading logic were added.
 
-### Milestone 6.2 Summary
+### Strategic Context Pack Summary
 
-README Final Portfolio Polish updated the project README into a recruiter-facing portfolio landing page.
+The public-safe strategic context pack is complete:
 
-The README now covers:
+- `docs/strategy/crypto_radar_context_pack.md`
 
-- project overview and positioning
-- narrative-level market intelligence rationale
-- current dashboard and static HTML report outputs
-- research methodology and Narrative Momentum Score V1
-- data outputs and repository structure
-- local run commands
-- skills demonstrated
-- limitations and future improvements
-- AI-assisted development disclosure
+It keeps Codex focused on market intelligence, research support, post-listing-style workflows, data sanity, incident investigation artifacts, and token risk review.
 
-Validation:
-
-- `.venv/bin/python -m pytest tests` passed: 71 passed
-
-Scope note:
-Milestone 6.2 changed documentation only. No implementation files, scoring formulas, report logic, dashboard logic, SQL, taxonomy, tests, or GitHub Actions were modified.
-
-### Milestone 6.3 Summary
-
-Narrative Watchlist Indicators V1 adds a research screening layer using historical narrative metrics.
-
-6.3A created the watchlist indicator pipeline:
-
-- input: `data/processed/historical/narrative_market_history_90d.csv`
-- output: `data/processed/historical/narrative_watchlist_indicators_90d.csv`
-- flags:
-  - `watch_volume_accel`
-  - `watch_breadth_expand`
-  - `watch_quiet_rs`
-  - `watch_momentum_pickup`
-- composite:
-  - `watchlist_score`
-  - `watchlist_label`
-
-  6.3B added the Streamlit `Narrative Watchlist` section:
-
-- latest watchlist table
-- watchlist score history chart
-- narrative multiselect
-- friendly missing-file handling
-- friendly missing-column warning
-
-Validation:
-
-- `.venv/bin/python -m pytest tests` passed: 87 passed
-- Streamlit rendered locally with current snapshot, Historical Narrative Trends, and Narrative Watchlist sections
-
-Scope note:
-This is a research screening layer only. It does not add trading signals, price prediction, backtesting, buy/sell recommendations, new APIs, DeFiLlama logic, or Narrative Momentum Score formula changes.
+It does not include private personal notes or company-specific targeting language.
