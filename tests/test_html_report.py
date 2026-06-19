@@ -207,6 +207,10 @@ def write_token_snapshot(path: Path) -> None:
     skew_token_snapshot_df().to_csv(path, index=False)
 
 
+def write_base_token_snapshot(path: Path, last_updated: str = "2026-05-20T00:00:00Z") -> None:
+    base_token_snapshot_df(last_updated=last_updated).to_csv(path, index=False)
+
+
 def extract_return_skew_section(html: str) -> str:
     start = html.index("<h2>Return Skew Diagnostics</h2>")
     end = html.index("<h2>Return, Volume, and Breadth Review</h2>", start)
@@ -307,6 +311,113 @@ def test_optional_files_missing_do_not_fail_context_preparation(tmp_path: Path) 
     assert context["concentration_note"]
     assert len(context["top_narratives"]["rows"]) == 3
     assert len(context["weakening_narratives"]["rows"]) == 3
+
+
+def test_normal_report_context_can_include_stale_snapshot_warning(tmp_path: Path) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-20"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+    write_base_token_snapshot(processed_dir / "token_market_snapshot_2026-05-20.csv")
+
+    context = prepare_report_context(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+    )
+
+    assert not context["is_sample_report"]
+    assert context["update_latest"]
+    assert any("last_updated appears stale" in warning for warning in context["qa_warnings"])
+
+
+def test_normal_report_generation_updates_latest_html(tmp_path: Path) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-25"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+
+    output_path = generate_report(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+    )
+    latest_path = tmp_path / "reports" / "html" / "latest.html"
+
+    assert output_path.name == "crypto_narrative_report_2026-05-25.html"
+    assert latest_path.exists()
+    assert latest_path.read_text(encoding="utf-8") == output_path.read_text(encoding="utf-8")
+
+
+def test_sample_report_context_uses_pinned_output_and_suppresses_stale_warning(
+    tmp_path: Path,
+) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-20"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+    write_base_token_snapshot(processed_dir / "token_market_snapshot_2026-05-20.csv")
+
+    context = prepare_report_context(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+        sample_mode=True,
+    )
+
+    assert context["is_sample_report"]
+    assert context["snapshot_date"] == "2026-05-20"
+    assert context["output_path"].name == "sample_2026-05-20.html"
+    assert not context["update_latest"]
+    assert context["sample_report_note"].startswith("Pinned sample report")
+    assert not any("last_updated appears stale" in warning for warning in context["qa_warnings"])
+
+
+def test_sample_report_renders_without_overwriting_latest_html(tmp_path: Path) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-20"
+    reports_dir = tmp_path / "reports" / "html"
+    processed_dir.mkdir(parents=True)
+    reports_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+    write_base_token_snapshot(processed_dir / "token_market_snapshot_2026-05-20.csv")
+    latest_path = reports_dir / "latest.html"
+    latest_path.write_text("normal latest sentinel", encoding="utf-8")
+
+    output_path = generate_report(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+        sample_mode=True,
+    )
+    html = output_path.read_text(encoding="utf-8")
+
+    assert output_path.name == "sample_2026-05-20.html"
+    assert latest_path.read_text(encoding="utf-8") == "normal latest sentinel"
+    assert "Pinned sample report: this report uses the fixed 2026-05-20 snapshot" in html
+    assert "not a current market update" in html
+    assert "last_updated appears stale" not in html
+
+
+def test_sample_report_keeps_portfolio_safe_research_framing(tmp_path: Path) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-20"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+    write_base_token_snapshot(processed_dir / "token_market_snapshot_2026-05-20.csv")
+
+    output_path = generate_report(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+        sample_mode=True,
+    )
+    html = output_path.read_text(encoding="utf-8").lower()
+    notice_start = html.index('<section class="sample-notice">')
+    notice_end = html.index("</section>", notice_start)
+    sample_notice = html[notice_start:notice_end]
+
+    assert "not a current market update" in html
+    assert "market intelligence only" in html
+    forbidden_terms = ["trading", "prediction", "backtesting", "buy/sell", "alpha"]
+    assert not any(term in sample_notice for term in forbidden_terms)
+    assert "alpha signal" not in html
+    assert "trading signal" not in html
 
 
 def test_score_column_detection_supports_expected_names() -> None:

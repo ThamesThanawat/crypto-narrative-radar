@@ -11,6 +11,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from crypto_narrative_radar.reports.html_report import (
+    SAMPLE_REPORT_DATE,
     prepare_report_context,
     render_report,
 )
@@ -22,14 +23,22 @@ def parse_args() -> argparse.Namespace:
         description="Generate a static Crypto Narrative Radar HTML report."
     )
     parser.add_argument("--date", help="Processed snapshot date, for example 2026-05-25.")
-    return parser.parse_args()
+    parser.add_argument(
+        "--sample",
+        action="store_true",
+        help=f"Generate the pinned sample report for {SAMPLE_REPORT_DATE}.",
+    )
+    args = parser.parse_args()
+    if args.sample and args.date:
+        parser.error("--sample uses the fixed sample snapshot and cannot be combined with --date.")
+    return args
 
 
 def main() -> int:
     """Generate the report and print output paths."""
     args = parse_args()
     try:
-        context = prepare_report_context(args.date)
+        context = prepare_report_context(args.date, sample_mode=args.sample)
         output_path = render_report(context)
     except (FileNotFoundError, ValueError) as error:
         print(f"HTML report generation failed: {error}")
@@ -38,7 +47,10 @@ def main() -> int:
     latest_path = output_path.parent / "latest.html"
     print("Static HTML research report generated")
     print(f"Report: {output_path}")
-    print(f"Latest: {latest_path}")
+    if context.get("update_latest", True):
+        print(f"Latest: {latest_path}")
+    else:
+        print(f"Latest unchanged: {latest_path}")
     qa_warnings = context.get("qa_warnings", [])
     if qa_warnings:
         print("Data quality warnings:")

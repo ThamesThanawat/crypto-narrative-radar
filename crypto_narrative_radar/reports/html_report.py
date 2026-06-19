@@ -21,9 +21,17 @@ from crypto_narrative_radar.config import (
 
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 REPORT_FILENAME_TEMPLATE = "crypto_narrative_report_{snapshot_date}.html"
+SAMPLE_REPORT_DATE = "2026-05-20"
+SAMPLE_REPORT_FILENAME_TEMPLATE = "sample_{snapshot_date}.html"
 TOKEN_SNAPSHOT_TEMPLATE = "token_market_snapshot_{snapshot_date}.csv"
 TEMPLATE_NAME = "research_report.html.j2"
 STALE_MARKET_DATA_DAYS = 2
+SAMPLE_REPORT_NOTE = (
+    "Pinned sample report: this report uses the fixed 2026-05-20 snapshot "
+    "to demonstrate narrative scoring, data quality notes, component "
+    "breakdown, and return skew diagnostics. It is intended as a "
+    "reproducible methodology example, not a current market update."
+)
 CURRENT_RETURN_COLUMNS = (
     "price_change_percentage_24h",
     "price_change_percentage_7d_in_currency",
@@ -673,6 +681,18 @@ def collect_report_qa_warnings(
     return warnings
 
 
+def _is_stale_market_data_warning(warning: str) -> bool:
+    return "last_updated appears stale" in warning
+
+
+def _sample_report_qa_warnings(warnings: list[str]) -> list[str]:
+    return [
+        warning
+        for warning in warnings
+        if not _is_stale_market_data_warning(warning)
+    ]
+
+
 def _row_for_extreme(df: pd.DataFrame, column: str, ascending: bool) -> dict[str, Any] | None:
     if column not in df.columns or "primary_narrative" not in df.columns:
         return None
@@ -1263,9 +1283,14 @@ def prepare_report_context(
     processed_root: Path = PROCESSED_DATA_DIR,
     reports_root: Path = REPORTS_DIR,
     templates_root: Path = TEMPLATES_DIR,
+    sample_mode: bool = False,
 ) -> dict[str, Any]:
     """Load processed outputs and prepare template context."""
-    selected_date = snapshot_date or find_latest_processed_date(processed_root)
+    selected_date = (
+        SAMPLE_REPORT_DATE
+        if sample_mode
+        else snapshot_date or find_latest_processed_date(processed_root)
+    )
     paths = get_snapshot_paths(selected_date, processed_root)
     ranking_df = load_required_csv(paths["narrative_ranking"])
     narrative_metrics_df = load_optional_csv(paths["narrative_metrics"])
@@ -1286,6 +1311,8 @@ def prepare_report_context(
         historical_df=historical_df,
         generated_at=generated_at,
     )
+    if sample_mode:
+        qa_warnings = _sample_report_qa_warnings(qa_warnings)
 
     summary = prepare_executive_summary(ranking_df, concentration_df)
     score_column = summary["score_column"]
@@ -1318,9 +1345,16 @@ def prepare_report_context(
         "market_cap_share_within_narrative",
     ]
     review_source = narrative_summary_df if narrative_summary_df is not None else narrative_metrics_df
+    output_filename = (
+        SAMPLE_REPORT_FILENAME_TEMPLATE.format(snapshot_date=selected_date)
+        if sample_mode
+        else REPORT_FILENAME_TEMPLATE.format(snapshot_date=selected_date)
+    )
     return {
         "snapshot_date": selected_date,
         "generated_at": generated_at.strftime("%Y-%m-%d %H:%M UTC"),
+        "is_sample_report": sample_mode,
+        "sample_report_note": SAMPLE_REPORT_NOTE if sample_mode else None,
         "project_root": PROJECT_ROOT,
         "reports_root": reports_root,
         "templates_root": templates_root,
@@ -1393,10 +1427,9 @@ def prepare_report_context(
         ),
         "historical": _prepare_historical_context(historical_df),
         "output_dir": reports_root / "html",
-        "output_path": reports_root
-        / "html"
-        / REPORT_FILENAME_TEMPLATE.format(snapshot_date=selected_date),
+        "output_path": reports_root / "html" / output_filename,
         "latest_path": reports_root / "html" / "latest.html",
+        "update_latest": not sample_mode,
     }
 
 
@@ -1404,7 +1437,7 @@ def render_report(
     context: dict[str, Any],
     templates_root: Path = TEMPLATES_DIR,
 ) -> Path:
-    """Render the static HTML report and update latest.html."""
+    """Render the static HTML report and optionally update latest.html."""
     output_path = Path(context["output_path"])
     latest_path = Path(context["latest_path"])
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1415,7 +1448,8 @@ def render_report(
     environment.filters["format_value"] = format_value
     html = environment.get_template(TEMPLATE_NAME).render(**context)
     output_path.write_text(html, encoding="utf-8")
-    shutil.copyfile(output_path, latest_path)
+    if context.get("update_latest", True):
+        shutil.copyfile(output_path, latest_path)
     return output_path
 
 
@@ -1424,6 +1458,7 @@ def generate_report(
     processed_root: Path = PROCESSED_DATA_DIR,
     reports_root: Path = REPORTS_DIR,
     templates_root: Path = TEMPLATES_DIR,
+    sample_mode: bool = False,
 ) -> Path:
     """Generate a static HTML market intelligence report."""
     context = prepare_report_context(
@@ -1431,5 +1466,6 @@ def generate_report(
         processed_root=processed_root,
         reports_root=reports_root,
         templates_root=templates_root,
+        sample_mode=sample_mode,
     )
     return render_report(context, templates_root=templates_root)

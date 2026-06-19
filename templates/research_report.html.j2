@@ -84,6 +84,15 @@
       padding: 14px 16px;
     }
 
+    .sample-notice {
+      background: var(--accent-soft);
+      border: 1px solid #bfdfe2;
+      border-radius: 6px;
+      color: #143d43;
+      margin-top: 12px;
+      padding: 14px 16px;
+    }
+
     .cards {
       display: grid;
       gap: 12px;
@@ -199,6 +208,12 @@
       This report is market intelligence only. It is not investment advice, contains no buy/sell recommendations,
       does not provide price prediction, does not include backtesting, and does not provide portfolio allocation guidance.
     </section>
+
+    {% if sample_report_note %}
+    <section class="sample-notice">
+      {{ sample_report_note }}
+    </section>
+    {% endif %}
 
     {% if qa_warnings %}
     <section>
