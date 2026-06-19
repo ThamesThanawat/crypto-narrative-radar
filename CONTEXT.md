@@ -166,6 +166,7 @@ Current implemented project layers:
 - HTML report QA layer with Data Quality Notes
 - HTML report methodology clarity layer with Score Component Breakdown
 - HTML report Return Skew Diagnostics with mean-median gap and snapshot-relative IQR review flags
+- HTML report showcase pinning with sample mode that preserves `latest.html`
 - public-safe strategic context pack at `docs/strategy/crypto_radar_context_pack.md`
 
 Current next milestone:
@@ -413,6 +414,7 @@ Current sections include:
 - Token contributors
 - Concentration review
 - Return Skew Diagnostics
+- Pinned sample report mode
 - Return, volume, and breadth review
 - 90-day historical context
 - Data Quality Notes when QA warnings exist
@@ -510,6 +512,7 @@ Milestone 6.0: Static HTML Research Report
 Milestone 6.1: HTML Report QA & Data Sanity Review
 Milestone 6.2: Methodology Transparency & Report Clarity
 Milestone 6.3A: Return Skew Diagnostic Hotfix
+Milestone 6.3B: Showcase Report Pinning and Sample Mode
 Strategic context pack: public-safe project roadmap brief
 ```
 
@@ -522,7 +525,7 @@ Resume / LinkedIn / Interview Prep
 
 Roadmap notes:
 
-- Milestone 6.3A is complete; next work should move toward proof-pack artifacts.
+- Milestone 6.3B is complete; next work should move toward proof-pack artifacts.
 - Post-Listing Operations & Token Risk Packet is the next planned proof-pack artifact.
 - Do not prioritize Narrative Watchlist Indicators until after proof-pack artifacts are started.
 - On-chain investigation tools such as Arkham, Flipside, and Dune are future or optional evidence sources unless explicitly implemented.
@@ -736,6 +739,36 @@ Validation:
 
 Scope note:
 No Narrative Momentum Score, scoring formula, taxonomy, or CoinGecko API logic changed. No return contribution-share metric, winsorized scoring, NMS V1.1, prediction, backtesting, trading signal, buy/sell recommendation, or portfolio logic was added.
+
+### Milestone 6.3B Summary
+
+Showcase Report Pinning and Sample Mode is complete.
+
+The report generator now supports a pinned sample mode:
+
+- `python scripts/generate_html_report.py --sample` writes `reports/html/sample_2026-05-20.html`
+- sample mode does not overwrite `latest.html`
+- sample mode frames the pinned 2026-05-20 report as a reproducible methodology example
+- sample mode suppresses the accidental stale-data warning that is appropriate for a live latest report
+
+Normal report generation remains unchanged and still writes the dated report plus `latest.html`.
+
+A fresh pipeline check passed and generated 2026-06-19 outputs.
+
+Latest report status:
+
+- `latest.html` now uses snapshot date 2026-06-19
+- the stale warning no longer appears on the normal latest report
+- the normal QA layer currently flags one extreme 30D return for later data sanity review
+
+Validation:
+
+- compileall passed
+- report generation passed
+- pytest passed: 107 passed
+
+Scope note:
+No Narrative Momentum Score, scoring formula, taxonomy, or CoinGecko API logic changed. No charts, new APIs, Arkham, Flipside, Dune, Nansen, prediction, backtesting, trading signals, buy/sell recommendations, alpha language, or portfolio logic was added.
 
 ### Strategic Context Pack Summary
 
