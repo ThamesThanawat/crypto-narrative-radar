@@ -155,6 +155,7 @@ SCORE_WEIGHT_ROWS = [
     },
 ]
 RETURN_SKEW_REVIEW_THRESHOLD_PP = 3.0
+RETURN_DISPERSION_IQR_MULTIPLE = 2.0
 RETURN_SKEW_RETURN_COLUMN = "price_change_percentage_7d_in_currency"
 RETURN_SKEW_OUTPUT_COLUMNS = [
     "primary_narrative",
@@ -163,12 +164,15 @@ RETURN_SKEW_OUTPUT_COLUMNS = [
     "median_return_7d",
     "mean_median_gap_pp",
     "return_iqr_7d",
+    "median_return_iqr_7d_across_narratives",
     "top_return_symbol",
     "top_return_7d",
     "bottom_return_symbol",
     "bottom_return_7d",
     "top_return_token",
     "bottom_return_token",
+    "skew_trigger",
+    "dispersion_trigger",
     "skew_review_flag",
     "diagnostic_note",
 ]
@@ -184,8 +188,8 @@ COLUMN_LABELS = {
     "volume_confirmation_score": "Volume Confirmation Score",
     "breadth_score": "Breadth Score",
     "scoring_note": "Scoring Note",
-    "avg_return_7d": "Avg 7D Return",
-    "avg_return_30d": "Avg 30D Return",
+    "avg_return_7d": "Mean 7D Return",
+    "avg_return_30d": "Mean 30D Return",
     "median_return_7d": "Median 7D Return",
     "median_return_30d": "Median 30D Return",
     "total_market_cap": "Total Market Cap",
@@ -216,6 +220,7 @@ COLUMN_LABELS = {
     "volume_share_pct": "Volume Share",
     "mean_median_gap_pp": "Mean-Median Gap",
     "return_iqr_7d": "7D Return IQR",
+    "median_return_iqr_7d_across_narratives": "Snapshot Median 7D Return IQR",
     "top_return_symbol": "Top 7D Token",
     "top_return_7d": "Top 7D Return",
     "bottom_return_symbol": "Bottom 7D Token",
@@ -684,8 +689,8 @@ def _metric_label(column: str) -> str:
     labels = {
         "narrative_momentum_score": "Narrative Momentum Score",
         "momentum_score": "Narrative Momentum Score",
-        "avg_return_7d": "Avg 7D Return",
-        "avg_return_30d": "Avg 30D Return",
+        "avg_return_7d": "Mean 7D Return",
+        "avg_return_30d": "Mean 30D Return",
         "positive_breadth_pct": "Positive Breadth",
         "breadth_7d": "7D Breadth",
         "top_3_market_cap_share": "Top 3 Market Cap Share",
@@ -886,26 +891,65 @@ def _token_return_label(symbol: str, return_value: Any) -> str:
     return f"{symbol} ({format_percent_point(return_value)})"
 
 
-def _diagnostic_note(
-    gap: float | None,
+def _return_extremes_sentence(
     top_symbol: str,
     top_return: float | None,
     bottom_symbol: str,
     bottom_return: float | None,
 ) -> str:
-    if gap is None:
+    return (
+        f"Top 7D token was {top_symbol} at {format_percent_point(top_return)}; "
+        f"bottom 7D token was {bottom_symbol} at {format_percent_point(bottom_return)}."
+    )
+
+
+def _review_flag(skew_trigger: bool, dispersion_trigger: bool) -> str:
+    if skew_trigger and dispersion_trigger:
+        return "Skew + Dispersion Review"
+    if skew_trigger:
+        return "Skew Review"
+    if dispersion_trigger:
+        return "Dispersion Review"
+    return "No Review"
+
+
+def _diagnostic_note(
+    gap: float | None,
+    return_iqr: float | None,
+    median_return_iqr: float | None,
+    top_symbol: str,
+    top_return: float | None,
+    bottom_symbol: str,
+    bottom_return: float | None,
+    skew_trigger: bool,
+    dispersion_trigger: bool,
+) -> str:
+    if gap is None or return_iqr is None:
         return "7D return data was not available for this narrative."
-    if abs(gap) < RETURN_SKEW_REVIEW_THRESHOLD_PP:
-        return "Narrative mean and median were close; no large mean-median skew was observed."
-    gap_text = format_percentage_point_gap(abs(gap))
-    if gap >= 0:
+    extremes = _return_extremes_sentence(
+        top_symbol,
+        top_return,
+        bottom_symbol,
+        bottom_return,
+    )
+    gap_text = format_percentage_point_gap(gap)
+    iqr_text = format_percentage_point_gap(return_iqr)
+    median_iqr_text = format_percentage_point_gap(median_return_iqr)
+    if skew_trigger and dispersion_trigger:
         return (
-            f"{top_symbol} had the highest 7D return at {format_percent_point(top_return)}; "
-            f"narrative mean exceeded median by {gap_text}."
+            f"Mean-median gap was {gap_text} and 7D return IQR was {iqr_text} "
+            f"versus snapshot median IQR of {median_iqr_text}. {extremes}"
+        )
+    if skew_trigger:
+        return f"Mean-median gap was {gap_text}. {extremes}"
+    if dispersion_trigger:
+        return (
+            f"7D return IQR was {iqr_text} versus snapshot median IQR of "
+            f"{median_iqr_text}. {extremes}"
         )
     return (
-        f"{bottom_symbol} had the lowest 7D return at {format_percent_point(bottom_return)}; "
-        f"narrative mean was below median by {gap_text}."
+        f"Mean-median gap was {gap_text} and 7D return IQR was {iqr_text}; "
+        "neither exceeded V1 review thresholds."
     )
 
 
@@ -947,12 +991,15 @@ def calculate_return_skew_diagnostics(
             "median_return_7d": pd.NA,
             "mean_median_gap_pp": pd.NA,
             "return_iqr_7d": pd.NA,
+            "median_return_iqr_7d_across_narratives": pd.NA,
             "top_return_symbol": "N/A",
             "top_return_7d": pd.NA,
             "bottom_return_symbol": "N/A",
             "bottom_return_7d": pd.NA,
             "top_return_token": "N/A",
             "bottom_return_token": "N/A",
+            "skew_trigger": False,
+            "dispersion_trigger": False,
             "skew_review_flag": "No Review",
             "diagnostic_note": "7D return data was not available for this narrative.",
         }
@@ -994,21 +1041,56 @@ def calculate_return_skew_diagnostics(
                     bottom_symbol,
                     bottom_return_7d,
                 ),
-                "skew_review_flag": (
-                    "Review"
-                    if abs(mean_median_gap_pp) >= RETURN_SKEW_REVIEW_THRESHOLD_PP
-                    else "No Review"
-                ),
-                "diagnostic_note": _diagnostic_note(
-                    mean_median_gap_pp,
-                    top_symbol,
-                    top_return_7d,
-                    bottom_symbol,
-                    bottom_return_7d,
-                ),
             }
         )
         records.append(record)
+
+    median_return_iqr = _numeric_value(
+        pd.Series(
+            [record["return_iqr_7d"] for record in records],
+            dtype="Float64",
+        ).median()
+    )
+    dispersion_threshold = (
+        RETURN_DISPERSION_IQR_MULTIPLE * median_return_iqr
+        if median_return_iqr is not None
+        else None
+    )
+    for record in records:
+        gap = _numeric_value(record["mean_median_gap_pp"])
+        return_iqr = _numeric_value(record["return_iqr_7d"])
+        skew_trigger = (
+            abs(gap) >= RETURN_SKEW_REVIEW_THRESHOLD_PP
+            if gap is not None
+            else False
+        )
+        dispersion_trigger = (
+            return_iqr is not None
+            and median_return_iqr is not None
+            and dispersion_threshold is not None
+            and return_iqr >= dispersion_threshold
+            and (median_return_iqr > 0 or return_iqr > 0)
+        )
+        record["median_return_iqr_7d_across_narratives"] = (
+            median_return_iqr if median_return_iqr is not None else pd.NA
+        )
+        record["skew_trigger"] = bool(skew_trigger)
+        record["dispersion_trigger"] = bool(dispersion_trigger)
+        record["skew_review_flag"] = _review_flag(
+            bool(skew_trigger),
+            bool(dispersion_trigger),
+        )
+        record["diagnostic_note"] = _diagnostic_note(
+            gap,
+            return_iqr,
+            median_return_iqr,
+            record["top_return_symbol"],
+            _numeric_value(record["top_return_7d"]),
+            record["bottom_return_symbol"],
+            _numeric_value(record["bottom_return_7d"]),
+            bool(skew_trigger),
+            bool(dispersion_trigger),
+        )
 
     return pd.DataFrame(records, columns=RETURN_SKEW_OUTPUT_COLUMNS)
 
@@ -1041,11 +1123,14 @@ def _methodology_context() -> dict[str, Any]:
             "or token overlap."
         ),
         "return_skew_note": (
-            "Return skew diagnostics are descriptive only. The skew review flag "
-            "is a V1 heuristic for review, not a statistically derived cutoff. "
-            "It uses a judgment-based 3.0 percentage point mean-median gap "
-            "threshold, does not affect scoring, and does not imply an "
-            "investment recommendation."
+            "Return skew diagnostics are descriptive only. Skew and dispersion "
+            "review thresholds are judgment-based V1 review heuristics, not "
+            "statistically derived cutoffs. The IQR threshold is "
+            "snapshot-relative: each narrative's 7D return IQR is compared "
+            "with two times the median narrative 7D return IQR in the same "
+            "report snapshot, not an absolute cross-date threshold. These "
+            "diagnostics do not affect the Narrative Momentum Score. The "
+            "review flag does not imply an investment recommendation."
         ),
     }
 
@@ -1212,6 +1297,7 @@ def prepare_report_context(
         "token_count",
         score_column,
         "avg_return_7d",
+        "median_return_7d",
         "avg_return_30d",
         "total_market_cap",
         "total_volume",

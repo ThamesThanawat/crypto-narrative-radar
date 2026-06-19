@@ -28,6 +28,7 @@ def base_ranking_df() -> pd.DataFrame:
                 "primary_narrative": "AI",
                 "narrative_momentum_score": 88,
                 "avg_return_7d": 4,
+                "median_return_7d": 3,
                 "avg_return_30d": 12,
                 "breadth_7d": 0.75,
                 "total_market_cap": 1000,
@@ -66,6 +67,7 @@ def write_ranking(path: Path, score_column: str = "narrative_momentum_score") ->
                 "token_count": 10,
                 score_column: 92,
                 "avg_return_7d": 12,
+                "median_return_7d": 10,
                 "avg_return_30d": 20,
                 "breadth_7d": 0.8,
                 "total_market_cap": 1000,
@@ -84,6 +86,7 @@ def write_ranking(path: Path, score_column: str = "narrative_momentum_score") ->
                 "token_count": 10,
                 score_column: 75,
                 "avg_return_7d": 7,
+                "median_return_7d": 6,
                 "avg_return_30d": 12,
                 "breadth_7d": 0.7,
                 "total_market_cap": 950,
@@ -102,6 +105,7 @@ def write_ranking(path: Path, score_column: str = "narrative_momentum_score") ->
                 "token_count": 10,
                 score_column: 51,
                 "avg_return_7d": 3,
+                "median_return_7d": 3,
                 "avg_return_30d": 6,
                 "breadth_7d": 0.5,
                 "total_market_cap": 800,
@@ -120,6 +124,7 @@ def write_ranking(path: Path, score_column: str = "narrative_momentum_score") ->
                 "token_count": 10,
                 score_column: 35,
                 "avg_return_7d": -1,
+                "median_return_7d": 0,
                 "avg_return_30d": -3,
                 "breadth_7d": 0.4,
                 "total_market_cap": 600,
@@ -138,6 +143,7 @@ def write_ranking(path: Path, score_column: str = "narrative_momentum_score") ->
                 "token_count": 10,
                 score_column: 20,
                 "avg_return_7d": -2,
+                "median_return_7d": -1,
                 "avg_return_30d": -8,
                 "breadth_7d": 0.2,
                 "total_market_cap": 400,
@@ -167,11 +173,21 @@ def skew_token_snapshot_df() -> pd.DataFrame:
         ("sui", "SUI", "Sui", "Layer 1", 2),
         ("aptos", "APT", "Aptos", "Layer 1", 3),
         ("cardano", "ADA", "Cardano", "Layer 1", 4),
-        ("maker", "MKR", "Maker", "RWA", -20),
-        ("chainlink", "LINK", "Chainlink", "RWA", 1),
-        ("ondo-finance", "ONDO", "Ondo", "RWA", 2),
-        ("pendle", "PENDLE", "Pendle", "RWA", 3),
-        ("centrifuge", "CFG", "Centrifuge", "RWA", 4),
+        ("uniswap", "UNI", "Uniswap", "DeFi", 1),
+        ("aave", "AAVE", "Aave", "DeFi", 2),
+        ("maker", "MKR", "Maker", "DeFi", 3),
+        ("curve-dao-token", "CRV", "Curve", "DeFi", 4),
+        ("lido-dao", "LDO", "Lido DAO", "DeFi", 5),
+        ("chainlink", "LINK", "Chainlink", "RWA", -10),
+        ("ondo-finance", "ONDO", "Ondo", "RWA", -9),
+        ("maker-rwa", "MKR", "Maker RWA", "RWA", 0),
+        ("pendle", "PENDLE", "Pendle", "RWA", 9),
+        ("centrifuge", "CFG", "Centrifuge", "RWA", 10),
+        ("gala", "GALA", "Gala", "Gaming / GameFi", -20),
+        ("immutable-x", "IMX", "Immutable", "Gaming / GameFi", -10),
+        ("the-sandbox", "SAND", "The Sandbox", "Gaming / GameFi", 0),
+        ("ronin", "RON", "Ronin", "Gaming / GameFi", 10),
+        ("axie-infinity", "AXS", "Axie Infinity", "Gaming / GameFi", 40),
     ]
     return pd.DataFrame(
         [
@@ -347,15 +363,22 @@ def test_return_skew_diagnostics_calculates_mean_median_gap_and_iqr() -> None:
     assert ai["top_return_7d"] == pytest.approx(20.0)
     assert ai["bottom_return_symbol"] == "TAO"
     assert ai["bottom_return_7d"] == pytest.approx(1.0)
+    assert ai["median_return_iqr_7d_across_narratives"] == pytest.approx(2.0)
 
-
-def test_return_skew_review_flag_uses_absolute_three_point_threshold() -> None:
+def test_return_skew_review_flags_cover_skew_dispersion_and_combined_triggers() -> None:
     diagnostics = calculate_return_skew_diagnostics(skew_token_snapshot_df())
     rows = diagnostics.set_index("primary_narrative")
 
-    assert rows.loc["AI", "skew_review_flag"] == "Review"
-    assert rows.loc["RWA", "skew_review_flag"] == "Review"
+    assert rows.loc["AI", "skew_review_flag"] == "Skew Review"
+    assert rows.loc["RWA", "skew_review_flag"] == "Dispersion Review"
+    assert rows.loc["Gaming / GameFi", "skew_review_flag"] == "Skew + Dispersion Review"
     assert rows.loc["Layer 1", "skew_review_flag"] == "No Review"
+    assert rows.loc["AI", "skew_trigger"]
+    assert not rows.loc["AI", "dispersion_trigger"]
+    assert not rows.loc["RWA", "skew_trigger"]
+    assert rows.loc["RWA", "dispersion_trigger"]
+    assert rows.loc["Gaming / GameFi", "skew_trigger"]
+    assert rows.loc["Gaming / GameFi", "dispersion_trigger"]
 
 
 def test_return_skew_diagnostic_notes_are_factual() -> None:
@@ -364,12 +387,21 @@ def test_return_skew_diagnostic_notes_are_factual() -> None:
 
     assert (
         rows.loc["AI", "diagnostic_note"]
-        == "HYPE had the highest 7D return at 20.0%; narrative mean exceeded median by 3.0pp."
+        == "Mean-median gap was 3.0pp. Top 7D token was HYPE at 20.0%; bottom 7D token was TAO at 1.0%."
+    )
+    assert (
+        rows.loc["RWA", "diagnostic_note"]
+        == "7D return IQR was 18.0pp versus snapshot median IQR of 2.0pp. Top 7D token was CFG at 10.0%; bottom 7D token was LINK at -10.0%."
+    )
+    assert (
+        rows.loc["Gaming / GameFi", "diagnostic_note"]
+        == "Mean-median gap was 4.0pp and 7D return IQR was 20.0pp versus snapshot median IQR of 2.0pp. Top 7D token was AXS at 40.0%; bottom 7D token was GALA at -20.0%."
     )
     assert (
         rows.loc["Layer 1", "diagnostic_note"]
-        == "Narrative mean and median were close; no large mean-median skew was observed."
+        == "Mean-median gap was 0.0pp and 7D return IQR was 2.0pp; neither exceeded V1 review thresholds."
     )
+    assert "no skew" not in rows.loc["RWA", "diagnostic_note"].lower()
     forbidden_terms = ["risky", "buy", "sell", "signal", "prediction", "alpha"]
     notes = " ".join(diagnostics["diagnostic_note"].str.lower())
     assert not any(term in notes for term in forbidden_terms)
@@ -397,10 +429,31 @@ def test_rendered_return_skew_diagnostics_section_and_methodology(tmp_path: Path
     assert "<th>Bottom 7D Token</th>" in section
     assert "<th>Review Flag</th>" in section
     assert "HYPE (20.0%)" in section
-    assert "MKR (-20.0%)" in section
+    assert "LINK (-10.0%)" in section
     assert "3.0pp" in section
-    assert "The skew review flag is a V1 heuristic for review, not a statistically derived cutoff." in html
+    assert "The IQR threshold is snapshot-relative" in html
+    assert "not an absolute cross-date threshold" in html
+    assert "judgment-based V1 review heuristics, not statistically derived cutoffs" in html
     assert "does not imply an investment recommendation" in html
+
+
+def test_narrative_ranking_includes_median_7d_return(tmp_path: Path) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-25"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+
+    output_path = generate_report(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+    )
+    html = output_path.read_text(encoding="utf-8")
+    ranking_start = html.index("<h2>Narrative Ranking</h2>")
+    ranking_end = html.index("<h2>Score Component Breakdown</h2>", ranking_start)
+    ranking_section = html[ranking_start:ranking_end]
+
+    assert "<th>Mean 7D Return</th>" in ranking_section
+    assert "<th>Median 7D Return</th>" in ranking_section
 
 
 def test_return_skew_diagnostics_do_not_add_return_contribution_share(
@@ -674,7 +727,8 @@ def test_rendered_report_uses_research_friendly_section_titles_and_headers(
     assert "Lowest 3 by Narrative Momentum Score" in html
     assert "Score Component Breakdown" in html
     assert "<th>Narrative</th>" in html
-    assert "<th>Avg 7D Return</th>" in html
+    assert "<th>Mean 7D Return</th>" in html
+    assert "<th>Median 7D Return</th>" in html
     assert "<th>Narrative Momentum Score</th>" in html
     assert "<th>Price Momentum Score</th>" in html
     assert "<th>Relative Strength Score</th>" in html
