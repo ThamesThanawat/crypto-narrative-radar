@@ -770,6 +770,29 @@ Validation:
 Scope note:
 No Narrative Momentum Score, scoring formula, taxonomy, or CoinGecko API logic changed. No charts, new APIs, Arkham, Flipside, Dune, Nansen, prediction, backtesting, trading signals, buy/sell recommendations, alpha language, or portfolio logic was added.
 
+### Milestone 6.4 Summary
+
+Report Presentation Polish + GitHub Pages Showcase is complete.
+
+The static HTML report now includes a more polished research-note presentation and a tracked showcase artifact:
+
+- `python scripts/generate_html_report.py --sample --publish-showcase`
+- `docs/showcase/sample_2026-05-20.html`
+- a Narrative Momentum Score bar chart
+- a Mean vs Median 7D Return Skew chart
+- removal of duplicate Top 3 / Lowest 3 tables in favor of the main Narrative Ranking table
+
+The sample/latest separation remains intact, and the normal latest report still uses the current dated snapshot output.
+
+Validation:
+
+- compileall passed
+- report generation passed
+- pytest passed: 110 passed
+
+Scope note:
+No Narrative Momentum Score, scoring formula, taxonomy, CoinGecko API logic, trading logic, prediction logic, or backtesting logic changed. No contribution-share metric was added.
+
 ### Strategic Context Pack Summary
 
 The public-safe strategic context pack is complete:
