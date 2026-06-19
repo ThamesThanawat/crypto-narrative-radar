@@ -353,6 +353,39 @@
     {% endif %}
 
     <section>
+      <h2>Return Skew Diagnostics</h2>
+      <p class="section-note">
+        This diagnostic compares average and median 7D returns to show whether a narrative basket is broadly representative or influenced by one/few return outliers. It is diagnostic-only and does not affect the Narrative Momentum Score.
+      </p>
+      {% if return_skew_note %}
+      <p class="section-note">{{ return_skew_note }}</p>
+      {% endif %}
+      {% set table_data = return_skew_diagnostics %}
+      {% if table_data %}
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              {% for column in table_data.columns %}
+              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table_data.rows %}
+            <tr>
+              {% for column in table_data.columns %}
+              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </section>
+
+    <section>
       <h2>Return, Volume, and Breadth Review</h2>
       <p class="section-note">
         Breadth helps show whether participation is broad across a narrative. Volume confirmation helps contextualize whether market movement is supported by trading activity. These are descriptive research metrics.
@@ -492,6 +525,7 @@
         <p>{{ methodology.normalization_note }}</p>
         <p>{{ methodology.relative_strength_note }}</p>
         <p>{{ methodology.concentration_note }}</p>
+        <p>{{ methodology.return_skew_note }}</p>
         <p>{{ methodology.token_universe_note }}</p>
         <p>{{ methodology.taxonomy_note }}</p>
         <p>DuckDB SQL analytics outputs support narrative summaries, token-level contributors, and concentration context. Historical narrative data, when available, is used only as descriptive trend context.</p>

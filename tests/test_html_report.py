@@ -5,6 +5,7 @@ import pandas as pd
 import pytest
 
 from crypto_narrative_radar.reports.html_report import (
+    calculate_return_skew_diagnostics,
     collect_report_qa_warnings,
     detect_score_column,
     find_latest_processed_date,
@@ -15,6 +16,7 @@ from crypto_narrative_radar.reports.html_report import (
     load_required_csv,
     prepare_executive_summary,
     prepare_report_context,
+    render_report,
 )
 
 
@@ -153,6 +155,48 @@ def write_ranking(path: Path, score_column: str = "narrative_momentum_score") ->
     df.to_csv(path, index=False)
 
 
+def skew_token_snapshot_df() -> pd.DataFrame:
+    rows = [
+        ("hyperliquid", "HYPE", "Hyperliquid", "AI", 20),
+        ("bittensor", "TAO", "Bittensor", "AI", 1),
+        ("render-token", "RENDER", "Render", "AI", 2),
+        ("near", "NEAR", "NEAR Protocol", "AI", 3),
+        ("akash-network", "AKT", "Akash Network", "AI", 4),
+        ("ethereum", "ETH", "Ethereum", "Layer 1", 0),
+        ("solana", "SOL", "Solana", "Layer 1", 1),
+        ("sui", "SUI", "Sui", "Layer 1", 2),
+        ("aptos", "APT", "Aptos", "Layer 1", 3),
+        ("cardano", "ADA", "Cardano", "Layer 1", 4),
+        ("maker", "MKR", "Maker", "RWA", -20),
+        ("chainlink", "LINK", "Chainlink", "RWA", 1),
+        ("ondo-finance", "ONDO", "Ondo", "RWA", 2),
+        ("pendle", "PENDLE", "Pendle", "RWA", 3),
+        ("centrifuge", "CFG", "Centrifuge", "RWA", 4),
+    ]
+    return pd.DataFrame(
+        [
+            {
+                "coingecko_id": coingecko_id,
+                "symbol": symbol,
+                "name": name,
+                "primary_narrative": narrative,
+                "price_change_percentage_7d_in_currency": return_7d,
+            }
+            for coingecko_id, symbol, name, narrative, return_7d in rows
+        ]
+    )
+
+
+def write_token_snapshot(path: Path) -> None:
+    skew_token_snapshot_df().to_csv(path, index=False)
+
+
+def extract_return_skew_section(html: str) -> str:
+    start = html.index("<h2>Return Skew Diagnostics</h2>")
+    end = html.index("<h2>Return, Volume, and Breadth Review</h2>", start)
+    return html[start:end]
+
+
 def test_report_qa_warns_for_stale_snapshot_data() -> None:
     warnings = collect_report_qa_warnings(
         "2026-05-25",
@@ -287,6 +331,119 @@ def test_column_based_formatter_allows_historical_ratio_overrides() -> None:
     assert format_value(0.132, "relative_strength_7d", "ratio_pct") == "13.2%"
     assert format_value(0.90, "breadth_7d", "ratio_pct") == "90.0%"
     assert format_value(0.946, "top_3_market_cap_share") == "94.6%"
+
+
+def test_return_skew_diagnostics_calculates_mean_median_gap_and_iqr() -> None:
+    diagnostics = calculate_return_skew_diagnostics(skew_token_snapshot_df())
+    rows = diagnostics.set_index("primary_narrative")
+
+    ai = rows.loc["AI"]
+    assert ai["token_count"] == 5
+    assert ai["avg_return_7d"] == pytest.approx(6.0)
+    assert ai["median_return_7d"] == pytest.approx(3.0)
+    assert ai["mean_median_gap_pp"] == pytest.approx(3.0)
+    assert ai["return_iqr_7d"] == pytest.approx(2.0)
+    assert ai["top_return_symbol"] == "HYPE"
+    assert ai["top_return_7d"] == pytest.approx(20.0)
+    assert ai["bottom_return_symbol"] == "TAO"
+    assert ai["bottom_return_7d"] == pytest.approx(1.0)
+
+
+def test_return_skew_review_flag_uses_absolute_three_point_threshold() -> None:
+    diagnostics = calculate_return_skew_diagnostics(skew_token_snapshot_df())
+    rows = diagnostics.set_index("primary_narrative")
+
+    assert rows.loc["AI", "skew_review_flag"] == "Review"
+    assert rows.loc["RWA", "skew_review_flag"] == "Review"
+    assert rows.loc["Layer 1", "skew_review_flag"] == "No Review"
+
+
+def test_return_skew_diagnostic_notes_are_factual() -> None:
+    diagnostics = calculate_return_skew_diagnostics(skew_token_snapshot_df())
+    rows = diagnostics.set_index("primary_narrative")
+
+    assert (
+        rows.loc["AI", "diagnostic_note"]
+        == "HYPE had the highest 7D return at 20.0%; narrative mean exceeded median by 3.0pp."
+    )
+    assert (
+        rows.loc["Layer 1", "diagnostic_note"]
+        == "Narrative mean and median were close; no large mean-median skew was observed."
+    )
+    forbidden_terms = ["risky", "buy", "sell", "signal", "prediction", "alpha"]
+    notes = " ".join(diagnostics["diagnostic_note"].str.lower())
+    assert not any(term in notes for term in forbidden_terms)
+
+
+def test_rendered_return_skew_diagnostics_section_and_methodology(tmp_path: Path) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-25"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+    write_token_snapshot(processed_dir / "token_market_snapshot_2026-05-25.csv")
+
+    output_path = generate_report(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+    )
+    html = output_path.read_text(encoding="utf-8")
+    section = extract_return_skew_section(html)
+
+    assert "Return Skew Diagnostics" in section
+    assert "does not affect the Narrative Momentum Score" in section
+    assert "<th>Mean-Median Gap</th>" in section
+    assert "<th>7D Return IQR</th>" in section
+    assert "<th>Top 7D Token</th>" in section
+    assert "<th>Bottom 7D Token</th>" in section
+    assert "<th>Review Flag</th>" in section
+    assert "HYPE (20.0%)" in section
+    assert "MKR (-20.0%)" in section
+    assert "3.0pp" in section
+    assert "The skew review flag is a V1 heuristic for review, not a statistically derived cutoff." in html
+    assert "does not imply an investment recommendation" in html
+
+
+def test_return_skew_diagnostics_do_not_add_return_contribution_share(
+    tmp_path: Path,
+) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-25"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+    write_token_snapshot(processed_dir / "token_market_snapshot_2026-05-25.csv")
+
+    context = prepare_report_context(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+    )
+    table = context["return_skew_diagnostics"]
+    assert table is not None
+    assert not any("return_contribution" in column for column in table["columns"])
+
+    output_path = render_report(context, templates_root=Path("templates"))
+    html = output_path.read_text(encoding="utf-8").lower()
+    assert "return contribution share" not in html
+    assert "return_contribution" not in html
+
+
+def test_return_skew_section_avoids_trading_prediction_and_backtesting_language(
+    tmp_path: Path,
+) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-25"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+    write_token_snapshot(processed_dir / "token_market_snapshot_2026-05-25.csv")
+
+    output_path = generate_report(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+    )
+    html = output_path.read_text(encoding="utf-8")
+    section = extract_return_skew_section(html).lower()
+
+    forbidden_terms = ["trading", "prediction", "backtesting", "buy/sell", "signal", "alpha"]
+    assert not any(term in section for term in forbidden_terms)
 
 
 def test_executive_summary_identifies_top_and_weakest_narratives() -> None:

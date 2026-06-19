@@ -154,6 +154,24 @@ SCORE_WEIGHT_ROWS = [
         "description": "Share of tokens participating across return windows.",
     },
 ]
+RETURN_SKEW_REVIEW_THRESHOLD_PP = 3.0
+RETURN_SKEW_RETURN_COLUMN = "price_change_percentage_7d_in_currency"
+RETURN_SKEW_OUTPUT_COLUMNS = [
+    "primary_narrative",
+    "token_count",
+    "avg_return_7d",
+    "median_return_7d",
+    "mean_median_gap_pp",
+    "return_iqr_7d",
+    "top_return_symbol",
+    "top_return_7d",
+    "bottom_return_symbol",
+    "bottom_return_7d",
+    "top_return_token",
+    "bottom_return_token",
+    "skew_review_flag",
+    "diagnostic_note",
+]
 
 COLUMN_LABELS = {
     "rank": "Rank",
@@ -196,6 +214,20 @@ COLUMN_LABELS = {
     "top_3_market_cap_share": "Top 3 Market Cap Share",
     "concentration_comment": "Concentration Comment",
     "volume_share_pct": "Volume Share",
+    "mean_median_gap_pp": "Mean-Median Gap",
+    "return_iqr_7d": "7D Return IQR",
+    "top_return_symbol": "Top 7D Token",
+    "top_return_7d": "Top 7D Return",
+    "bottom_return_symbol": "Bottom 7D Token",
+    "bottom_return_7d": "Bottom 7D Return",
+    "top_return_token": "Top 7D Token",
+    "bottom_return_token": "Bottom 7D Token",
+    "skew_review_flag": "Review Flag",
+    "diagnostic_note": "Diagnostic Note",
+}
+PERCENTAGE_POINT_GAP_COLUMNS = {
+    "mean_median_gap_pp",
+    "return_iqr_7d",
 }
 
 
@@ -831,6 +863,156 @@ def _sanitize_concentration_review(df: pd.DataFrame | None) -> pd.DataFrame | No
     return working
 
 
+def _clean_text_value(value: Any, fallback: str = "N/A") -> str:
+    if value is None or pd.isna(value):
+        return fallback
+    text = str(value).strip()
+    return text if text else fallback
+
+
+def _token_count(group: pd.DataFrame) -> int:
+    if "coingecko_id" not in group.columns:
+        return int(len(group))
+    ids = group["coingecko_id"].dropna().astype(str).str.strip()
+    ids = ids[ids != ""]
+    if ids.empty:
+        return int(len(group))
+    return int(ids.nunique())
+
+
+def _token_return_label(symbol: str, return_value: Any) -> str:
+    if symbol == "N/A" or _numeric_value(return_value) is None:
+        return "N/A"
+    return f"{symbol} ({format_percent_point(return_value)})"
+
+
+def _diagnostic_note(
+    gap: float | None,
+    top_symbol: str,
+    top_return: float | None,
+    bottom_symbol: str,
+    bottom_return: float | None,
+) -> str:
+    if gap is None:
+        return "7D return data was not available for this narrative."
+    if abs(gap) < RETURN_SKEW_REVIEW_THRESHOLD_PP:
+        return "Narrative mean and median were close; no large mean-median skew was observed."
+    gap_text = format_percentage_point_gap(abs(gap))
+    if gap >= 0:
+        return (
+            f"{top_symbol} had the highest 7D return at {format_percent_point(top_return)}; "
+            f"narrative mean exceeded median by {gap_text}."
+        )
+    return (
+        f"{bottom_symbol} had the lowest 7D return at {format_percent_point(bottom_return)}; "
+        f"narrative mean was below median by {gap_text}."
+    )
+
+
+def calculate_return_skew_diagnostics(
+    token_snapshot_df: pd.DataFrame | None,
+) -> pd.DataFrame:
+    """Calculate descriptive 7D return skew diagnostics by primary narrative."""
+    required_columns = {"primary_narrative", RETURN_SKEW_RETURN_COLUMN}
+    if (
+        token_snapshot_df is None
+        or token_snapshot_df.empty
+        or not required_columns.issubset(token_snapshot_df.columns)
+    ):
+        return pd.DataFrame(columns=RETURN_SKEW_OUTPUT_COLUMNS)
+
+    working = token_snapshot_df.copy()
+    if "symbol" not in working.columns:
+        working["symbol"] = pd.NA
+    working["primary_narrative"] = (
+        working["primary_narrative"]
+        .astype("string")
+        .str.strip()
+        .replace("", pd.NA)
+        .fillna("Unknown")
+    )
+    working[RETURN_SKEW_RETURN_COLUMN] = pd.to_numeric(
+        working[RETURN_SKEW_RETURN_COLUMN],
+        errors="coerce",
+    )
+
+    records: list[dict[str, Any]] = []
+    grouped = working.groupby("primary_narrative", dropna=False, sort=True)
+    for narrative, group in grouped:
+        valid_returns = group[RETURN_SKEW_RETURN_COLUMN].dropna()
+        record: dict[str, Any] = {
+            "primary_narrative": str(narrative),
+            "token_count": _token_count(group),
+            "avg_return_7d": pd.NA,
+            "median_return_7d": pd.NA,
+            "mean_median_gap_pp": pd.NA,
+            "return_iqr_7d": pd.NA,
+            "top_return_symbol": "N/A",
+            "top_return_7d": pd.NA,
+            "bottom_return_symbol": "N/A",
+            "bottom_return_7d": pd.NA,
+            "top_return_token": "N/A",
+            "bottom_return_token": "N/A",
+            "skew_review_flag": "No Review",
+            "diagnostic_note": "7D return data was not available for this narrative.",
+        }
+        if valid_returns.empty:
+            records.append(record)
+            continue
+
+        valid_rows = group.dropna(subset=[RETURN_SKEW_RETURN_COLUMN]).copy()
+        valid_rows["_symbol_sort"] = valid_rows["symbol"].astype("string").fillna("")
+        top_row = valid_rows.sort_values(
+            [RETURN_SKEW_RETURN_COLUMN, "_symbol_sort"],
+            ascending=[False, True],
+        ).iloc[0]
+        bottom_row = valid_rows.sort_values(
+            [RETURN_SKEW_RETURN_COLUMN, "_symbol_sort"],
+            ascending=[True, True],
+        ).iloc[0]
+        avg_return_7d = float(valid_returns.mean())
+        median_return_7d = float(valid_returns.median())
+        mean_median_gap_pp = avg_return_7d - median_return_7d
+        return_iqr_7d = float(valid_returns.quantile(0.75) - valid_returns.quantile(0.25))
+        top_symbol = _clean_text_value(top_row.get("symbol"))
+        bottom_symbol = _clean_text_value(bottom_row.get("symbol"))
+        top_return_7d = float(top_row[RETURN_SKEW_RETURN_COLUMN])
+        bottom_return_7d = float(bottom_row[RETURN_SKEW_RETURN_COLUMN])
+
+        record.update(
+            {
+                "avg_return_7d": avg_return_7d,
+                "median_return_7d": median_return_7d,
+                "mean_median_gap_pp": mean_median_gap_pp,
+                "return_iqr_7d": return_iqr_7d,
+                "top_return_symbol": top_symbol,
+                "top_return_7d": top_return_7d,
+                "bottom_return_symbol": bottom_symbol,
+                "bottom_return_7d": bottom_return_7d,
+                "top_return_token": _token_return_label(top_symbol, top_return_7d),
+                "bottom_return_token": _token_return_label(
+                    bottom_symbol,
+                    bottom_return_7d,
+                ),
+                "skew_review_flag": (
+                    "Review"
+                    if abs(mean_median_gap_pp) >= RETURN_SKEW_REVIEW_THRESHOLD_PP
+                    else "No Review"
+                ),
+                "diagnostic_note": _diagnostic_note(
+                    mean_median_gap_pp,
+                    top_symbol,
+                    top_return_7d,
+                    bottom_symbol,
+                    bottom_return_7d,
+                ),
+            }
+        )
+        records.append(record)
+
+    return pd.DataFrame(records, columns=RETURN_SKEW_OUTPUT_COLUMNS)
+
+
 def _methodology_context() -> dict[str, Any]:
     return {
         "score_weights": SCORE_WEIGHT_ROWS,
@@ -857,6 +1039,13 @@ def _methodology_context() -> dict[str, Any]:
         "taxonomy_note": (
             "Taxonomy assignments involve judgment and can miss sector breadth "
             "or token overlap."
+        ),
+        "return_skew_note": (
+            "Return skew diagnostics are descriptive only. The skew review flag "
+            "is a V1 heuristic for review, not a statistically derived cutoff. "
+            "It uses a judgment-based 3.0 percentage point mean-median gap "
+            "threshold, does not affect scoring, and does not imply an "
+            "investment recommendation."
         ),
     }
 
@@ -934,6 +1123,14 @@ def format_percent_point(value: Any) -> str:
     return f"{numeric:,.1f}%"
 
 
+def format_percentage_point_gap(value: Any) -> str:
+    """Format a difference between percent-point values."""
+    numeric = _numeric_value(value)
+    if numeric is None:
+        return "N/A"
+    return f"{numeric:,.1f}pp"
+
+
 def format_ratio_pct(value: Any) -> str:
     """Format a ratio value as a percentage."""
     numeric = _numeric_value(value)
@@ -957,8 +1154,12 @@ def format_value(
         return str(value)
     if scale == "percent_point":
         return format_percent_point(numeric)
+    if scale == "percentage_point_gap":
+        return format_percentage_point_gap(numeric)
     if scale == "ratio_pct":
         return format_ratio_pct(numeric)
+    if column in PERCENTAGE_POINT_GAP_COLUMNS:
+        return format_percentage_point_gap(numeric)
     if column in PERCENT_POINT_COLUMNS:
         return format_percent_point(numeric)
     if column in RATIO_PERCENT_COLUMNS:
@@ -989,6 +1190,7 @@ def prepare_report_context(
     display_concentration_df = _sanitize_concentration_review(concentration_df)
     narrative_summary_df = load_optional_csv(paths["sql_narrative_summary"])
     historical_df = load_optional_csv(paths["historical_narrative"])
+    return_skew_df = calculate_return_skew_diagnostics(token_snapshot_df)
     generated_at = datetime.now(timezone.utc)
     qa_warnings = collect_report_qa_warnings(
         snapshot_date=selected_date,
@@ -1055,6 +1257,29 @@ def prepare_report_context(
                 "breadth_7d",
                 "relative_strength_7d",
             ],
+        ),
+        "return_skew_diagnostics": _table_from_df(
+            return_skew_df,
+            [
+                "primary_narrative",
+                "avg_return_7d",
+                "median_return_7d",
+                "mean_median_gap_pp",
+                "return_iqr_7d",
+                "top_return_token",
+                "bottom_return_token",
+                "skew_review_flag",
+                "diagnostic_note",
+            ],
+            column_formats={
+                "mean_median_gap_pp": "percentage_point_gap",
+                "return_iqr_7d": "percentage_point_gap",
+            },
+        ),
+        "return_skew_note": (
+            "Return skew diagnostics require token-level 7D return data and were not available for this report."
+            if return_skew_df.empty
+            else None
         ),
         "token_contributors": _table_from_df(
             contributor_source if contributor_source is not None else pd.DataFrame(),
