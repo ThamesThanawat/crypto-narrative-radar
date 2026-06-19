@@ -79,6 +79,12 @@ Current report path:
 reports/html/latest.html
 ```
 
+Sample HTML research report:
+
+```text
+docs/showcase/sample_2026-05-20.html
+```
+
 Generate it with:
 
 ```bash

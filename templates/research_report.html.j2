@@ -600,36 +600,6 @@
     </section>
 
     <section>
-      <h2>Return, Volume, and Breadth Review</h2>
-      <p class="section-note">
-        Breadth helps show whether participation is broad across a narrative. Volume confirmation helps contextualize whether market movement is supported by trading activity. These are descriptive research metrics.
-      </p>
-      {% set table_data = review_table %}
-      {% if table_data %}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              {% for column in table_data.columns %}
-              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in table_data.rows %}
-            <tr>
-              {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-      {% endif %}
-    </section>
-
-    <section>
       <h2>Token-Level Contributors</h2>
       <p class="section-note">Token-level contributors show which assets are contributing most to narrative-level market activity.</p>
       {% if token_contributor_note %}

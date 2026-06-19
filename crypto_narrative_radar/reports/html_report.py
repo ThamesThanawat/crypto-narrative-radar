@@ -730,9 +730,75 @@ def _card(title: str, row: dict[str, Any] | None, column: str, note: str) -> dic
     }
 
 
+def _format_signed_percent_point(value: Any) -> str:
+    numeric = _numeric_value(value)
+    if numeric is None:
+        return "N/A"
+    return f"{numeric:+,.1f}%"
+
+
+def _row_for_narrative(
+    df: pd.DataFrame | None,
+    narrative: str,
+) -> dict[str, Any] | None:
+    if df is None or df.empty or "primary_narrative" not in df.columns:
+        return None
+    matches = df[
+        df["primary_narrative"].astype("string").str.strip() == str(narrative).strip()
+    ]
+    if matches.empty:
+        return None
+    return matches.iloc[0].to_dict()
+
+
+def _return_leadership_bullet(
+    strongest_7d: dict[str, Any] | None,
+    return_skew_df: pd.DataFrame | None = None,
+) -> str | None:
+    if not strongest_7d:
+        return None
+    narrative = str(strongest_7d["primary_narrative"])
+    skew_row = _row_for_narrative(return_skew_df, narrative)
+    mean_return = (
+        skew_row.get("avg_return_7d")
+        if skew_row is not None
+        else strongest_7d.get("avg_return_7d")
+    )
+    median_return = (
+        skew_row.get("median_return_7d")
+        if skew_row is not None
+        else strongest_7d.get("median_return_7d")
+    )
+    review_flag = str(skew_row.get("skew_review_flag", "No Review")) if skew_row else "No Review"
+
+    if skew_row is not None and review_flag != "No Review":
+        top_symbol = _clean_text_value(skew_row.get("top_return_symbol"))
+        top_return = skew_row.get("top_return_7d")
+        descriptor = (
+            "least-negative 7D return context by mean"
+            if (_numeric_value(mean_return) or 0) < 0
+            else "strongest mean 7D return context"
+        )
+        flag_text = "skew-flagged" if "Skew" in review_flag else "review-flagged"
+        return (
+            f"{narrative} had the {descriptor}, but this was {flag_text}: "
+            f"mean 7D return was {_format_signed_percent_point(mean_return)} "
+            f"while median 7D return was {_format_signed_percent_point(median_return)}, "
+            f"with {top_symbol} as the strongest 7D token at "
+            f"{_format_signed_percent_point(top_return)}."
+        )
+
+    return (
+        f"{narrative} showed the strongest mean 7D return context at "
+        f"{_format_signed_percent_point(mean_return)}, with median 7D return at "
+        f"{_format_signed_percent_point(median_return)}."
+    )
+
+
 def prepare_executive_summary(
     ranking_df: pd.DataFrame,
     concentration_df: pd.DataFrame | None = None,
+    return_skew_df: pd.DataFrame | None = None,
 ) -> dict[str, Any]:
     """Prepare top-level descriptive insights for the research report."""
     score_column = detect_score_column(ranking_df)
@@ -791,11 +857,9 @@ def prepare_executive_summary(
             f"{top_score['primary_narrative']} leads the current Narrative Momentum Score at "
             f"{format_value(top_score.get(score_column), score_column)}."
         )
-    if strongest_7d:
-        bullets.append(
-            f"{strongest_7d['primary_narrative']} shows the strongest 7D return context at "
-            f"{format_value(strongest_7d.get('avg_return_7d'), 'avg_return_7d')}."
-        )
+    return_bullet = _return_leadership_bullet(strongest_7d, return_skew_df)
+    if return_bullet:
+        bullets.append(return_bullet)
     if strongest_30d:
         bullets.append(
             f"{strongest_30d['primary_narrative']} shows the strongest 30D return context at "
@@ -1426,7 +1490,6 @@ def prepare_report_context(
     contributors_df = load_optional_csv(paths["sql_top_token_contributors"])
     concentration_df = load_optional_csv(paths["sql_concentration_review"])
     display_concentration_df = _sanitize_concentration_review(concentration_df)
-    narrative_summary_df = load_optional_csv(paths["sql_narrative_summary"])
     historical_df = load_optional_csv(paths["historical_narrative"])
     return_skew_df = calculate_return_skew_diagnostics(token_snapshot_df)
     generated_at = datetime.now(timezone.utc)
@@ -1442,7 +1505,7 @@ def prepare_report_context(
     if sample_mode:
         qa_warnings = _sample_report_qa_warnings(qa_warnings)
 
-    summary = prepare_executive_summary(ranking_df, concentration_df)
+    summary = prepare_executive_summary(ranking_df, concentration_df, return_skew_df)
     score_column = summary["score_column"]
     sorted_desc = _sort_by_score(ranking_df, score_column, ascending=False)
     sorted_asc = _sort_by_score(ranking_df, score_column, ascending=True)
@@ -1472,7 +1535,6 @@ def prepare_report_context(
         "volume_share_within_narrative",
         "market_cap_share_within_narrative",
     ]
-    review_source = narrative_summary_df if narrative_summary_df is not None else narrative_metrics_df
     output_filename = (
         SAMPLE_REPORT_FILENAME_TEMPLATE.format(snapshot_date=selected_date)
         if sample_mode
@@ -1495,19 +1557,6 @@ def prepare_report_context(
         "score_component_breakdown": _component_breakdown_table(sorted_desc, score_column),
         "score_chart": _prepare_score_chart(sorted_desc, score_column),
         "return_skew_chart": _prepare_return_skew_chart(return_skew_df),
-        "review_table": _table_from_df(
-            review_source if review_source is not None else ranking_df,
-            [
-                "primary_narrative",
-                "avg_return_7d",
-                "avg_return_30d",
-                "total_volume",
-                "volume_share_pct",
-                "positive_breadth_pct",
-                "breadth_7d",
-                "relative_strength_7d",
-            ],
-        ),
         "return_skew_diagnostics": _table_from_df(
             return_skew_df,
             [

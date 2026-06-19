@@ -214,7 +214,7 @@ def write_base_token_snapshot(path: Path, last_updated: str = "2026-05-20T00:00:
 
 def extract_return_skew_section(html: str) -> str:
     start = html.index("<h2>Return Skew Diagnostics</h2>")
-    end = html.index("<h2>Return, Volume, and Breadth Review</h2>", start)
+    end = html.index("<h2>Token-Level Contributors</h2>", start)
     return html[start:end]
 
 
@@ -706,6 +706,7 @@ def test_executive_summary_identifies_top_and_weakest_narratives() -> None:
             "primary_narrative": ["AI", "DeFi", "RWA"],
             "narrative_momentum_score": [90, 40, 65],
             "avg_return_7d": [8, -3, 4],
+            "median_return_7d": [7, -2, 3],
             "avg_return_30d": [10, -4, 9],
             "breadth_7d": [0.9, 0.2, 0.6],
         }
@@ -715,6 +716,75 @@ def test_executive_summary_identifies_top_and_weakest_narratives() -> None:
 
     assert summary["top_score"]["primary_narrative"] == "AI"
     assert summary["weakest_score"]["primary_narrative"] == "DeFi"
+
+
+def test_executive_summary_caveats_skew_flagged_7d_leadership() -> None:
+    ranking = pd.DataFrame(
+        {
+            "primary_narrative": ["Exchange Tokens", "Layer 1"],
+            "narrative_momentum_score": [72, 80],
+            "avg_return_7d": [0.4, -1.2],
+            "median_return_7d": [-2.6, -1.8],
+            "avg_return_30d": [4, 6],
+            "breadth_7d": [0.3, 0.5],
+        }
+    )
+    return_skew = pd.DataFrame(
+        [
+            {
+                "primary_narrative": "Exchange Tokens",
+                "avg_return_7d": 0.4,
+                "median_return_7d": -2.6,
+                "skew_review_flag": "Skew Review",
+                "top_return_symbol": "HYPE",
+                "top_return_7d": 31.5,
+            }
+        ]
+    )
+
+    summary = prepare_executive_summary(ranking, return_skew_df=return_skew)
+    bullets = " ".join(summary["bullets"])
+
+    assert "shows the strongest 7D return context at 0.4%" not in bullets
+    assert "Exchange Tokens had the strongest mean 7D return context" in bullets
+    assert "this was skew-flagged" in bullets
+    assert "mean 7D return was +0.4%" in bullets
+    assert "median 7D return was -2.6%" in bullets
+    assert "HYPE as the strongest 7D token at +31.5%" in bullets
+
+
+def test_executive_summary_uses_clean_7d_leadership_when_not_skew_flagged() -> None:
+    ranking = pd.DataFrame(
+        {
+            "primary_narrative": ["AI", "DeFi"],
+            "narrative_momentum_score": [90, 70],
+            "avg_return_7d": [8.0, 2.0],
+            "median_return_7d": [7.0, 1.5],
+            "avg_return_30d": [10, 5],
+            "breadth_7d": [0.9, 0.5],
+        }
+    )
+    return_skew = pd.DataFrame(
+        [
+            {
+                "primary_narrative": "AI",
+                "avg_return_7d": 8.0,
+                "median_return_7d": 7.0,
+                "skew_review_flag": "No Review",
+                "top_return_symbol": "TAO",
+                "top_return_7d": 9.0,
+            }
+        ]
+    )
+
+    summary = prepare_executive_summary(ranking, return_skew_df=return_skew)
+    bullets = " ".join(summary["bullets"])
+
+    assert (
+        "AI showed the strongest mean 7D return context at +8.0%, "
+        "with median 7D return at +7.0%."
+    ) in bullets
+    assert "skew-flagged" not in bullets
 
 
 def test_render_report_creates_dated_report_and_latest(tmp_path: Path) -> None:
@@ -927,6 +997,7 @@ def test_rendered_report_uses_research_friendly_section_titles_and_headers(
 
     assert "Top 3 by Narrative Momentum Score" not in html
     assert "Lowest 3 by Narrative Momentum Score" not in html
+    assert "Return, Volume, and Breadth Review" not in html
     assert "Narrative Momentum Score Bar Chart" in html
     assert "Mean vs Median 7D Return Skew Chart" in html
     assert "Score Component Breakdown" in html
