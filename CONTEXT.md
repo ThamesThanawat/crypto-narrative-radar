@@ -73,7 +73,7 @@ historical narrative metrics
         ↓
 historical dashboard view
         ↓
-static HTML research report with QA notes and methodology clarity
+static HTML research report with QA notes, methodology clarity, and return skew diagnostics
         ->
 public-safe strategic context pack
 ```
@@ -165,6 +165,7 @@ Current implemented project layers:
 - static HTML report generator
 - HTML report QA layer with Data Quality Notes
 - HTML report methodology clarity layer with Score Component Breakdown
+- HTML report Return Skew Diagnostics with mean-median gap and snapshot-relative IQR review flags
 - public-safe strategic context pack at `docs/strategy/crypto_radar_context_pack.md`
 
 Current next milestone:
@@ -411,6 +412,7 @@ Current sections include:
 - Score Component Breakdown
 - Token contributors
 - Concentration review
+- Return Skew Diagnostics
 - Return, volume, and breadth review
 - 90-day historical context
 - Data Quality Notes when QA warnings exist
@@ -507,6 +509,7 @@ Milestone 5.10: Mac environment + context cleanup
 Milestone 6.0: Static HTML Research Report
 Milestone 6.1: HTML Report QA & Data Sanity Review
 Milestone 6.2: Methodology Transparency & Report Clarity
+Milestone 6.3A: Return Skew Diagnostic Hotfix
 Strategic context pack: public-safe project roadmap brief
 ```
 
@@ -519,7 +522,7 @@ Resume / LinkedIn / Interview Prep
 
 Roadmap notes:
 
-- Milestone 6.2 is complete; next work should move toward proof-pack artifacts.
+- Milestone 6.3A is complete; next work should move toward proof-pack artifacts.
 - Post-Listing Operations & Token Risk Packet is the next planned proof-pack artifact.
 - Do not prioritize Narrative Watchlist Indicators until after proof-pack artifacts are started.
 - On-chain investigation tools such as Arkham, Flipside, and Dune are future or optional evidence sources unless explicitly implemented.
@@ -702,6 +705,37 @@ Validation:
 
 Scope note:
 No scoring formulas, taxonomy, API calls, prediction, backtesting, portfolio allocation, dashboard changes, or trading logic were changed.
+
+### Milestone 6.3A Summary
+
+Return Skew Diagnostic Hotfix is complete.
+
+The static HTML report now includes Return Skew Diagnostics that use both:
+
+- mean-median 7D return gap
+- snapshot-relative 7D return IQR dispersion
+
+Review labels include:
+
+- Skew Review
+- Dispersion Review
+- Skew + Dispersion Review
+- No Review
+
+The dispersion review trigger compares a narrative's 7D return IQR with two times the median narrative 7D return IQR in the same report snapshot. The threshold is a judgment-based V1 review heuristic, not a statistically derived cutoff.
+
+The RWA-like high-IQR / low-gap case is covered by tests.
+
+The Narrative Ranking table now includes Median 7D Return beside Mean 7D Return so outlier-sensitive mean returns have nearby median context.
+
+Validation:
+
+- compileall passed
+- report generation passed
+- pytest passed: 102 passed
+
+Scope note:
+No Narrative Momentum Score, scoring formula, taxonomy, or CoinGecko API logic changed. No return contribution-share metric, winsorized scoring, NMS V1.1, prediction, backtesting, trading signal, buy/sell recommendation, or portfolio logic was added.
 
 ### Strategic Context Pack Summary
 
