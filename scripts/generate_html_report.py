@@ -13,6 +13,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from crypto_narrative_radar.reports.html_report import (
     SAMPLE_REPORT_DATE,
     prepare_report_context,
+    publish_showcase_report,
     render_report,
 )
 
@@ -28,9 +29,16 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help=f"Generate the pinned sample report for {SAMPLE_REPORT_DATE}.",
     )
+    parser.add_argument(
+        "--publish-showcase",
+        action="store_true",
+        help="Copy the pinned sample report to docs/showcase for portfolio publishing.",
+    )
     args = parser.parse_args()
     if args.sample and args.date:
         parser.error("--sample uses the fixed sample snapshot and cannot be combined with --date.")
+    if args.publish_showcase and not args.sample:
+        parser.error("--publish-showcase requires --sample.")
     return args
 
 
@@ -40,6 +48,9 @@ def main() -> int:
     try:
         context = prepare_report_context(args.date, sample_mode=args.sample)
         output_path = render_report(context)
+        showcase_path = (
+            publish_showcase_report(output_path) if args.publish_showcase else None
+        )
     except (FileNotFoundError, ValueError) as error:
         print(f"HTML report generation failed: {error}")
         return 1
@@ -51,6 +62,8 @@ def main() -> int:
         print(f"Latest: {latest_path}")
     else:
         print(f"Latest unchanged: {latest_path}")
+    if showcase_path is not None:
+        print(f"Showcase: {showcase_path}")
     qa_warnings = context.get("qa_warnings", [])
     if qa_warnings:
         print("Data quality warnings:")

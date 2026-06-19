@@ -6,13 +6,17 @@
   <title>Crypto Narrative Radar - {{ snapshot_date }}</title>
   <style>
     :root {
-      --bg: #f6f7f9;
+      --bg: #f2f4f6;
       --panel: #ffffff;
-      --ink: #17202a;
-      --muted: #5e6b78;
-      --line: #d9dee5;
-      --accent: #1d6f78;
-      --accent-soft: #e7f3f4;
+      --panel-alt: #f8fafb;
+      --ink: #111827;
+      --muted: #5a6673;
+      --line: #d4dbe3;
+      --line-strong: #a9b5c3;
+      --accent: #0f5f6f;
+      --accent-2: #2f6f4e;
+      --accent-soft: #e6f1f3;
+      --terminal: #17202a;
       --warn-soft: #fff4df;
     }
 
@@ -24,7 +28,7 @@
       margin: 0;
       background: var(--bg);
       color: var(--ink);
-      font-family: Arial, Helvetica, sans-serif;
+      font-family: "Aptos", "Segoe UI", "Trebuchet MS", Verdana, sans-serif;
       line-height: 1.55;
     }
 
@@ -35,9 +39,12 @@
     }
 
     header {
-      border-bottom: 1px solid var(--line);
+      background: var(--terminal);
+      border: 1px solid #23313f;
+      border-radius: 6px;
+      color: #f8fafc;
       margin-bottom: 24px;
-      padding-bottom: 22px;
+      padding: 22px 24px;
     }
 
     h1 {
@@ -63,13 +70,13 @@
     }
 
     .subtitle {
-      color: var(--muted);
+      color: #cbd5df;
       font-size: 16px;
       margin-bottom: 14px;
     }
 
     .meta {
-      color: var(--muted);
+      color: #aebccc;
       display: flex;
       flex-wrap: wrap;
       gap: 14px;
@@ -157,14 +164,22 @@
     }
 
     th {
-      background: var(--accent-soft);
-      color: #143d43;
+      background: #edf2f5;
+      color: #26333f;
       font-size: 12px;
       text-transform: uppercase;
     }
 
     td {
       font-size: 13px;
+    }
+
+    td,
+    .card .value,
+    .bar-value,
+    .skew-values,
+    .axis-labels {
+      font-variant-numeric: tabular-nums;
     }
 
     tr:last-child td {
@@ -174,6 +189,168 @@
     .section-note {
       color: var(--muted);
       max-width: 880px;
+    }
+
+    .chart-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 16px;
+    }
+
+    .bar-chart,
+    .skew-chart {
+      display: grid;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .bar-row,
+    .skew-row {
+      align-items: center;
+      display: grid;
+      gap: 12px;
+    }
+
+    .bar-row {
+      grid-template-columns: minmax(140px, 190px) minmax(180px, 1fr) 64px;
+    }
+
+    .bar-label,
+    .skew-label {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .bar-track,
+    .skew-track {
+      background: var(--panel-alt);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      min-height: 18px;
+      position: relative;
+    }
+
+    .bar-fill {
+      background: linear-gradient(90deg, var(--accent), #3f8b95);
+      border-radius: 3px;
+      height: 18px;
+    }
+
+    .bar-value {
+      color: var(--terminal);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .axis-labels {
+      color: var(--muted);
+      display: flex;
+      font-size: 12px;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+
+    .skew-row {
+      grid-template-columns: minmax(170px, 230px) minmax(220px, 1fr) minmax(190px, 240px);
+    }
+
+    .skew-label {
+      display: grid;
+      gap: 4px;
+    }
+
+    .review-pill {
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      color: var(--muted);
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      width: fit-content;
+    }
+
+    .review-pill.skew-review,
+    .review-pill.dispersion-review,
+    .review-pill.skew-dispersion-review {
+      background: #fff4df;
+      border-color: #d7b46c;
+      color: #604a13;
+    }
+
+    .review-pill.no-review {
+      background: #edf7f1;
+      border-color: #b8d9c6;
+      color: #28543a;
+    }
+
+    .zero-line {
+      background: #778494;
+      bottom: -4px;
+      position: absolute;
+      top: -4px;
+      width: 1px;
+    }
+
+    .skew-marker {
+      border-radius: 999px;
+      height: 14px;
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 14px;
+    }
+
+    .skew-marker.mean {
+      background: var(--accent);
+      border: 2px solid #dff3f5;
+    }
+
+    .skew-marker.median {
+      background: var(--accent-2);
+      border: 2px solid #e5f3eb;
+      height: 10px;
+      width: 10px;
+    }
+
+    .skew-values {
+      color: var(--muted);
+      display: grid;
+      font-size: 12px;
+      gap: 2px;
+    }
+
+    .legend {
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      font-size: 12px;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .legend-item {
+      align-items: center;
+      display: inline-flex;
+      gap: 6px;
+    }
+
+    .legend-dot {
+      border-radius: 999px;
+      display: inline-block;
+      height: 9px;
+      width: 9px;
+    }
+
+    .legend-dot.mean {
+      background: var(--accent);
+    }
+
+    .legend-dot.median {
+      background: var(--accent-2);
     }
 
     .method-box {
@@ -189,6 +366,17 @@
       font-size: 12px;
       margin-top: 34px;
       padding-top: 16px;
+    }
+
+    @media (max-width: 760px) {
+      .bar-row,
+      .skew-row {
+        grid-template-columns: 1fr;
+      }
+
+      .bar-value {
+        text-align: left;
+      }
     }
   </style>
 </head>
@@ -253,61 +441,72 @@
       </div>
     </section>
 
+    {% if score_chart.available %}
     <section>
-      <h2>Top 3 by Narrative Momentum Score</h2>
-      <p class="section-note">Leading narratives are ranked by the current Narrative Momentum Score and describe current narrative leadership.</p>
-      {% set table_data = top_narratives %}
-      {% if table_data %}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              {% for column in table_data.columns %}
-              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in table_data.rows %}
-            <tr>
-              {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+      <h2>Narrative Momentum Score Bar Chart</h2>
+      <p class="section-note">Narratives are sorted by the current Narrative Momentum Score. The score is a descriptive research ranking tool and does not affect any return skew diagnostics.</p>
+      <div class="chart-panel">
+        <div class="bar-chart">
+          {% for row in score_chart.rows %}
+          <div class="bar-row">
+            <div class="bar-label">{{ row.primary_narrative }}</div>
+            <div class="bar-track" aria-label="{{ row.primary_narrative }} {{ score_chart.score_label }} {{ row.score_label }}">
+              <div class="bar-fill" style="width: {{ row.width_pct }}%;"></div>
+            </div>
+            <div class="bar-value">{{ row.score_label }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="axis-labels">
+          <span>0</span>
+          <span>100</span>
+        </div>
       </div>
-      {% endif %}
     </section>
+    {% endif %}
 
+    {% if return_skew_chart.available %}
     <section>
-      <h2>Lowest 3 by Narrative Momentum Score</h2>
-      <p class="section-note">Lagging narratives show softer relative momentum in this snapshot. This is descriptive research context.</p>
-      {% set table_data = weakening_narratives %}
-      {% if table_data %}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              {% for column in table_data.columns %}
-              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in table_data.rows %}
-            <tr>
-              {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+      <h2>Mean vs Median 7D Return Skew Chart</h2>
+      <p class="section-note">This diagnostic-only view plots mean and median 7D returns by narrative and displays the current review label. It does not affect the Narrative Momentum Score.</p>
+      <div class="chart-panel">
+        <div class="skew-chart">
+          {% for row in return_skew_chart.rows %}
+          <div class="skew-row">
+            <div class="skew-label">
+              <span>{{ row.primary_narrative }}</span>
+              <span class="review-pill {{ row.review_flag_class }}">{{ row.review_flag }}</span>
+            </div>
+            <div class="skew-track" aria-label="{{ row.primary_narrative }} mean {{ row.mean_label }} median {{ row.median_label }}">
+              {% if return_skew_chart.zero_position_pct is not none %}
+              <span class="zero-line" style="left: {{ return_skew_chart.zero_position_pct }}%;"></span>
+              {% endif %}
+              {% if row.mean_position_pct is not none %}
+              <span class="skew-marker mean" style="left: {{ row.mean_position_pct }}%;" title="Mean 7D Return {{ row.mean_label }}"></span>
+              {% endif %}
+              {% if row.median_position_pct is not none %}
+              <span class="skew-marker median" style="left: {{ row.median_position_pct }}%;" title="Median 7D Return {{ row.median_label }}"></span>
+              {% endif %}
+            </div>
+            <div class="skew-values">
+              <span>Mean {{ row.mean_label }}</span>
+              <span>Median {{ row.median_label }}</span>
+              <span>Gap {{ row.gap_label }} | IQR {{ row.iqr_label }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="axis-labels">
+          <span>{{ return_skew_chart.axis_min_label }}</span>
+          <span>{{ return_skew_chart.axis_max_label }}</span>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><span class="legend-dot mean"></span>Mean 7D Return</span>
+          <span class="legend-item"><span class="legend-dot median"></span>Median 7D Return</span>
+        </div>
       </div>
-      {% endif %}
     </section>
+    {% endif %}
 
     <section>
       <h2>Narrative Ranking</h2>

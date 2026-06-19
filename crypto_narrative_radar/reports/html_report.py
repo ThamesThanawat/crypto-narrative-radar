@@ -23,6 +23,7 @@ DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 REPORT_FILENAME_TEMPLATE = "crypto_narrative_report_{snapshot_date}.html"
 SAMPLE_REPORT_DATE = "2026-05-20"
 SAMPLE_REPORT_FILENAME_TEMPLATE = "sample_{snapshot_date}.html"
+SHOWCASE_DIR = PROJECT_ROOT / "docs" / "showcase"
 TOKEN_SNAPSHOT_TEMPLATE = "token_market_snapshot_{snapshot_date}.csv"
 TEMPLATE_NAME = "research_report.html.j2"
 STALE_MARKET_DATA_DAYS = 2
@@ -1161,6 +1162,133 @@ def _sort_by_score(df: pd.DataFrame, score_column: str, ascending: bool) -> pd.D
     return working.sort_values([score_column, "primary_narrative"], ascending=[ascending, True])
 
 
+def _chart_pct(value: float) -> float:
+    return round(max(0.0, min(100.0, value)), 2)
+
+
+def _axis_position(value: float | None, axis_min: float, axis_max: float) -> float | None:
+    if value is None or axis_max == axis_min:
+        return None
+    return _chart_pct(((value - axis_min) / (axis_max - axis_min)) * 100)
+
+
+def _review_flag_class(flag: Any) -> str:
+    label = str(flag or "No Review").lower()
+    css_name = re.sub(r"[^a-z0-9]+", "-", label).strip("-")
+    return css_name or "no-review"
+
+
+def _prepare_score_chart(ranking_df: pd.DataFrame, score_column: str) -> dict[str, Any]:
+    if (
+        ranking_df.empty
+        or "primary_narrative" not in ranking_df.columns
+        or score_column not in ranking_df.columns
+    ):
+        return {"available": False, "rows": []}
+    working = ranking_df[["primary_narrative", score_column]].copy()
+    working[score_column] = pd.to_numeric(working[score_column], errors="coerce")
+    working = working.dropna(subset=[score_column])
+    if working.empty:
+        return {"available": False, "rows": []}
+    working = working.sort_values(
+        [score_column, "primary_narrative"],
+        ascending=[False, True],
+    )
+    rows = []
+    for row in working.to_dict(orient="records"):
+        score = float(row[score_column])
+        rows.append(
+            {
+                "primary_narrative": str(row["primary_narrative"]),
+                "score": score,
+                "score_label": format_value(score, score_column),
+                "width_pct": _chart_pct(score),
+            }
+        )
+    return {
+        "available": True,
+        "score_column": score_column,
+        "score_label": COLUMN_LABELS.get(score_column, "Narrative Momentum Score"),
+        "rows": rows,
+    }
+
+
+def _prepare_return_skew_chart(return_skew_df: pd.DataFrame) -> dict[str, Any]:
+    required_columns = {
+        "primary_narrative",
+        "avg_return_7d",
+        "median_return_7d",
+        "mean_median_gap_pp",
+        "skew_review_flag",
+    }
+    if return_skew_df.empty or not required_columns.issubset(return_skew_df.columns):
+        return {"available": False, "rows": []}
+
+    working = return_skew_df.copy()
+    for column in [
+        "avg_return_7d",
+        "median_return_7d",
+        "mean_median_gap_pp",
+        "return_iqr_7d",
+    ]:
+        if column in working.columns:
+            working[column] = pd.to_numeric(working[column], errors="coerce")
+    working = working.dropna(subset=["avg_return_7d", "median_return_7d"], how="all")
+    if working.empty:
+        return {"available": False, "rows": []}
+
+    values = pd.concat(
+        [
+            working["avg_return_7d"].dropna(),
+            working["median_return_7d"].dropna(),
+            pd.Series([0.0]),
+        ],
+        ignore_index=True,
+    )
+    axis_min = float(values.min())
+    axis_max = float(values.max())
+    if axis_min == axis_max:
+        axis_min -= 1.0
+        axis_max += 1.0
+    else:
+        padding = max((axis_max - axis_min) * 0.08, 1.0)
+        axis_min -= padding
+        axis_max += padding
+
+    rows = []
+    for row in working.sort_values("primary_narrative").to_dict(orient="records"):
+        mean_return = _numeric_value(row.get("avg_return_7d"))
+        median_return = _numeric_value(row.get("median_return_7d"))
+        gap = _numeric_value(row.get("mean_median_gap_pp"))
+        return_iqr = _numeric_value(row.get("return_iqr_7d"))
+        flag = str(row.get("skew_review_flag") or "No Review")
+        rows.append(
+            {
+                "primary_narrative": str(row["primary_narrative"]),
+                "mean_label": format_percent_point(mean_return),
+                "median_label": format_percent_point(median_return),
+                "gap_label": format_percentage_point_gap(gap),
+                "iqr_label": format_percentage_point_gap(return_iqr),
+                "mean_position_pct": _axis_position(mean_return, axis_min, axis_max),
+                "median_position_pct": _axis_position(
+                    median_return,
+                    axis_min,
+                    axis_max,
+                ),
+                "review_flag": flag,
+                "review_flag_class": _review_flag_class(flag),
+            }
+        )
+
+    return {
+        "available": True,
+        "axis_min_label": format_percent_point(axis_min),
+        "axis_max_label": format_percent_point(axis_max),
+        "zero_position_pct": _axis_position(0.0, axis_min, axis_max),
+        "rows": rows,
+    }
+
+
 def _prepare_historical_context(history_df: pd.DataFrame | None) -> dict[str, Any]:
     if history_df is None or history_df.empty or "date" not in history_df.columns:
         return {
@@ -1365,6 +1493,8 @@ def prepare_report_context(
         "weakening_narratives": _records(_select_columns(sorted_asc.head(3), ranking_columns)),
         "ranking_table": _table_from_df(sorted_desc, ranking_columns),
         "score_component_breakdown": _component_breakdown_table(sorted_desc, score_column),
+        "score_chart": _prepare_score_chart(sorted_desc, score_column),
+        "return_skew_chart": _prepare_return_skew_chart(return_skew_df),
         "review_table": _table_from_df(
             review_source if review_source is not None else ranking_df,
             [
@@ -1450,6 +1580,23 @@ def render_report(
     output_path.write_text(html, encoding="utf-8")
     if context.get("update_latest", True):
         shutil.copyfile(output_path, latest_path)
+    return output_path
+
+
+def publish_showcase_report(
+    report_path: Path,
+    showcase_dir: Path = SHOWCASE_DIR,
+    snapshot_date: str = SAMPLE_REPORT_DATE,
+) -> Path:
+    """Copy a pinned sample report into the tracked showcase folder."""
+    source_path = Path(report_path)
+    if not source_path.exists():
+        raise FileNotFoundError(f"Sample report not found: {source_path}")
+    showcase_dir.mkdir(parents=True, exist_ok=True)
+    output_path = showcase_dir / SAMPLE_REPORT_FILENAME_TEMPLATE.format(
+        snapshot_date=snapshot_date
+    )
+    shutil.copyfile(source_path, output_path)
     return output_path
 
 

@@ -16,6 +16,7 @@ from crypto_narrative_radar.reports.html_report import (
     load_required_csv,
     prepare_executive_summary,
     prepare_report_context,
+    publish_showcase_report,
     render_report,
 )
 
@@ -395,6 +396,35 @@ def test_sample_report_renders_without_overwriting_latest_html(tmp_path: Path) -
     assert "last_updated appears stale" not in html
 
 
+def test_sample_publish_showcase_copies_sample_without_overwriting_latest_html(
+    tmp_path: Path,
+) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-20"
+    reports_dir = tmp_path / "reports" / "html"
+    showcase_dir = tmp_path / "docs" / "showcase"
+    processed_dir.mkdir(parents=True)
+    reports_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+    write_base_token_snapshot(processed_dir / "token_market_snapshot_2026-05-20.csv")
+    latest_path = reports_dir / "latest.html"
+    latest_path.write_text("normal latest sentinel", encoding="utf-8")
+
+    sample_path = generate_report(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+        sample_mode=True,
+    )
+    showcase_path = publish_showcase_report(sample_path, showcase_dir=showcase_dir)
+
+    assert showcase_path == showcase_dir / "sample_2026-05-20.html"
+    assert showcase_path.exists()
+    assert showcase_path.read_text(encoding="utf-8") == sample_path.read_text(
+        encoding="utf-8"
+    )
+    assert latest_path.read_text(encoding="utf-8") == "normal latest sentinel"
+
+
 def test_sample_report_keeps_portfolio_safe_research_framing(tmp_path: Path) -> None:
     processed_dir = tmp_path / "processed" / "2026-05-20"
     processed_dir.mkdir(parents=True)
@@ -546,6 +576,66 @@ def test_rendered_return_skew_diagnostics_section_and_methodology(tmp_path: Path
     assert "not an absolute cross-date threshold" in html
     assert "judgment-based V1 review heuristics, not statistically derived cutoffs" in html
     assert "does not imply an investment recommendation" in html
+
+
+def test_presentation_charts_render_with_research_framing(tmp_path: Path) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-20"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+    write_token_snapshot(processed_dir / "token_market_snapshot_2026-05-20.csv")
+
+    output_path = generate_report(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+        sample_mode=True,
+    )
+    html = output_path.read_text(encoding="utf-8")
+
+    assert "Narrative Momentum Score Bar Chart" in html
+    assert "Mean vs Median 7D Return Skew Chart" in html
+    assert "Research disclaimer:" in html
+    assert "Pinned sample report: this report uses the fixed 2026-05-20 snapshot" in html
+    assert "not a current market update" in html
+    assert "relative research ranking score" in html
+    assert "does not affect the Narrative Momentum Score" in html
+    assert html.index('<div class="bar-label">AI</div>') < html.index(
+        '<div class="bar-label">Layer 1</div>'
+    )
+    assert html.index('<div class="bar-label">Layer 1</div>') < html.index(
+        '<div class="bar-label">DeFi</div>'
+    )
+
+
+def test_presentation_charts_do_not_add_unsafe_language_or_contribution_share(
+    tmp_path: Path,
+) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-25"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+    write_token_snapshot(processed_dir / "token_market_snapshot_2026-05-25.csv")
+
+    output_path = generate_report(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+    )
+    html = output_path.read_text(encoding="utf-8")
+    chart_start = html.index("<h2>Narrative Momentum Score Bar Chart</h2>")
+    chart_end = html.index("<h2>Narrative Ranking</h2>", chart_start)
+    chart_section = html[chart_start:chart_end].lower()
+
+    forbidden_terms = [
+        "trading",
+        "prediction",
+        "backtesting",
+        "buy",
+        "sell",
+        "alpha",
+    ]
+    assert not any(term in chart_section for term in forbidden_terms)
+    assert "return contribution share" not in html.lower()
+    assert "return_contribution" not in html.lower()
 
 
 def test_narrative_ranking_includes_median_7d_return(tmp_path: Path) -> None:
@@ -826,6 +916,7 @@ def test_rendered_report_uses_research_friendly_section_titles_and_headers(
     processed_dir = tmp_path / "processed" / "2026-05-25"
     processed_dir.mkdir(parents=True)
     write_ranking(processed_dir / "narrative_ranking.csv")
+    write_token_snapshot(processed_dir / "token_market_snapshot_2026-05-25.csv")
 
     output_path = generate_report(
         processed_root=tmp_path / "processed",
@@ -834,8 +925,10 @@ def test_rendered_report_uses_research_friendly_section_titles_and_headers(
     )
     html = output_path.read_text(encoding="utf-8")
 
-    assert "Top 3 by Narrative Momentum Score" in html
-    assert "Lowest 3 by Narrative Momentum Score" in html
+    assert "Top 3 by Narrative Momentum Score" not in html
+    assert "Lowest 3 by Narrative Momentum Score" not in html
+    assert "Narrative Momentum Score Bar Chart" in html
+    assert "Mean vs Median 7D Return Skew Chart" in html
     assert "Score Component Breakdown" in html
     assert "<th>Narrative</th>" in html
     assert "<th>Mean 7D Return</th>" in html
