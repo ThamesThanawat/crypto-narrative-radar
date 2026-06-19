@@ -79,16 +79,44 @@ Current report path:
 reports/html/latest.html
 ```
 
-Sample HTML research report:
+#### Sample Research Report
 
-```text
-docs/showcase/sample_2026-05-20.html
-```
+Live sample report:
+[docs/showcase/sample_2026-05-20.html](https://ThamesThanawat.github.io/crypto-narrative-radar/showcase/sample_2026-05-20.html)
 
-Generate it with:
+The sample report uses the fixed 2026-05-20 snapshot as an intentionally pinned,
+reproducible methodology example. It demonstrates narrative scoring, data
+quality notes, component breakdown, and return skew diagnostics without claiming
+to be a current market update.
+
+Sample vs. latest report:
+
+| Report | Path | Purpose | Git tracking |
+| --- | --- | --- | --- |
+| Sample report | `docs/showcase/sample_2026-05-20.html` | Reproducible methodology example for portfolio review | Committed under `docs/showcase` for GitHub Pages |
+| Latest report | `reports/html/latest.html` | Normal operational output from the latest report generation run | Git-ignored generated output |
+
+To publish the sample with GitHub Pages:
+
+1. Open repository Settings -> Pages.
+2. Set Source to `Deploy from branch`.
+3. Set Branch to `main` and Folder to `/docs`.
+4. Use this URL: `https://ThamesThanawat.github.io/crypto-narrative-radar/showcase/sample_2026-05-20.html`
+
+This report is market intelligence only. It is not investment advice, contains
+no buy/sell recommendations, does not provide prediction, does not include
+backtesting, and does not provide portfolio allocation guidance.
+
+Generate the latest operational report with:
 
 ```bash
 python scripts/generate_html_report.py
+```
+
+Regenerate and publish the pinned sample artifact with:
+
+```bash
+python scripts/generate_html_report.py --sample --publish-showcase
 ```
 
 The report is designed for research communication. It summarizes narrative rankings, current market context, token-level contributors, concentration review, historical context, methodology notes, and limitations in a format that can be reviewed without running the dashboard.
