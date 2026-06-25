@@ -793,6 +793,32 @@ Validation:
 Scope note:
 No Narrative Momentum Score, scoring formula, taxonomy, CoinGecko API logic, trading logic, prediction logic, or backtesting logic changed. No contribution-share metric was added.
 
+### Milestone 6.5A Summary
+
+Demo Readiness Micro-fix is complete.
+
+Completed demo readiness polish before external sharing.
+
+Changes:
+
+- Integrated narrative watchlist indicator refresh into `scripts/run_daily_pipeline.py`.
+- Daily pipeline now refreshes `data/processed/historical/narrative_watchlist_indicators_90d.csv` when `data/processed/historical/narrative_market_history_90d.csv` exists.
+- If historical narrative history is missing, the pipeline skips watchlist generation gracefully and continues.
+- Dashboard KPI metric values now wrap instead of truncating long narrative names such as `Exchange Tokens`.
+- README now points reviewers to the live sample report as the zero-friction preview path and clarifies processed-data/watchlist expectations.
+
+Verification:
+
+- compileall passed
+- pytest passed: 117 passed
+- git diff --check passed
+- run_daily_pipeline.py ran successfully
+- fresh processed outputs generated for 2026-06-25
+- watchlist indicators refreshed successfully
+
+Scope note:
+No Narrative Momentum Score, scoring formula, taxonomy, CoinGecko API logic, new APIs, new metrics, prediction, backtesting, trading-signal, buy/sell, alpha, or portfolio-allocation logic was added.
+
 ### Strategic Context Pack Summary
 
 The public-safe strategic context pack is complete:
