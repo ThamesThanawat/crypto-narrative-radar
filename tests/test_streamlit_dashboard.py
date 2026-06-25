@@ -4,6 +4,7 @@ import pandas as pd
 
 from dashboard import streamlit_app
 from dashboard.streamlit_app import (
+    DASHBOARD_STYLE_CSS,
     HISTORICAL_NARRATIVE_PATH,
     WATCHLIST_INDICATORS_PATH,
     choose_return_metric,
@@ -33,6 +34,12 @@ def test_load_csv_if_exists_returns_none_for_missing_file(tmp_path: Path) -> Non
 
 def test_dashboard_file_exists() -> None:
     assert Path("dashboard/streamlit_app.py").exists()
+
+
+def test_dashboard_metric_styles_allow_long_kpi_values_to_wrap() -> None:
+    assert 'data-testid="stMetricValue"' in DASHBOARD_STYLE_CSS
+    assert "white-space: normal" in DASHBOARD_STYLE_CSS
+    assert "text-overflow: clip" in DASHBOARD_STYLE_CSS
 
 
 def test_requirements_include_streamlit_and_plotly() -> None:

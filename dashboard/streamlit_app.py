@@ -29,6 +29,20 @@ WATCHLIST_REQUIRED_COLUMNS = [
     "watch_momentum_pickup",
     "watchlist_label",
 ]
+DASHBOARD_STYLE_CSS = """
+<style>
+div[data-testid="stMetricValue"] {
+    font-size: 1.45rem;
+    line-height: 1.2;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+}
+div[data-testid="stMetricLabel"] {
+    white-space: normal;
+}
+</style>
+"""
 
 DISPLAY_COLUMN_LABELS = {
     "rank": "Rank",
@@ -353,6 +367,11 @@ def display_kpis(ranking_df: pd.DataFrame) -> None:
         )
     else:
         columns[3].metric("Concentration Watch", "N/A")
+
+
+def inject_dashboard_styles() -> None:
+    """Apply small Streamlit style tweaks that keep KPI labels readable."""
+    st.markdown(DASHBOARD_STYLE_CSS, unsafe_allow_html=True)
 
 
 def select_table_columns(df: pd.DataFrame, preferred_columns: list[str]) -> pd.DataFrame:
@@ -696,6 +715,7 @@ def render_narrative_watchlist() -> None:
 def main() -> None:
     """Render the Streamlit dashboard."""
     st.set_page_config(page_title="Crypto Narrative Radar", layout="wide")
+    inject_dashboard_styles()
 
     st.title("Crypto Narrative Radar")
     st.caption(

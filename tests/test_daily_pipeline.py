@@ -3,7 +3,12 @@ from pathlib import Path
 
 import pytest
 
-from scripts.run_daily_pipeline import DAILY_PIPELINE_STEPS, run_step
+from scripts.run_daily_pipeline import (
+    DAILY_PIPELINE_STEPS,
+    WATCHLIST_STEP_LABEL,
+    refresh_watchlist_indicators_if_available,
+    run_step,
+)
 
 
 WORKFLOW_PATH = Path(".github/workflows/daily_pipeline.yml")
@@ -31,6 +36,51 @@ def test_run_step_raises_on_failed_subprocess(monkeypatch) -> None:
 
     with pytest.raises(subprocess.CalledProcessError):
         run_step("Failing step", ["python", "missing.py"])
+
+
+def test_daily_pipeline_skips_watchlist_generation_when_history_is_missing(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    def fail_runner(*args, **kwargs):
+        pytest.fail("watchlist step should not run when historical history is missing")
+
+    refreshed = refresh_watchlist_indicators_if_available(
+        history_path=tmp_path / "missing_history.csv",
+        command=["python", "scripts/calculate_watchlist_indicators.py"],
+        runner=fail_runner,
+    )
+
+    output = capsys.readouterr().out
+    assert not refreshed
+    assert (
+        "Historical narrative history not found; skipping watchlist indicator generation."
+        in output
+    )
+
+
+def test_daily_pipeline_runs_watchlist_generation_when_history_exists(
+    tmp_path: Path,
+    capsys,
+) -> None:
+    history_path = tmp_path / "narrative_market_history_90d.csv"
+    history_path.write_text("date,primary_narrative\n2026-05-20,AI\n", encoding="utf-8")
+    command = ["python", "scripts/calculate_watchlist_indicators.py"]
+    calls: list[tuple[str, list[str]]] = []
+
+    def fake_runner(label: str, step_command: list[str]) -> None:
+        calls.append((label, step_command))
+
+    refreshed = refresh_watchlist_indicators_if_available(
+        history_path=history_path,
+        command=command,
+        runner=fake_runner,
+    )
+
+    output = capsys.readouterr().out
+    assert refreshed
+    assert calls == [(WATCHLIST_STEP_LABEL, command)]
+    assert "Watchlist indicator generation completed successfully." in output
 
 
 def test_daily_pipeline_workflow_exists() -> None:

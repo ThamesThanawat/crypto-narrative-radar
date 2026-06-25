@@ -136,6 +136,10 @@ These outputs support repeatable research review, dashboard visualizations, stat
 
 ## Dashboard and Report Preview
 
+To preview the project without cloning or running the pipeline, open the live
+sample report first:
+[docs/showcase/sample_2026-05-20.html](https://ThamesThanawat.github.io/crypto-narrative-radar/showcase/sample_2026-05-20.html)
+
 The dashboard is built for market research workflows rather than trade execution. It emphasizes narrative rankings, relative momentum, volume confirmation, breadth of participation, concentration context, token contributors, and historical narrative trends.
 
 ![Dashboard overview](docs/assets/dashboard_overview.png)
@@ -362,7 +366,11 @@ python scripts/run_daily_pipeline.py
 
 This validates the taxonomy, fetches CoinGecko market data, validates the current market snapshot, calculates narrative metrics, runs DuckDB SQL analytics, and validates SQL outputs.
 
+When historical narrative history already exists, this also refreshes narrative watchlist indicators for the dashboard. Historical backfill remains a separate step.
+
 ### 5. Launch the Streamlit dashboard
+
+The dashboard requires processed CSV outputs. Run the current snapshot pipeline first if `data/processed/` is empty.
 
 ```bash
 streamlit run dashboard/streamlit_app.py
