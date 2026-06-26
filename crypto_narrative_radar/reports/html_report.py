@@ -144,23 +144,31 @@ COMPONENT_SCORE_COLUMNS = [
 SCORE_WEIGHT_ROWS = [
     {
         "component": "Price momentum",
+        "component_th": "Price momentum",
         "weight": "40%",
         "description": "24h, 7D, and 30D median return context.",
+        "description_th": "ใช้บริบท median return ในกรอบ 24h, 7D และ 30D",
     },
     {
         "component": "Relative strength",
+        "component_th": "Relative strength",
         "weight": "25%",
         "description": "7D median return compared with BTC and ETH.",
+        "description_th": "เปรียบเทียบ median 7D return กับ BTC และ ETH",
     },
     {
         "component": "Volume confirmation",
+        "component_th": "Volume confirmation",
         "weight": "20%",
         "description": "Volume-to-market-cap activity context.",
+        "description_th": "ใช้บริบท activity จาก volume-to-market-cap",
     },
     {
         "component": "Breadth of participation",
+        "component_th": "Breadth of participation",
         "weight": "15%",
         "description": "Share of tokens participating across return windows.",
+        "description_th": "ดูสัดส่วน token ที่มีส่วนร่วมในหลายกรอบ return",
     },
 ]
 RETURN_SKEW_REVIEW_THRESHOLD_PP = 3.0
@@ -183,7 +191,9 @@ RETURN_SKEW_OUTPUT_COLUMNS = [
     "skew_trigger",
     "dispersion_trigger",
     "skew_review_flag",
+    "skew_review_flag_th",
     "diagnostic_note",
+    "diagnostic_note_th",
 ]
 
 COLUMN_LABELS = {
@@ -238,6 +248,29 @@ COLUMN_LABELS = {
     "bottom_return_token": "Bottom 7D Token",
     "skew_review_flag": "Review Flag",
     "diagnostic_note": "Diagnostic Note",
+}
+THAI_REVIEW_FLAGS = {
+    "No Review": "ไม่ต้อง Review",
+    "Skew Review": "Review เพราะ Skew",
+    "Dispersion Review": "Review เพราะ Dispersion",
+    "Skew + Dispersion Review": "Review เพราะ Skew และ Dispersion",
+}
+THAI_CONCENTRATION_COMMENTS = {
+    "High concentration: one token dominates market cap": (
+        "กระจุกตัวสูง: market cap ถูกขับเคลื่อนโดย token หลักตัวเดียว"
+    ),
+    "Moderate concentration: top three tokens dominate market cap": (
+        "กระจุกตัวปานกลาง: market cap ถูกขับเคลื่อนโดย token ใหญ่ 3 อันดับแรก"
+    ),
+    "Lower concentration: market cap is more distributed": (
+        "กระจุกตัวต่ำกว่า: market cap กระจายตัวมากกว่า narrative อื่น"
+    ),
+    "Lower concentration: market cap is more distributed across tokens": (
+        "กระจุกตัวต่ำกว่า: market cap กระจายตัวมากกว่าในกลุ่ม token"
+    ),
+}
+COMMON_CELL_TRANSLATIONS_TH = {
+    "Full V1 scoring weights applied.": "ใช้ weighting ของ V1 scoring ครบถ้วน",
 }
 PERCENTAGE_POINT_GAP_COLUMNS = {
     "mean_median_gap_pp",
@@ -719,14 +752,65 @@ def _metric_label(column: str) -> str:
     return labels.get(column, column.replace("_", " ").title())
 
 
-def _card(title: str, row: dict[str, Any] | None, column: str, note: str) -> dict[str, str]:
+def _metric_label_th(column: str) -> str:
+    labels = {
+        "narrative_momentum_score": "Narrative Momentum Score",
+        "momentum_score": "Narrative Momentum Score",
+        "avg_return_7d": "Mean 7D Return",
+        "avg_return_30d": "Mean 30D Return",
+        "positive_breadth_pct": "Positive Breadth",
+        "breadth_7d": "7D Breadth",
+        "top_3_market_cap_share": "Top 3 Market Cap Share",
+    }
+    return labels.get(column, _metric_label(column))
+
+
+def _review_flag_th(flag: Any) -> str:
+    return THAI_REVIEW_FLAGS.get(str(flag or "No Review"), str(flag or "No Review"))
+
+
+def _concentration_comment_th(comment: Any) -> str | None:
+    if comment is None or pd.isna(comment):
+        return None
+    text = str(comment).strip()
+    if not text:
+        return None
+    return THAI_CONCENTRATION_COMMENTS.get(text)
+
+
+def _common_cell_translation_th(value: Any) -> str | None:
+    if value is None or pd.isna(value):
+        return None
+    text = str(value).strip()
+    if not text:
+        return None
+    return COMMON_CELL_TRANSLATIONS_TH.get(text)
+
+
+def _card(
+    title: str,
+    title_th: str,
+    row: dict[str, Any] | None,
+    column: str,
+    note: str,
+    note_th: str,
+) -> dict[str, str]:
     if not row:
-        return {"title": title, "narrative": "Not available", "value": "n/a", "note": note}
+        return {
+            "title": title,
+            "title_th": title_th,
+            "narrative": "Not available",
+            "value": "n/a",
+            "note": note,
+            "note_th": note_th,
+        }
     return {
         "title": title,
+        "title_th": title_th,
         "narrative": str(row.get("primary_narrative", "Not available")),
         "value": format_value(row.get(column), column),
         "note": note,
+        "note_th": note_th,
     }
 
 
@@ -751,10 +835,10 @@ def _row_for_narrative(
     return matches.iloc[0].to_dict()
 
 
-def _return_leadership_bullet(
+def _return_leadership_bullets(
     strongest_7d: dict[str, Any] | None,
     return_skew_df: pd.DataFrame | None = None,
-) -> str | None:
+) -> tuple[str, str] | None:
     if not strongest_7d:
         return None
     narrative = str(strongest_7d["primary_narrative"])
@@ -779,20 +863,41 @@ def _return_leadership_bullet(
             if (_numeric_value(mean_return) or 0) < 0
             else "strongest mean 7D return context"
         )
+        descriptor_th = (
+            "mean 7D return ติดลบน้อยที่สุด"
+            if (_numeric_value(mean_return) or 0) < 0
+            else "mean 7D return แข็งแรงที่สุด"
+        )
         flag_text = "skew-flagged" if "Skew" in review_flag else "review-flagged"
         return (
             f"{narrative} had the {descriptor}, but this was {flag_text}: "
             f"mean 7D return was {_format_signed_percent_point(mean_return)} "
             f"while median 7D return was {_format_signed_percent_point(median_return)}, "
             f"with {top_symbol} as the strongest 7D token at "
-            f"{_format_signed_percent_point(top_return)}."
+            f"{_format_signed_percent_point(top_return)}.",
+            f"{narrative} มี {descriptor_th} แต่ถูกจัดเป็น {_review_flag_th(review_flag)}: "
+            f"mean 7D return อยู่ที่ {_format_signed_percent_point(mean_return)} "
+            f"ขณะที่ median 7D return อยู่ที่ {_format_signed_percent_point(median_return)} "
+            f"โดย {top_symbol} เป็น token ที่แข็งแรงที่สุดใน 7D ที่ "
+            f"{_format_signed_percent_point(top_return)}.",
         )
 
     return (
         f"{narrative} showed the strongest mean 7D return context at "
         f"{_format_signed_percent_point(mean_return)}, with median 7D return at "
-        f"{_format_signed_percent_point(median_return)}."
+        f"{_format_signed_percent_point(median_return)}.",
+        f"{narrative} มี mean 7D return แข็งแรงที่สุดที่ "
+        f"{_format_signed_percent_point(mean_return)} โดย median 7D return อยู่ที่ "
+        f"{_format_signed_percent_point(median_return)}.",
     )
+
+
+def _return_leadership_bullet(
+    strongest_7d: dict[str, Any] | None,
+    return_skew_df: pd.DataFrame | None = None,
+) -> str | None:
+    bullets = _return_leadership_bullets(strongest_7d, return_skew_df)
+    return bullets[0] if bullets else None
 
 
 def prepare_executive_summary(
@@ -816,53 +921,75 @@ def prepare_executive_summary(
     cards = [
         _card(
             "Top Narrative by Momentum",
+            "Narrative อันดับต้นตาม Momentum",
             top_score,
             score_column,
             "Current narrative leadership based on the research ranking.",
+            "narrative ที่นำใน snapshot นี้จาก research ranking",
         ),
         _card(
             "Strongest 7D Narrative",
+            "Narrative 7D แข็งแรงที่สุด",
             strongest_7d,
             "avg_return_7d",
             "Recent return context, not a trading recommendation.",
+            "บริบท return ล่าสุด ไม่ใช่คำแนะนำการซื้อขาย",
         ),
         _card(
             "Strongest 30D Narrative",
+            "Narrative 30D แข็งแรงที่สุด",
             strongest_30d,
             "avg_return_30d",
             "Medium-window return context for narrative-level analysis.",
+            "บริบท return ระยะกลางสำหรับการวิเคราะห์ระดับ narrative",
         ),
         _card(
             "Broadest Participation",
+            "การมีส่วนร่วมกว้างที่สุด",
             broadest,
             breadth_column,
             "Breadth helps show whether participation is broad across a narrative.",
+            "Breadth ช่วยดูว่าการมีส่วนร่วมกระจายกว้างใน narrative หรือไม่",
         ),
         _card(
             "Weakest Relative Momentum",
+            "Relative Momentum อ่อนที่สุด",
             weakest_score,
             score_column,
             "Lagging narrative momentum in the current snapshot.",
+            "narrative momentum อ่อนกว่าใน snapshot ปัจจุบัน",
         ),
         _card(
             "Highest Concentration",
+            "Concentration สูงที่สุด",
             highest_concentration,
             "top_3_market_cap_share",
             "Concentration context shows whether activity is driven by a few large tokens.",
+            "Concentration context ช่วยดูว่า activity ถูกขับเคลื่อนโดย token ใหญ่ไม่กี่ตัวหรือไม่",
         ),
     ]
     bullets = []
+    bullets_th = []
     if top_score:
         bullets.append(
             f"{top_score['primary_narrative']} leads the current Narrative Momentum Score at "
             f"{format_value(top_score.get(score_column), score_column)}."
         )
-    return_bullet = _return_leadership_bullet(strongest_7d, return_skew_df)
-    if return_bullet:
-        bullets.append(return_bullet)
+        bullets_th.append(
+            f"{top_score['primary_narrative']} นำ Narrative Momentum Score ใน snapshot นี้ที่ "
+            f"{format_value(top_score.get(score_column), score_column)}."
+        )
+    return_bullets = _return_leadership_bullets(strongest_7d, return_skew_df)
+    if return_bullets:
+        bullets.append(return_bullets[0])
+        bullets_th.append(return_bullets[1])
     if strongest_30d:
         bullets.append(
             f"{strongest_30d['primary_narrative']} shows the strongest 30D return context at "
+            f"{format_value(strongest_30d.get('avg_return_30d'), 'avg_return_30d')}."
+        )
+        bullets_th.append(
+            f"{strongest_30d['primary_narrative']} มี 30D return context แข็งแรงที่สุดที่ "
             f"{format_value(strongest_30d.get('avg_return_30d'), 'avg_return_30d')}."
         )
     if broadest:
@@ -870,19 +997,31 @@ def prepare_executive_summary(
             f"{broadest['primary_narrative']} has the broadest participation using "
             f"{_metric_label(breadth_column)} at {format_value(broadest.get(breadth_column), breadth_column)}."
         )
+        bullets_th.append(
+            f"{broadest['primary_narrative']} มี breadth of participation กว้างที่สุดจาก "
+            f"{_metric_label_th(breadth_column)} ที่ {format_value(broadest.get(breadth_column), breadth_column)}."
+        )
     if weakest_score:
         bullets.append(
             f"{weakest_score['primary_narrative']} has softer relative momentum in this snapshot."
+        )
+        bullets_th.append(
+            f"{weakest_score['primary_narrative']} มี relative momentum อ่อนกว่ากลุ่มอื่นใน snapshot นี้."
         )
     if highest_concentration:
         bullets.append(
             f"{highest_concentration['primary_narrative']} has the highest top-three market cap concentration at "
             f"{format_value(highest_concentration.get('top_3_market_cap_share'), 'top_3_market_cap_share')}."
         )
+        bullets_th.append(
+            f"{highest_concentration['primary_narrative']} มี top-three market cap concentration สูงที่สุดที่ "
+            f"{format_value(highest_concentration.get('top_3_market_cap_share'), 'top_3_market_cap_share')}."
+        )
     return {
         "score_column": score_column,
         "cards": cards,
         "bullets": bullets,
+        "bullets_th": bullets_th,
         "top_score": top_score,
         "weakest_score": weakest_score,
     }
@@ -897,17 +1036,39 @@ def _records(
     df: pd.DataFrame,
     max_rows: int | None = None,
     column_formats: dict[str, str] | None = None,
+    display_columns: list[str] | None = None,
+    translation_columns: dict[str, str] | None = None,
 ) -> dict[str, Any] | None:
     if df.empty:
         return None
     if max_rows is not None:
         df = df.head(max_rows)
-    columns = list(df.columns)
+    columns = display_columns or list(df.columns)
+    rows = df.to_dict(orient="records")
+    translations: list[dict[str, str]] = []
+    for row in rows:
+        row_translations: dict[str, str] = {}
+        for column in columns:
+            translated_value: str | None = None
+            thai_column = (translation_columns or {}).get(column)
+            if thai_column and thai_column in row and not pd.isna(row[thai_column]):
+                translated_value = str(row[thai_column])
+            elif column == "skew_review_flag":
+                translated_value = _review_flag_th(row.get(column))
+            elif column == "concentration_comment":
+                translated_value = _concentration_comment_th(row.get(column))
+            elif column == "scoring_note":
+                translated_value = _common_cell_translation_th(row.get(column))
+
+            if translated_value:
+                row_translations[column] = translated_value
+        translations.append(row_translations)
     return {
         "columns": columns,
         "labels": {column: COLUMN_LABELS.get(column, column.replace("_", " ").title()) for column in columns},
         "formats": column_formats or {},
-        "rows": df.to_dict(orient="records"),
+        "rows": rows,
+        "translations": translations,
     }
 
 
@@ -916,9 +1077,21 @@ def _table_from_df(
     columns: list[str],
     max_rows: int | None = None,
     column_formats: dict[str, str] | None = None,
+    translation_columns: dict[str, str] | None = None,
 ) -> dict[str, Any] | None:
-    selected = _select_columns(df, columns)
-    return _records(selected, max_rows=max_rows, column_formats=column_formats)
+    hidden_translation_columns = [
+        column
+        for column in (translation_columns or {}).values()
+        if column not in columns
+    ]
+    selected = _select_columns(df, [*columns, *hidden_translation_columns])
+    return _records(
+        selected,
+        max_rows=max_rows,
+        column_formats=column_formats,
+        display_columns=[column for column in columns if column in selected.columns],
+        translation_columns=translation_columns,
+    )
 
 
 def _component_breakdown_table(
@@ -949,6 +1122,9 @@ def _sanitize_concentration_review(df: pd.DataFrame | None) -> pd.DataFrame | No
             "Lower concentration:",
             regex=False,
         )
+    )
+    working["concentration_comment_th"] = working["concentration_comment"].apply(
+        _concentration_comment_th
     )
     return working
 
@@ -985,6 +1161,18 @@ def _return_extremes_sentence(
     return (
         f"Top 7D token was {top_symbol} at {format_percent_point(top_return)}; "
         f"bottom 7D token was {bottom_symbol} at {format_percent_point(bottom_return)}."
+    )
+
+
+def _return_extremes_sentence_th(
+    top_symbol: str,
+    top_return: float | None,
+    bottom_symbol: str,
+    bottom_return: float | None,
+) -> str:
+    return (
+        f"token ที่แข็งแรงที่สุดใน 7D คือ {top_symbol} ที่ {format_percent_point(top_return)} "
+        f"และ token ที่อ่อนที่สุดคือ {bottom_symbol} ที่ {format_percent_point(bottom_return)}."
     )
 
 
@@ -1038,6 +1226,46 @@ def _diagnostic_note(
     )
 
 
+def _diagnostic_note_th(
+    gap: float | None,
+    return_iqr: float | None,
+    median_return_iqr: float | None,
+    top_symbol: str,
+    top_return: float | None,
+    bottom_symbol: str,
+    bottom_return: float | None,
+    skew_trigger: bool,
+    dispersion_trigger: bool,
+) -> str:
+    if gap is None or return_iqr is None:
+        return "ไม่มีข้อมูล 7D return สำหรับ narrative นี้."
+    extremes = _return_extremes_sentence_th(
+        top_symbol,
+        top_return,
+        bottom_symbol,
+        bottom_return,
+    )
+    gap_text = format_percentage_point_gap(gap)
+    iqr_text = format_percentage_point_gap(return_iqr)
+    median_iqr_text = format_percentage_point_gap(median_return_iqr)
+    if skew_trigger and dispersion_trigger:
+        return (
+            f"ช่องว่างระหว่าง mean และ median อยู่ที่ {gap_text} และ IQR ของ 7D return อยู่ที่ {iqr_text} "
+            f"เทียบกับ snapshot median IQR ที่ {median_iqr_text}. {extremes}"
+        )
+    if skew_trigger:
+        return f"ช่องว่างระหว่าง mean และ median อยู่ที่ {gap_text}. {extremes}"
+    if dispersion_trigger:
+        return (
+            f"IQR ของ 7D return อยู่ที่ {iqr_text} เทียบกับ snapshot median IQR ที่ "
+            f"{median_iqr_text}. {extremes}"
+        )
+    return (
+        f"ช่องว่างระหว่าง mean และ median อยู่ที่ {gap_text} และ IQR ของ 7D return อยู่ที่ {iqr_text}; "
+        "ทั้งสองค่าไม่เกิน threshold สำหรับ review ใน V1."
+    )
+
+
 def calculate_return_skew_diagnostics(
     token_snapshot_df: pd.DataFrame | None,
 ) -> pd.DataFrame:
@@ -1086,7 +1314,9 @@ def calculate_return_skew_diagnostics(
             "skew_trigger": False,
             "dispersion_trigger": False,
             "skew_review_flag": "No Review",
+            "skew_review_flag_th": _review_flag_th("No Review"),
             "diagnostic_note": "7D return data was not available for this narrative.",
+            "diagnostic_note_th": "ไม่มีข้อมูล 7D return สำหรับ narrative นี้.",
         }
         if valid_returns.empty:
             records.append(record)
@@ -1165,7 +1395,19 @@ def calculate_return_skew_diagnostics(
             bool(skew_trigger),
             bool(dispersion_trigger),
         )
+        record["skew_review_flag_th"] = _review_flag_th(record["skew_review_flag"])
         record["diagnostic_note"] = _diagnostic_note(
+            gap,
+            return_iqr,
+            median_return_iqr,
+            record["top_return_symbol"],
+            _numeric_value(record["top_return_7d"]),
+            record["bottom_return_symbol"],
+            _numeric_value(record["bottom_return_7d"]),
+            bool(skew_trigger),
+            bool(dispersion_trigger),
+        )
+        record["diagnostic_note_th"] = _diagnostic_note_th(
             gap,
             return_iqr,
             median_return_iqr,
@@ -1187,25 +1429,51 @@ def _methodology_context() -> dict[str, Any]:
             "Narrative Momentum Score is a relative research ranking score, "
             "not statistical confidence."
         ),
+        "score_note_th": (
+            "Narrative Momentum Score เป็น score สำหรับจัดอันดับเชิงเปรียบเทียบเพื่อสนับสนุนงานวิจัย "
+            "ไม่ใช่ความเชื่อมั่นทางสถิติ."
+        ),
+        "small_gap_caution": "Small score gaps should be interpreted cautiously.",
+        "small_gap_caution_th": "ควรตีความช่องว่างคะแนนที่เล็กด้วยความระมัดระวัง.",
         "normalization_note": (
             "Component scores are percentile-rank normalized within the current "
             "narrative universe using the existing pandas rank percentile method."
+        ),
+        "normalization_note_th": (
+            "Component scores ถูก normalize แบบ percentile-rank ภายใน narrative universe ปัจจุบัน "
+            "โดยใช้วิธี pandas rank percentile เดิม."
         ),
         "relative_strength_note": (
             "Relative Strength 7D averages median narrative 7D return minus BTC "
             "7D return and median narrative 7D return minus ETH 7D return."
         ),
+        "relative_strength_note_th": (
+            "Relative Strength 7D ใช้ค่าเฉลี่ยของ median narrative 7D return ลบ BTC 7D return "
+            "และ median narrative 7D return ลบ ETH 7D return."
+        ),
         "concentration_note": (
             "Concentration labels and comments are judgment-based V1 heuristics, "
             "not statistically derived cutoffs."
+        ),
+        "concentration_note_th": (
+            "Concentration labels และ comments เป็น V1 heuristics จาก judgment "
+            "ไม่ใช่ cutoff ที่ derive จากสถิติ."
         ),
         "token_universe_note": (
             "The token universe is 80 manually curated tokens: 10 representative "
             "tokens per narrative, not full sector coverage."
         ),
+        "token_universe_note_th": (
+            "token universe มี 80 token ที่ curate ด้วยมือ: 10 token ตัวแทนต่อ narrative "
+            "ไม่ใช่การครอบคลุมทั้ง sector."
+        ),
         "taxonomy_note": (
             "Taxonomy assignments involve judgment and can miss sector breadth "
             "or token overlap."
+        ),
+        "taxonomy_note_th": (
+            "การจัด taxonomy มีส่วนของ judgment และอาจไม่ครอบคลุม breadth ของ sector "
+            "หรือ overlap ระหว่าง token ทั้งหมด."
         ),
         "return_skew_note": (
             "Return skew diagnostics are descriptive only. Skew and dispersion "
@@ -1216,6 +1484,14 @@ def _methodology_context() -> dict[str, Any]:
             "report snapshot, not an absolute cross-date threshold. These "
             "diagnostics do not affect the Narrative Momentum Score. The "
             "review flag does not imply an investment recommendation."
+        ),
+        "return_skew_note_th": (
+            "Return skew diagnostics เป็นข้อมูลเชิงพรรณนาเท่านั้น. threshold สำหรับ skew และ dispersion review "
+            "เป็น V1 review heuristics จาก judgment ไม่ใช่ cutoff ที่ derive จากสถิติ. "
+            "IQR threshold เป็นแบบ snapshot-relative: IQR ของ 7D return ในแต่ละ narrative "
+            "ถูกเทียบกับ 2 เท่าของ median narrative 7D return IQR ใน report snapshot เดียวกัน "
+            "ไม่ใช่ threshold แบบ absolute ที่ใช้ข้ามวันที่. diagnostics เหล่านี้ไม่ส่งผลต่อ "
+            "Narrative Momentum Score และ review flag ไม่ได้สื่อถึงคำแนะนำการลงทุน."
         ),
     }
 
@@ -1340,6 +1616,7 @@ def _prepare_return_skew_chart(return_skew_df: pd.DataFrame) -> dict[str, Any]:
                     axis_max,
                 ),
                 "review_flag": flag,
+                "review_flag_th": _review_flag_th(flag),
                 "review_flag_class": _review_flag_class(flag),
             }
         )
@@ -1358,6 +1635,7 @@ def _prepare_historical_context(history_df: pd.DataFrame | None) -> dict[str, An
         return {
             "available": False,
             "note": "Historical narrative data was not available for this report.",
+            "note_th": "ไม่มีข้อมูล historical narrative สำหรับรายงานนี้.",
         }
     working = history_df.copy()
     working["date"] = pd.to_datetime(working["date"], errors="coerce")
@@ -1366,6 +1644,7 @@ def _prepare_historical_context(history_df: pd.DataFrame | None) -> dict[str, An
         return {
             "available": False,
             "note": "Historical narrative data was not available for this report.",
+            "note_th": "ไม่มีข้อมูล historical narrative สำหรับรายงานนี้.",
         }
     latest_date = working["date"].max()
     latest_rows = working.loc[working["date"] == latest_date].copy()
@@ -1399,6 +1678,16 @@ def _prepare_historical_context(history_df: pd.DataFrame | None) -> dict[str, An
         "narrative_count": int(working["primary_narrative"].nunique())
         if "primary_narrative" in working.columns
         else 0,
+        "summary_note": (
+            f"Historical narrative data covers {int(working['primary_narrative'].nunique()) if 'primary_narrative' in working.columns else 0} "
+            f"narratives from {working['date'].min().date().isoformat()} to {latest_date.date().isoformat()}. "
+            "This view is descriptive trend context only."
+        ),
+        "summary_note_th": (
+            f"ข้อมูล historical narrative ครอบคลุม {int(working['primary_narrative'].nunique()) if 'primary_narrative' in working.columns else 0} "
+            f"narratives ตั้งแต่ {working['date'].min().date().isoformat()} ถึง {latest_date.date().isoformat()}. "
+            "มุมมองนี้เป็น descriptive trend context เท่านั้น."
+        ),
         "latest_table": table,
     }
 
@@ -1574,9 +1863,18 @@ def prepare_report_context(
                 "mean_median_gap_pp": "percentage_point_gap",
                 "return_iqr_7d": "percentage_point_gap",
             },
+            translation_columns={
+                "skew_review_flag": "skew_review_flag_th",
+                "diagnostic_note": "diagnostic_note_th",
+            },
         ),
         "return_skew_note": (
             "Return skew diagnostics require token-level 7D return data and were not available for this report."
+            if return_skew_df.empty
+            else None
+        ),
+        "return_skew_note_th": (
+            "Return skew diagnostics ต้องใช้ข้อมูล token-level 7D return และไม่มีข้อมูลสำหรับรายงานนี้."
             if return_skew_df.empty
             else None
         ),
@@ -1590,6 +1888,11 @@ def prepare_report_context(
             if contributor_source is None
             else None
         ),
+        "token_contributor_note_th": (
+            "ไม่มีข้อมูล token-level contributors สำหรับรายงานนี้."
+            if contributor_source is None
+            else None
+        ),
         "concentration_review": _table_from_df(
             display_concentration_df if display_concentration_df is not None else pd.DataFrame(),
             [
@@ -1598,9 +1901,17 @@ def prepare_report_context(
                 "top_3_market_cap_share",
                 "concentration_comment",
             ],
+            translation_columns={
+                "concentration_comment": "concentration_comment_th",
+            },
         ),
         "concentration_note": (
             "Concentration review output was not available for this report."
+            if concentration_df is None
+            else None
+        ),
+        "concentration_note_th": (
+            "ไม่มีข้อมูล concentration review สำหรับรายงานนี้."
             if concentration_df is None
             else None
         ),
@@ -1626,6 +1937,7 @@ def render_report(
     )
     environment.filters["format_value"] = format_value
     html = environment.get_template(TEMPLATE_NAME).render(**context)
+    html = "\n".join(line.rstrip() for line in html.splitlines()) + "\n"
     output_path.write_text(html, encoding="utf-8")
     if context.get("update_latest", True):
         shutil.copyfile(output_path, latest_path)

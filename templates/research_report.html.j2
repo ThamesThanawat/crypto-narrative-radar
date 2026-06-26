@@ -100,6 +100,32 @@
       padding: 14px 16px;
     }
 
+    .language-toggle {
+      align-items: center;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin: -8px 0 16px;
+    }
+
+    .language-button {
+      background: var(--panel);
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      color: var(--muted);
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 5px 12px;
+    }
+
+    .language-button.active {
+      background: var(--terminal);
+      border-color: var(--terminal);
+      color: #f8fafc;
+    }
+
     .cards {
       display: grid;
       gap: 12px;
@@ -380,18 +406,50 @@
     }
   </style>
 </head>
-<body>
+<body data-language="en">
   <main class="page">
+    {% macro render_table(table_data) -%}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            {% for column in table_data.columns %}
+            <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
+            {% endfor %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in table_data.rows %}
+          {% set row_index = loop.index0 %}
+          {% set row_translations = table_data.translations[row_index] if table_data.translations else {} %}
+          <tr>
+            {% for column in table_data.columns %}
+            {% set cell_value = row[column]|format_value(column, table_data.formats.get(column)) %}
+            {% set translated_value = row_translations.get(column) %}
+            <td{% if translated_value %} data-en-text="{{ cell_value }}" data-th-text="{{ translated_value }}"{% endif %}>{{ cell_value }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {%- endmacro %}
+
     <header>
-      <h1>Crypto Narrative Radar</h1>
-      <p class="subtitle">Static market intelligence research report using narrative-level crypto market data.</p>
+      <h1 data-i18n="reportTitle">Crypto Narrative Radar</h1>
+      <p class="subtitle" data-i18n="reportSubtitle">Static market intelligence research report using narrative-level crypto market data.</p>
       <div class="meta">
-        <span>Snapshot date: {{ snapshot_date }}</span>
-        <span>Generated: {{ generated_at }}</span>
+        <span><span data-i18n="snapshotDateLabel">Snapshot date:</span> {{ snapshot_date }}</span>
+        <span><span data-i18n="generatedLabel">Generated:</span> {{ generated_at }}</span>
       </div>
     </header>
 
-    <section class="notice">
+    <nav class="language-toggle" aria-label="Report language">
+      <button type="button" class="language-button active" data-language-button="en" aria-pressed="true">English</button>
+      <button type="button" class="language-button" data-language-button="th" aria-pressed="false">ไทย</button>
+    </nav>
+
+    <section class="notice" data-i18n="researchDisclaimer">
       <strong>Research disclaimer:</strong>
       This report is market intelligence only. It is not investment advice, contains no buy/sell recommendations,
       does not provide price prediction, does not include backtesting, and does not provide portfolio allocation guidance.
@@ -399,13 +457,13 @@
 
     {% if sample_report_note %}
     <section class="sample-notice">
-      {{ sample_report_note }}
+      <span data-i18n="sampleNotice">{{ sample_report_note }}</span>
     </section>
     {% endif %}
 
     {% if qa_warnings %}
     <section>
-      <h2>Data Quality Notes</h2>
+      <h2 data-i18n="dataQualityHeading">Data Quality Notes</h2>
       <ul>
         {% for warning in qa_warnings %}
         <li>{{ warning }}</li>
@@ -415,27 +473,28 @@
     {% endif %}
 
     <section>
-      <h2>Executive Summary</h2>
+      <h2 data-i18n="executiveSummaryHeading">Executive Summary</h2>
       {% if summary.bullets %}
       <ul>
         {% for bullet in summary.bullets %}
-        <li>{{ bullet }}</li>
+        {% set bullet_th = summary.bullets_th[loop.index0] if summary.bullets_th else none %}
+        <li{% if bullet_th %} data-en-text="{{ bullet }}" data-th-text="{{ bullet_th }}"{% endif %}>{{ bullet }}</li>
         {% endfor %}
       </ul>
       {% else %}
-      <p class="section-note">Executive summary metrics were not available for this snapshot.</p>
+      <p class="section-note" data-i18n="executiveUnavailable">Executive summary metrics were not available for this snapshot.</p>
       {% endif %}
     </section>
 
     <section>
-      <h2>Market Snapshot</h2>
+      <h2 data-i18n="marketSnapshotHeading">Market Snapshot</h2>
       <div class="cards">
         {% for card in summary.cards %}
         <article class="card">
-          <div class="label">{{ card.title }}</div>
+          <div class="label" data-en-text="{{ card.title }}" data-th-text="{{ card.title_th }}">{{ card.title }}</div>
           <h3>{{ card.narrative }}</h3>
           <div class="value">{{ card.value }}</div>
-          <div class="note">{{ card.note }}</div>
+          <div class="note" data-en-text="{{ card.note }}" data-th-text="{{ card.note_th }}">{{ card.note }}</div>
         </article>
         {% endfor %}
       </div>
@@ -443,8 +502,8 @@
 
     {% if score_chart.available %}
     <section>
-      <h2>Narrative Momentum Score Bar Chart</h2>
-      <p class="section-note">Narratives are sorted by the current Narrative Momentum Score. The score is a descriptive research ranking tool and does not affect any return skew diagnostics.</p>
+      <h2 data-i18n="scoreChartHeading">Narrative Momentum Score Bar Chart</h2>
+      <p class="section-note" data-i18n="scoreChartCaption">Narratives are sorted by the current Narrative Momentum Score. The score is a descriptive research ranking tool and does not affect any return skew diagnostics.</p>
       <div class="chart-panel">
         <div class="bar-chart">
           {% for row in score_chart.rows %}
@@ -467,15 +526,15 @@
 
     {% if return_skew_chart.available %}
     <section>
-      <h2>Mean vs Median 7D Return Skew Chart</h2>
-      <p class="section-note">This diagnostic-only view plots mean and median 7D returns by narrative and displays the current review label. It does not affect the Narrative Momentum Score.</p>
+      <h2 data-i18n="skewChartHeading">Mean vs Median 7D Return Skew Chart</h2>
+      <p class="section-note" data-i18n="skewChartCaption">This diagnostic-only view plots mean and median 7D returns by narrative and displays the current review label. It does not affect the Narrative Momentum Score.</p>
       <div class="chart-panel">
         <div class="skew-chart">
           {% for row in return_skew_chart.rows %}
           <div class="skew-row">
             <div class="skew-label">
               <span>{{ row.primary_narrative }}</span>
-              <span class="review-pill {{ row.review_flag_class }}">{{ row.review_flag }}</span>
+              <span class="review-pill {{ row.review_flag_class }}" data-en-text="{{ row.review_flag }}" data-th-text="{{ row.review_flag_th }}">{{ row.review_flag }}</span>
             </div>
             <div class="skew-track" aria-label="{{ row.primary_narrative }} mean {{ row.mean_label }} median {{ row.median_label }}">
               {% if return_skew_chart.zero_position_pct is not none %}
@@ -489,252 +548,271 @@
               {% endif %}
             </div>
             <div class="skew-values">
-              <span>Mean {{ row.mean_label }}</span>
-              <span>Median {{ row.median_label }}</span>
-              <span>Gap {{ row.gap_label }} | IQR {{ row.iqr_label }}</span>
+              <span><span data-i18n="meanLabel">Mean</span> {{ row.mean_label }}</span>
+              <span><span data-i18n="medianLabel">Median</span> {{ row.median_label }}</span>
+              <span><span data-i18n="gapLabel">Gap</span> {{ row.gap_label }} | IQR {{ row.iqr_label }}</span>
             </div>
           </div>
           {% endfor %}
         </div>
-        <div class="axis-labels">
-          <span>{{ return_skew_chart.axis_min_label }}</span>
-          <span>{{ return_skew_chart.axis_max_label }}</span>
-        </div>
         <div class="legend">
-          <span class="legend-item"><span class="legend-dot mean"></span>Mean 7D Return</span>
-          <span class="legend-item"><span class="legend-dot median"></span>Median 7D Return</span>
+          <span class="legend-item"><span class="legend-dot mean"></span><span data-i18n="meanLegend">Mean 7D Return</span></span>
+          <span class="legend-item"><span class="legend-dot median"></span><span data-i18n="medianLegend">Median 7D Return</span></span>
         </div>
       </div>
     </section>
     {% endif %}
 
     <section>
-      <h2>Narrative Ranking</h2>
-      <p class="section-note">The ranking table compares narrative-level analysis across momentum, relative strength, volume confirmation, breadth of participation, and concentration context.</p>
+      <h2 data-i18n="rankingHeading">Narrative Ranking</h2>
+      <p class="section-note" data-i18n="rankingCaption">The ranking table compares narrative-level analysis across momentum, relative strength, volume confirmation, breadth of participation, and concentration context.</p>
       {% set table_data = ranking_table %}
       {% if table_data %}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              {% for column in table_data.columns %}
-              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in table_data.rows %}
-            <tr>
-              {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+      {{ render_table(table_data) }}
       {% endif %}
     </section>
 
     {% if score_component_breakdown %}
     <section>
-      <h2>Score Component Breakdown</h2>
-      <p class="section-note">
+      <h2 data-i18n="componentHeading">Score Component Breakdown</h2>
+      <p class="section-note" data-i18n="componentCaption">
         Component scores are percentile-rank normalized within the current narrative universe and combined into the Narrative Momentum Score. They are relative research ranking inputs, not statistical confidence.
       </p>
       {% set table_data = score_component_breakdown %}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              {% for column in table_data.columns %}
-              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in table_data.rows %}
-            <tr>
-              {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+      {{ render_table(table_data) }}
     </section>
     {% endif %}
 
     <section>
-      <h2>Return Skew Diagnostics</h2>
-      <p class="section-note">
+      <h2 data-i18n="returnSkewHeading">Return Skew Diagnostics</h2>
+      <p class="section-note" data-i18n="returnSkewCaption">
         This diagnostic compares mean, median, and IQR of 7D returns to show whether a narrative basket is broadly representative or influenced by one/few return outliers. It is diagnostic-only and does not affect the Narrative Momentum Score.
       </p>
       {% if return_skew_note %}
-      <p class="section-note">{{ return_skew_note }}</p>
+      <p class="section-note" data-en-text="{{ return_skew_note }}" data-th-text="{{ return_skew_note_th }}">{{ return_skew_note }}</p>
       {% endif %}
       {% set table_data = return_skew_diagnostics %}
       {% if table_data %}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              {% for column in table_data.columns %}
-              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in table_data.rows %}
-            <tr>
-              {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+      {{ render_table(table_data) }}
       {% endif %}
     </section>
 
     <section>
-      <h2>Token-Level Contributors</h2>
-      <p class="section-note">Token-level contributors show which assets are contributing most to narrative-level market activity.</p>
+      <h2 data-i18n="contributorsHeading">Token-Level Contributors</h2>
+      <p class="section-note" data-i18n="contributorsCaption">Token-level contributors show which assets are contributing most to narrative-level market activity.</p>
       {% if token_contributor_note %}
-      <p class="section-note">{{ token_contributor_note }}</p>
+      <p class="section-note" data-en-text="{{ token_contributor_note }}" data-th-text="{{ token_contributor_note_th }}">{{ token_contributor_note }}</p>
       {% endif %}
       {% set table_data = token_contributors %}
       {% if table_data %}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              {% for column in table_data.columns %}
-              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in table_data.rows %}
-            <tr>
-              {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+      {{ render_table(table_data) }}
       {% endif %}
     </section>
 
     <section>
-      <h2>Concentration Review</h2>
-      <p class="section-note">Concentration review shows whether narrative-level market cap is more distributed or driven by a small number of large tokens. Labels and comments are judgment-based V1 heuristics, not statistically derived cutoffs.</p>
+      <h2 data-i18n="concentrationHeading">Concentration Review</h2>
+      <p class="section-note" data-i18n="concentrationCaption">Concentration review shows whether narrative-level market cap is more distributed or driven by a small number of large tokens. Labels and comments are judgment-based V1 heuristics, not statistically derived cutoffs.</p>
       {% if concentration_note %}
-      <p class="section-note">{{ concentration_note }}</p>
+      <p class="section-note" data-en-text="{{ concentration_note }}" data-th-text="{{ concentration_note_th }}">{{ concentration_note }}</p>
       {% endif %}
       {% set table_data = concentration_review %}
       {% if table_data %}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              {% for column in table_data.columns %}
-              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in table_data.rows %}
-            <tr>
-              {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+      {{ render_table(table_data) }}
       {% endif %}
     </section>
 
     <section>
-      <h2>90-Day Historical Context</h2>
+      <h2 data-i18n="historicalHeading">90-Day Historical Context</h2>
       {% if historical.available %}
-      <p class="section-note">
-        Historical narrative data covers {{ historical.narrative_count }} narratives from {{ historical.start_date }} to {{ historical.end_date }}. This view is descriptive trend context only.
-      </p>
+      <p class="section-note" data-en-text="{{ historical.summary_note }}" data-th-text="{{ historical.summary_note_th }}">{{ historical.summary_note }}</p>
       {% set table_data = historical.latest_table %}
       {% if table_data %}
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              {% for column in table_data.columns %}
-              <th>{{ table_data.labels.get(column, column.replace('_', ' ').title()) }}</th>
-              {% endfor %}
-            </tr>
-          </thead>
-          <tbody>
-            {% for row in table_data.rows %}
-            <tr>
-              {% for column in table_data.columns %}
-              <td>{{ row[column]|format_value(column, table_data.formats.get(column)) }}</td>
-              {% endfor %}
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+      {{ render_table(table_data) }}
       {% endif %}
       {% else %}
-      <p class="section-note">{{ historical.note }}</p>
+      <p class="section-note" data-en-text="{{ historical.note }}" data-th-text="{{ historical.note_th }}">{{ historical.note }}</p>
       {% endif %}
     </section>
 
     <section>
-      <h2>Methodology</h2>
+      <h2 data-i18n="methodologyHeading">Methodology</h2>
       <div class="method-box">
-        <p>Crypto Narrative Radar uses a manually reviewed narrative taxonomy, CoinGecko market data, token-level market snapshots, and narrative-level aggregation to create a descriptive research view.</p>
-        <p>{{ methodology.score_note }} Small score gaps should be interpreted cautiously.</p>
-        <p>The Narrative Momentum Score uses the current V1 framework: 40% price momentum, 25% relative strength, 20% volume confirmation, and 15% breadth of participation.</p>
+        <p data-i18n="methodologyIntro">Crypto Narrative Radar uses a manually reviewed narrative taxonomy, CoinGecko market data, token-level market snapshots, and narrative-level aggregation to create a descriptive research view.</p>
+        <p data-en-text="{{ methodology.score_note }} {{ methodology.small_gap_caution }}" data-th-text="{{ methodology.score_note_th }} {{ methodology.small_gap_caution_th }}">{{ methodology.score_note }} {{ methodology.small_gap_caution }}</p>
+        <p data-i18n="scoreFramework">The Narrative Momentum Score uses the current V1 framework: 40% price momentum, 25% relative strength, 20% volume confirmation, and 15% breadth of participation.</p>
         <ul>
           {% for row in methodology.score_weights %}
-          <li>{{ row.weight }} {{ row.component }}: {{ row.description }}</li>
+          <li data-en-text="{{ row.weight }} {{ row.component }}: {{ row.description }}" data-th-text="{{ row.weight }} {{ row.component_th }}: {{ row.description_th }}">{{ row.weight }} {{ row.component }}: {{ row.description }}</li>
           {% endfor %}
         </ul>
-        <p>{{ methodology.normalization_note }}</p>
-        <p>{{ methodology.relative_strength_note }}</p>
-        <p>{{ methodology.concentration_note }}</p>
-        <p>{{ methodology.return_skew_note }}</p>
-        <p>{{ methodology.token_universe_note }}</p>
-        <p>{{ methodology.taxonomy_note }}</p>
-        <p>DuckDB SQL analytics outputs support narrative summaries, token-level contributors, and concentration context. Historical narrative data, when available, is used only as descriptive trend context.</p>
-        <p>The score is a research ranking tool for market intelligence. It does not imply future returns.</p>
+        <p data-en-text="{{ methodology.normalization_note }}" data-th-text="{{ methodology.normalization_note_th }}">{{ methodology.normalization_note }}</p>
+        <p data-en-text="{{ methodology.relative_strength_note }}" data-th-text="{{ methodology.relative_strength_note_th }}">{{ methodology.relative_strength_note }}</p>
+        <p data-en-text="{{ methodology.concentration_note }}" data-th-text="{{ methodology.concentration_note_th }}">{{ methodology.concentration_note }}</p>
+        <p data-en-text="{{ methodology.return_skew_note }}" data-th-text="{{ methodology.return_skew_note_th }}">{{ methodology.return_skew_note }}</p>
+        <p data-en-text="{{ methodology.token_universe_note }}" data-th-text="{{ methodology.token_universe_note_th }}">{{ methodology.token_universe_note }}</p>
+        <p data-en-text="{{ methodology.taxonomy_note }}" data-th-text="{{ methodology.taxonomy_note_th }}">{{ methodology.taxonomy_note }}</p>
+        <p data-i18n="sqlAnalyticsNote">DuckDB SQL analytics outputs support narrative summaries, token-level contributors, and concentration context. Historical narrative data, when available, is used only as descriptive trend context.</p>
+        <p data-i18n="scoreResearchNote">The score is a research ranking tool for market intelligence. It does not imply future returns.</p>
       </div>
     </section>
 
     <section>
-      <h2>Limitations</h2>
+      <h2 data-i18n="limitationsHeading">Limitations</h2>
       <ul>
-        <li>This report is not investment advice.</li>
-        <li>It includes no buy/sell recommendations.</li>
-        <li>It includes no price prediction.</li>
-        <li>It includes no backtesting.</li>
-        <li>It includes no portfolio allocation guidance.</li>
-        <li>Snapshot and 90-day historical views are descriptive.</li>
-        <li>CoinGecko data availability and API limits may affect data quality.</li>
-        <li>Taxonomy design involves judgment and should be reviewed over time.</li>
-        <li>No DeFiLlama fundamentals overlay is included yet.</li>
+        <li data-i18n="limitationAdvice">This report is not investment advice.</li>
+        <li data-i18n="limitationRecommendations">It includes no buy/sell recommendations.</li>
+        <li data-i18n="limitationPrediction">It includes no price prediction.</li>
+        <li data-i18n="limitationBacktesting">It includes no backtesting.</li>
+        <li data-i18n="limitationPortfolio">It includes no portfolio allocation guidance.</li>
+        <li data-i18n="limitationDescriptive">Snapshot and 90-day historical views are descriptive.</li>
+        <li data-i18n="limitationCoingecko">CoinGecko data availability and API limits may affect data quality.</li>
+        <li data-i18n="limitationTaxonomy">Taxonomy design involves judgment and should be reviewed over time.</li>
+        <li data-i18n="limitationDefillama">No DeFiLlama fundamentals overlay is included yet.</li>
       </ul>
     </section>
 
-    <footer>
+    <footer data-i18n="footerText">
       Crypto Narrative Radar static market intelligence report. Generated from existing processed outputs.
     </footer>
   </main>
+  <script>
+    const thaiTranslations = {
+      reportTitle: "Crypto Narrative Radar",
+      reportSubtitle: "รายงาน market intelligence แบบ static จากข้อมูลตลาดคริปโตระดับ narrative",
+      snapshotDateLabel: "วันที่ snapshot:",
+      generatedLabel: "สร้างเมื่อ:",
+      researchDisclaimer: "<strong>หมายเหตุการใช้งาน:</strong> รายงานนี้เป็น market intelligence และระบบสนับสนุนงานวิจัยเท่านั้น ไม่ใช่คำแนะนำการลงทุน ไม่ใช่ trading bot ไม่มีคำแนะนำ buy/sell ไม่ใช่การทำนายราคา ไม่มี backtesting และไม่มีคำแนะนำ portfolio allocation",
+      sampleNotice: "รายงานตัวอย่างแบบ pinned: รายงานนี้ใช้ snapshot วันที่ 2026-05-20 เพื่อสาธิตวิธีคิดเรื่อง narrative scoring, data quality notes, component breakdown และ return skew diagnostics โดยเป็นตัวอย่าง methodology ที่ทำซ้ำได้ ไม่ใช่อัปเดตตลาดปัจจุบัน",
+      dataQualityHeading: "หมายเหตุคุณภาพข้อมูล",
+      executiveSummaryHeading: "สรุปผู้บริหาร",
+      executiveUnavailable: "ไม่มีข้อมูลสรุปสำหรับ snapshot นี้",
+      marketSnapshotHeading: "ภาพรวมตลาด",
+      scoreChartHeading: "กราฟ Narrative Momentum Score",
+      scoreChartCaption: "Narrative ถูกจัดเรียงตาม Narrative Momentum Score ปัจจุบัน คะแนนนี้เป็นการจัดอันดับเชิงเปรียบเทียบเพื่อช่วยคัดกรอง narrative สำหรับการวิเคราะห์ต่อ ไม่ใช่ความเชื่อมั่นทางสถิติ และไม่ส่งผลต่อ return skew diagnostics",
+      skewChartHeading: "กราฟ Mean vs Median 7D Return Skew",
+      skewChartCaption: "มุมมอง diagnostic นี้แสดง mean และ median ของ 7D return แยกตาม narrative พร้อม review label ปัจจุบัน โดยไม่ส่งผลต่อ Narrative Momentum Score",
+      meanLabel: "Mean",
+      medianLabel: "Median",
+      gapLabel: "Gap",
+      meanLegend: "Mean 7D Return",
+      medianLegend: "Median 7D Return",
+      rankingHeading: "ตารางจัดอันดับ Narrative",
+      rankingCaption: "ตารางนี้เปรียบเทียบ narrative ผ่าน momentum, relative strength, volume confirmation, breadth of participation และ concentration context",
+      componentHeading: "รายละเอียดองค์ประกอบคะแนน",
+      componentCaption: "Component scores ถูก normalize แบบ percentile-rank ภายใน narrative universe ปัจจุบัน แล้วนำมารวมเป็น Narrative Momentum Score โดยเป็น input สำหรับการจัดอันดับเชิงวิจัย ไม่ใช่ความเชื่อมั่นทางสถิติ",
+      returnSkewHeading: "Return Skew Diagnostics",
+      returnSkewCaption: "Diagnostics ช่วยอธิบายว่า headline return ของ narrative สะท้อนการมีส่วนร่วมที่กว้าง การกระจุกตัว หรืออาจถูกลากโดย token บางตัวหรือไม่ โดยเปรียบเทียบ mean, median และ IQR ของ 7D return และไม่ส่งผลต่อ Narrative Momentum Score",
+      contributorsHeading: "Token-Level Contributors",
+      contributorsCaption: "Token-level contributors แสดงว่า asset ใดมีส่วนเกี่ยวข้องกับ market activity ของแต่ละ narrative มากที่สุด",
+      concentrationHeading: "Concentration Review",
+      concentrationCaption: "Concentration review แสดงว่า market cap ระดับ narrative กระจายตัวหรือถูกขับเคลื่อนโดย token ขนาดใหญ่ไม่กี่ตัว โดย label และ comment เป็น V1 heuristics ไม่ใช่ cutoff ทางสถิติ",
+      historicalHeading: "บริบทข้อมูลย้อนหลัง 90 วัน",
+      methodologyHeading: "Methodology",
+      methodologyIntro: "Crypto Narrative Radar ใช้ taxonomy ที่รีวิวด้วยมือ ข้อมูล CoinGecko, token-level market snapshots และการ aggregate ระดับ narrative เพื่อสร้างมุมมองเชิงวิจัยแบบ descriptive",
+      smallGapCaution: "ควรตีความช่องว่างคะแนนที่เล็กด้วยความระมัดระวัง",
+      scoreFramework: "Narrative Momentum Score ใช้กรอบ V1 ปัจจุบัน: 40% price momentum, 25% relative strength, 20% volume confirmation และ 15% breadth of participation",
+      sqlAnalyticsNote: "DuckDB SQL analytics outputs สนับสนุน narrative summaries, token-level contributors และ concentration context ส่วนข้อมูล historical narrative ใช้เป็น descriptive trend context เท่านั้น",
+      scoreResearchNote: "คะแนนนี้เป็น research ranking tool สำหรับ market intelligence และไม่ได้บอกผลตอบแทนในอนาคต",
+      limitationsHeading: "ข้อจำกัด",
+      limitationAdvice: "รายงานนี้ไม่ใช่คำแนะนำการลงทุน",
+      limitationRecommendations: "ไม่มีคำแนะนำ buy/sell",
+      limitationPrediction: "ไม่มีการทำนายราคา",
+      limitationBacktesting: "ไม่มี backtesting",
+      limitationPortfolio: "ไม่มีคำแนะนำ portfolio allocation",
+      limitationDescriptive: "มุมมอง snapshot และข้อมูลย้อนหลัง 90 วันเป็นข้อมูลเชิงพรรณนา",
+      limitationCoingecko: "ความพร้อมของข้อมูล CoinGecko และ API limits อาจกระทบคุณภาพข้อมูล",
+      limitationTaxonomy: "การออกแบบ taxonomy มีส่วนของ judgment และควรถูกทบทวนเป็นระยะ",
+      limitationDefillama: "ยังไม่มี DeFiLlama fundamentals overlay",
+      footerText: "รายงาน static market intelligence ของ Crypto Narrative Radar สร้างจาก processed outputs ที่มีอยู่"
+    };
+
+    const thaiColumnLabels = {
+      "Rank": "อันดับ",
+      "Narrative": "Narrative",
+      "Token Count": "จำนวน Token",
+      "Narrative Momentum Score": "Narrative Momentum Score",
+      "Mean 7D Return": "Mean 7D Return",
+      "Median 7D Return": "Median 7D Return",
+      "Mean 30D Return": "Mean 30D Return",
+      "Total Market Cap": "Total Market Cap",
+      "Total Volume": "Total Volume",
+      "7D Breadth": "7D Breadth",
+      "Positive Breadth": "Positive Breadth",
+      "Avg RS vs BTC/ETH 7D": "Avg RS vs BTC/ETH 7D",
+      "Concentration": "Concentration",
+      "Price Momentum Score": "Price Momentum Score",
+      "Relative Strength Score": "Relative Strength Score",
+      "Volume Confirmation Score": "Volume Confirmation Score",
+      "Breadth Score": "Breadth Score",
+      "Scoring Note": "หมายเหตุคะแนน",
+      "Mean-Median Gap": "Mean-Median Gap",
+      "7D Return IQR": "7D Return IQR",
+      "Top 7D Token": "Top 7D Token",
+      "Bottom 7D Token": "Bottom 7D Token",
+      "Review Flag": "Review Flag",
+      "Diagnostic Note": "หมายเหตุ Diagnostics",
+      "Symbol": "Symbol",
+      "Name": "Name",
+      "Market Cap": "Market Cap",
+      "7D Return": "7D Return",
+      "Volume Share": "Volume Share",
+      "Market Cap Share": "Market Cap Share",
+      "Top 1 Market Cap Share": "Top 1 Market Cap Share",
+      "Top 3 Market Cap Share": "Top 3 Market Cap Share",
+      "Concentration Comment": "หมายเหตุ Concentration",
+      "Snapshot Median 7D Return IQR": "Snapshot Median 7D Return IQR",
+      "RS vs BTC 7D": "RS vs BTC 7D",
+      "RS vs ETH 7D": "RS vs ETH 7D",
+      "RS vs BTC 30D": "RS vs BTC 30D",
+      "RS vs ETH 30D": "RS vs ETH 30D",
+      "Relative Strength 30D": "Relative Strength 30D"
+    };
+
+    function setReportLanguage(language) {
+      const selectedLanguage = language === "th" ? "th" : "en";
+      document.documentElement.lang = selectedLanguage === "th" ? "th" : "en";
+      document.body.dataset.language = selectedLanguage;
+      document.title = selectedLanguage === "th"
+        ? "Crypto Narrative Radar - รายงานตัวอย่าง"
+        : "Crypto Narrative Radar - {{ snapshot_date }}";
+
+      document.querySelectorAll("[data-i18n]").forEach((element) => {
+        if (!element.dataset.enHtml) {
+          element.dataset.enHtml = element.innerHTML;
+        }
+        const key = element.dataset.i18n;
+        element.innerHTML = selectedLanguage === "th" && thaiTranslations[key]
+          ? thaiTranslations[key]
+          : element.dataset.enHtml;
+      });
+
+      document.querySelectorAll("[data-th-text]").forEach((element) => {
+        element.textContent = selectedLanguage === "th"
+          ? element.dataset.thText
+          : element.dataset.enText;
+      });
+
+      document.querySelectorAll("th").forEach((heading) => {
+        if (!heading.dataset.enText) {
+          heading.dataset.enText = heading.textContent.trim();
+        }
+        heading.textContent = selectedLanguage === "th"
+          ? thaiColumnLabels[heading.dataset.enText] || heading.dataset.enText
+          : heading.dataset.enText;
+      });
+
+      document.querySelectorAll("[data-language-button]").forEach((button) => {
+        const isActive = button.dataset.languageButton === selectedLanguage;
+        button.classList.toggle("active", isActive);
+        button.setAttribute("aria-pressed", String(isActive));
+      });
+    }
+
+    document.querySelectorAll("[data-language-button]").forEach((button) => {
+      button.addEventListener("click", () => {
+        setReportLanguage(button.dataset.languageButton);
+      });
+    });
+  </script>
 </body>
 </html>

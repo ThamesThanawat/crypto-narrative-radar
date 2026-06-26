@@ -212,9 +212,34 @@ def write_base_token_snapshot(path: Path, last_updated: str = "2026-05-20T00:00:
     base_token_snapshot_df(last_updated=last_updated).to_csv(path, index=False)
 
 
+def write_concentration_review(path: Path) -> None:
+    pd.DataFrame(
+        [
+            {
+                "primary_narrative": "AI",
+                "top_1_market_cap_share": 0.35,
+                "top_3_market_cap_share": 0.65,
+                "concentration_comment": "Broad participation: market cap is more distributed",
+            },
+            {
+                "primary_narrative": "Layer 1",
+                "top_1_market_cap_share": 0.80,
+                "top_3_market_cap_share": 0.95,
+                "concentration_comment": "High concentration: one token dominates market cap",
+            },
+            {
+                "primary_narrative": "RWA",
+                "top_1_market_cap_share": 0.45,
+                "top_3_market_cap_share": 0.89,
+                "concentration_comment": "Moderate concentration: top three tokens dominate market cap",
+            },
+        ]
+    ).to_csv(path, index=False)
+
+
 def extract_return_skew_section(html: str) -> str:
-    start = html.index("<h2>Return Skew Diagnostics</h2>")
-    end = html.index("<h2>Token-Level Contributors</h2>", start)
+    start = html.index('data-i18n="returnSkewHeading"')
+    end = html.index('data-i18n="contributorsHeading"', start)
     return html[start:end]
 
 
@@ -599,12 +624,82 @@ def test_presentation_charts_render_with_research_framing(tmp_path: Path) -> Non
     assert "not a current market update" in html
     assert "relative research ranking score" in html
     assert "does not affect the Narrative Momentum Score" in html
+    assert 'data-language-button="en"' in html
+    assert 'data-language-button="th"' in html
+    assert "ไทย" in html
     assert html.index('<div class="bar-label">AI</div>') < html.index(
         '<div class="bar-label">Layer 1</div>'
     )
     assert html.index('<div class="bar-label">Layer 1</div>') < html.index(
         '<div class="bar-label">DeFi</div>'
     )
+
+
+def test_static_report_language_toggle_includes_representative_thai_text(
+    tmp_path: Path,
+) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-20"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+    write_token_snapshot(processed_dir / "token_market_snapshot_2026-05-20.csv")
+    write_concentration_review(processed_dir / "sql_concentration_review.csv")
+
+    output_path = generate_report(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+        sample_mode=True,
+    )
+    html = output_path.read_text(encoding="utf-8")
+
+    assert "function setReportLanguage" in html
+    assert "data-th-text" in html
+    assert "ระบบสนับสนุนงานวิจัย" in html
+    assert "ไม่ใช่ trading bot" in html
+    assert "การจัดอันดับเชิงเปรียบเทียบ" in html
+    assert "Diagnostics ช่วยอธิบาย" in html
+    assert "นำ Narrative Momentum Score" in html
+    assert "narrative ที่นำใน snapshot นี้จาก research ranking" in html
+    assert "ช่องว่างระหว่าง mean และ median" in html
+    assert "IQR ของ 7D return" in html
+    assert "Review เพราะ Skew" in html
+    assert "Review เพราะ Dispersion" in html
+    assert "ไม่ต้อง Review" in html
+    assert "กระจุกตัวสูง: market cap ถูกขับเคลื่อนโดย token หลักตัวเดียว" in html
+    assert "กระจุกตัวปานกลาง: market cap ถูกขับเคลื่อนโดย token ใหญ่ 3 อันดับแรก" in html
+    assert "กระจุกตัวต่ำกว่า: market cap กระจายตัวมากกว่า narrative อื่น" in html
+    assert "IQR threshold เป็นแบบ snapshot-relative" in html
+    assert "ไม่ใช่ threshold แบบ absolute" in html
+    assert "Narrative Momentum Score Bar Chart" in html
+    assert "Return Skew Diagnostics" in html
+
+
+def test_skew_chart_removes_boundary_axis_labels_but_keeps_values_and_legend(
+    tmp_path: Path,
+) -> None:
+    processed_dir = tmp_path / "processed" / "2026-05-25"
+    processed_dir.mkdir(parents=True)
+    write_ranking(processed_dir / "narrative_ranking.csv")
+    write_token_snapshot(processed_dir / "token_market_snapshot_2026-05-25.csv")
+
+    output_path = generate_report(
+        processed_root=tmp_path / "processed",
+        reports_root=tmp_path / "reports",
+        templates_root=Path("templates"),
+    )
+    html = output_path.read_text(encoding="utf-8")
+    chart_start = html.index('data-i18n="skewChartHeading"')
+    chart_end = html.index('data-i18n="rankingHeading"', chart_start)
+    skew_chart_section = html[chart_start:chart_end]
+
+    assert "axis-labels" not in skew_chart_section
+    assert "Mean " in skew_chart_section
+    assert "Median " in skew_chart_section
+    assert 'data-i18n="gapLabel">Gap' in skew_chart_section
+    assert "IQR" in skew_chart_section
+    assert "Mean 7D Return" in skew_chart_section
+    assert "Median 7D Return" in skew_chart_section
+    assert "Skew Review" in skew_chart_section
 
 
 def test_presentation_charts_do_not_add_unsafe_language_or_contribution_share(
@@ -621,8 +716,8 @@ def test_presentation_charts_do_not_add_unsafe_language_or_contribution_share(
         templates_root=Path("templates"),
     )
     html = output_path.read_text(encoding="utf-8")
-    chart_start = html.index("<h2>Narrative Momentum Score Bar Chart</h2>")
-    chart_end = html.index("<h2>Narrative Ranking</h2>", chart_start)
+    chart_start = html.index('data-i18n="scoreChartHeading"')
+    chart_end = html.index('data-i18n="rankingHeading"', chart_start)
     chart_section = html[chart_start:chart_end].lower()
 
     forbidden_terms = [
@@ -649,8 +744,8 @@ def test_narrative_ranking_includes_median_7d_return(tmp_path: Path) -> None:
         templates_root=Path("templates"),
     )
     html = output_path.read_text(encoding="utf-8")
-    ranking_start = html.index("<h2>Narrative Ranking</h2>")
-    ranking_end = html.index("<h2>Score Component Breakdown</h2>", ranking_start)
+    ranking_start = html.index('data-i18n="rankingHeading"')
+    ranking_end = html.index('data-i18n="componentHeading"', ranking_start)
     ranking_section = html[ranking_start:ranking_end]
 
     assert "<th>Mean 7D Return</th>" in ranking_section

@@ -100,6 +100,32 @@
       padding: 14px 16px;
     }
 
+    .language-toggle {
+      align-items: center;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin: -8px 0 16px;
+    }
+
+    .language-button {
+      background: var(--panel);
+      border: 1px solid var(--line-strong);
+      border-radius: 999px;
+      color: var(--muted);
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 5px 12px;
+    }
+
+    .language-button.active {
+      background: var(--terminal);
+      border-color: var(--terminal);
+      color: #f8fafc;
+    }
+
     .cards {
       display: grid;
       gap: 12px;
@@ -380,108 +406,121 @@
     }
   </style>
 </head>
-<body>
+<body data-language="en">
   <main class="page">
+
+
     <header>
-      <h1>Crypto Narrative Radar</h1>
-      <p class="subtitle">Static market intelligence research report using narrative-level crypto market data.</p>
+      <h1 data-i18n="reportTitle">Crypto Narrative Radar</h1>
+      <p class="subtitle" data-i18n="reportSubtitle">Static market intelligence research report using narrative-level crypto market data.</p>
       <div class="meta">
-        <span>Snapshot date: 2026-05-20</span>
-        <span>Generated: 2026-06-19 10:27 UTC</span>
+        <span><span data-i18n="snapshotDateLabel">Snapshot date:</span> 2026-05-20</span>
+        <span><span data-i18n="generatedLabel">Generated:</span> 2026-06-26 04:14 UTC</span>
       </div>
     </header>
 
-    <section class="notice">
+    <nav class="language-toggle" aria-label="Report language">
+      <button type="button" class="language-button active" data-language-button="en" aria-pressed="true">English</button>
+      <button type="button" class="language-button" data-language-button="th" aria-pressed="false">ไทย</button>
+    </nav>
+
+    <section class="notice" data-i18n="researchDisclaimer">
       <strong>Research disclaimer:</strong>
       This report is market intelligence only. It is not investment advice, contains no buy/sell recommendations,
       does not provide price prediction, does not include backtesting, and does not provide portfolio allocation guidance.
     </section>
 
-    
+
     <section class="sample-notice">
-      Pinned sample report: this report uses the fixed 2026-05-20 snapshot to demonstrate narrative scoring, data quality notes, component breakdown, and return skew diagnostics. It is intended as a reproducible methodology example, not a current market update.
+      <span data-i18n="sampleNotice">Pinned sample report: this report uses the fixed 2026-05-20 snapshot to demonstrate narrative scoring, data quality notes, component breakdown, and return skew diagnostics. It is intended as a reproducible methodology example, not a current market update.</span>
     </section>
-    
 
-    
+
+
 
     <section>
-      <h2>Executive Summary</h2>
-      
+      <h2 data-i18n="executiveSummaryHeading">Executive Summary</h2>
+
       <ul>
-        
-        <li>Exchange Tokens leads the current Narrative Momentum Score at 76.9.</li>
-        
-        <li>Exchange Tokens had the strongest mean 7D return context, but this was skew-flagged: mean 7D return was +0.4% while median 7D return was -2.6%, with HYPE as the strongest 7D token at +31.5%.</li>
-        
-        <li>DePIN shows the strongest 30D return context at 14.1%.</li>
-        
-        <li>RWA has the broadest participation using 7D Breadth at 40.0%.</li>
-        
-        <li>Layer 2 has softer relative momentum in this snapshot.</li>
-        
-        <li>Layer 1 has the highest top-three market cap concentration at 94.6%.</li>
-        
+
+
+        <li data-en-text="Exchange Tokens leads the current Narrative Momentum Score at 76.9." data-th-text="Exchange Tokens นำ Narrative Momentum Score ใน snapshot นี้ที่ 76.9.">Exchange Tokens leads the current Narrative Momentum Score at 76.9.</li>
+
+
+        <li data-en-text="Exchange Tokens had the strongest mean 7D return context, but this was skew-flagged: mean 7D return was +0.4% while median 7D return was -2.6%, with HYPE as the strongest 7D token at +31.5%." data-th-text="Exchange Tokens มี mean 7D return แข็งแรงที่สุด แต่ถูกจัดเป็น Review เพราะ Skew: mean 7D return อยู่ที่ +0.4% ขณะที่ median 7D return อยู่ที่ -2.6% โดย HYPE เป็น token ที่แข็งแรงที่สุดใน 7D ที่ +31.5%.">Exchange Tokens had the strongest mean 7D return context, but this was skew-flagged: mean 7D return was +0.4% while median 7D return was -2.6%, with HYPE as the strongest 7D token at +31.5%.</li>
+
+
+        <li data-en-text="DePIN shows the strongest 30D return context at 14.1%." data-th-text="DePIN มี 30D return context แข็งแรงที่สุดที่ 14.1%.">DePIN shows the strongest 30D return context at 14.1%.</li>
+
+
+        <li data-en-text="RWA has the broadest participation using 7D Breadth at 40.0%." data-th-text="RWA มี breadth of participation กว้างที่สุดจาก 7D Breadth ที่ 40.0%.">RWA has the broadest participation using 7D Breadth at 40.0%.</li>
+
+
+        <li data-en-text="Layer 2 has softer relative momentum in this snapshot." data-th-text="Layer 2 มี relative momentum อ่อนกว่ากลุ่มอื่นใน snapshot นี้.">Layer 2 has softer relative momentum in this snapshot.</li>
+
+
+        <li data-en-text="Layer 1 has the highest top-three market cap concentration at 94.6%." data-th-text="Layer 1 มี top-three market cap concentration สูงที่สุดที่ 94.6%.">Layer 1 has the highest top-three market cap concentration at 94.6%.</li>
+
       </ul>
-      
+
     </section>
 
     <section>
-      <h2>Market Snapshot</h2>
+      <h2 data-i18n="marketSnapshotHeading">Market Snapshot</h2>
       <div class="cards">
-        
+
         <article class="card">
-          <div class="label">Top Narrative by Momentum</div>
+          <div class="label" data-en-text="Top Narrative by Momentum" data-th-text="Narrative อันดับต้นตาม Momentum">Top Narrative by Momentum</div>
           <h3>Exchange Tokens</h3>
           <div class="value">76.9</div>
-          <div class="note">Current narrative leadership based on the research ranking.</div>
+          <div class="note" data-en-text="Current narrative leadership based on the research ranking." data-th-text="narrative ที่นำใน snapshot นี้จาก research ranking">Current narrative leadership based on the research ranking.</div>
         </article>
-        
+
         <article class="card">
-          <div class="label">Strongest 7D Narrative</div>
+          <div class="label" data-en-text="Strongest 7D Narrative" data-th-text="Narrative 7D แข็งแรงที่สุด">Strongest 7D Narrative</div>
           <h3>Exchange Tokens</h3>
           <div class="value">0.4%</div>
-          <div class="note">Recent return context, not a trading recommendation.</div>
+          <div class="note" data-en-text="Recent return context, not a trading recommendation." data-th-text="บริบท return ล่าสุด ไม่ใช่คำแนะนำการซื้อขาย">Recent return context, not a trading recommendation.</div>
         </article>
-        
+
         <article class="card">
-          <div class="label">Strongest 30D Narrative</div>
+          <div class="label" data-en-text="Strongest 30D Narrative" data-th-text="Narrative 30D แข็งแรงที่สุด">Strongest 30D Narrative</div>
           <h3>DePIN</h3>
           <div class="value">14.1%</div>
-          <div class="note">Medium-window return context for narrative-level analysis.</div>
+          <div class="note" data-en-text="Medium-window return context for narrative-level analysis." data-th-text="บริบท return ระยะกลางสำหรับการวิเคราะห์ระดับ narrative">Medium-window return context for narrative-level analysis.</div>
         </article>
-        
+
         <article class="card">
-          <div class="label">Broadest Participation</div>
+          <div class="label" data-en-text="Broadest Participation" data-th-text="การมีส่วนร่วมกว้างที่สุด">Broadest Participation</div>
           <h3>RWA</h3>
           <div class="value">40.0%</div>
-          <div class="note">Breadth helps show whether participation is broad across a narrative.</div>
+          <div class="note" data-en-text="Breadth helps show whether participation is broad across a narrative." data-th-text="Breadth ช่วยดูว่าการมีส่วนร่วมกระจายกว้างใน narrative หรือไม่">Breadth helps show whether participation is broad across a narrative.</div>
         </article>
-        
+
         <article class="card">
-          <div class="label">Weakest Relative Momentum</div>
+          <div class="label" data-en-text="Weakest Relative Momentum" data-th-text="Relative Momentum อ่อนที่สุด">Weakest Relative Momentum</div>
           <h3>Layer 2</h3>
           <div class="value">27.5</div>
-          <div class="note">Lagging narrative momentum in the current snapshot.</div>
+          <div class="note" data-en-text="Lagging narrative momentum in the current snapshot." data-th-text="narrative momentum อ่อนกว่าใน snapshot ปัจจุบัน">Lagging narrative momentum in the current snapshot.</div>
         </article>
-        
+
         <article class="card">
-          <div class="label">Highest Concentration</div>
+          <div class="label" data-en-text="Highest Concentration" data-th-text="Concentration สูงที่สุด">Highest Concentration</div>
           <h3>Layer 1</h3>
           <div class="value">94.6%</div>
-          <div class="note">Concentration context shows whether activity is driven by a few large tokens.</div>
+          <div class="note" data-en-text="Concentration context shows whether activity is driven by a few large tokens." data-th-text="Concentration context ช่วยดูว่า activity ถูกขับเคลื่อนโดย token ใหญ่ไม่กี่ตัวหรือไม่">Concentration context shows whether activity is driven by a few large tokens.</div>
         </article>
-        
+
       </div>
     </section>
 
-    
+
     <section>
-      <h2>Narrative Momentum Score Bar Chart</h2>
-      <p class="section-note">Narratives are sorted by the current Narrative Momentum Score. The score is a descriptive research ranking tool and does not affect any return skew diagnostics.</p>
+      <h2 data-i18n="scoreChartHeading">Narrative Momentum Score Bar Chart</h2>
+      <p class="section-note" data-i18n="scoreChartCaption">Narratives are sorted by the current Narrative Momentum Score. The score is a descriptive research ranking tool and does not affect any return skew diagnostics.</p>
       <div class="chart-panel">
         <div class="bar-chart">
-          
+
           <div class="bar-row">
             <div class="bar-label">Exchange Tokens</div>
             <div class="bar-track" aria-label="Exchange Tokens Narrative Momentum Score 76.9">
@@ -489,7 +528,7 @@
             </div>
             <div class="bar-value">76.9</div>
           </div>
-          
+
           <div class="bar-row">
             <div class="bar-label">DePIN</div>
             <div class="bar-track" aria-label="DePIN Narrative Momentum Score 72.2">
@@ -497,7 +536,7 @@
             </div>
             <div class="bar-value">72.2</div>
           </div>
-          
+
           <div class="bar-row">
             <div class="bar-label">Layer 1</div>
             <div class="bar-track" aria-label="Layer 1 Narrative Momentum Score 69.1">
@@ -505,7 +544,7 @@
             </div>
             <div class="bar-value">69.1</div>
           </div>
-          
+
           <div class="bar-row">
             <div class="bar-label">RWA</div>
             <div class="bar-track" aria-label="RWA Narrative Momentum Score 68.8">
@@ -513,7 +552,7 @@
             </div>
             <div class="bar-value">68.8</div>
           </div>
-          
+
           <div class="bar-row">
             <div class="bar-label">Gaming / GameFi</div>
             <div class="bar-track" aria-label="Gaming / GameFi Narrative Momentum Score 55.3">
@@ -521,7 +560,7 @@
             </div>
             <div class="bar-value">55.3</div>
           </div>
-          
+
           <div class="bar-row">
             <div class="bar-label">DeFi</div>
             <div class="bar-track" aria-label="DeFi Narrative Momentum Score 45.9">
@@ -529,7 +568,7 @@
             </div>
             <div class="bar-value">45.9</div>
           </div>
-          
+
           <div class="bar-row">
             <div class="bar-label">AI</div>
             <div class="bar-track" aria-label="AI Narrative Momentum Score 34.4">
@@ -537,7 +576,7 @@
             </div>
             <div class="bar-value">34.4</div>
           </div>
-          
+
           <div class="bar-row">
             <div class="bar-label">Layer 2</div>
             <div class="bar-track" aria-label="Layer 2 Narrative Momentum Score 27.5">
@@ -545,7 +584,7 @@
             </div>
             <div class="bar-value">27.5</div>
           </div>
-          
+
         </div>
         <div class="axis-labels">
           <span>0</span>
@@ -553,2011 +592,3516 @@
         </div>
       </div>
     </section>
-    
 
-    
+
+
     <section>
-      <h2>Mean vs Median 7D Return Skew Chart</h2>
-      <p class="section-note">This diagnostic-only view plots mean and median 7D returns by narrative and displays the current review label. It does not affect the Narrative Momentum Score.</p>
+      <h2 data-i18n="skewChartHeading">Mean vs Median 7D Return Skew Chart</h2>
+      <p class="section-note" data-i18n="skewChartCaption">This diagnostic-only view plots mean and median 7D returns by narrative and displays the current review label. It does not affect the Narrative Momentum Score.</p>
       <div class="chart-panel">
         <div class="skew-chart">
-          
+
           <div class="skew-row">
             <div class="skew-label">
               <span>AI</span>
-              <span class="review-pill no-review">No Review</span>
+              <span class="review-pill no-review" data-en-text="No Review" data-th-text="ไม่ต้อง Review">No Review</span>
             </div>
             <div class="skew-track" aria-label="AI mean -7.9% median -7.5%">
-              
+
               <span class="zero-line" style="left: 88.27%;"></span>
-              
-              
+
+
               <span class="skew-marker mean" style="left: 23.04%;" title="Mean 7D Return -7.9%"></span>
-              
-              
+
+
               <span class="skew-marker median" style="left: 26.5%;" title="Median 7D Return -7.5%"></span>
-              
+
             </div>
             <div class="skew-values">
-              <span>Mean -7.9%</span>
-              <span>Median -7.5%</span>
-              <span>Gap -0.4pp | IQR 4.1pp</span>
+              <span><span data-i18n="meanLabel">Mean</span> -7.9%</span>
+              <span><span data-i18n="medianLabel">Median</span> -7.5%</span>
+              <span><span data-i18n="gapLabel">Gap</span> -0.4pp | IQR 4.1pp</span>
             </div>
           </div>
-          
+
           <div class="skew-row">
             <div class="skew-label">
               <span>DeFi</span>
-              <span class="review-pill no-review">No Review</span>
+              <span class="review-pill no-review" data-en-text="No Review" data-th-text="ไม่ต้อง Review">No Review</span>
             </div>
             <div class="skew-track" aria-label="DeFi mean -8.8% median -8.4%">
-              
+
               <span class="zero-line" style="left: 88.27%;"></span>
-              
-              
+
+
               <span class="skew-marker mean" style="left: 16.03%;" title="Mean 7D Return -8.8%"></span>
-              
-              
+
+
               <span class="skew-marker median" style="left: 19.43%;" title="Median 7D Return -8.4%"></span>
-              
+
             </div>
             <div class="skew-values">
-              <span>Mean -8.8%</span>
-              <span>Median -8.4%</span>
-              <span>Gap -0.4pp | IQR 2.6pp</span>
+              <span><span data-i18n="meanLabel">Mean</span> -8.8%</span>
+              <span><span data-i18n="medianLabel">Median</span> -8.4%</span>
+              <span><span data-i18n="gapLabel">Gap</span> -0.4pp | IQR 2.6pp</span>
             </div>
           </div>
-          
+
           <div class="skew-row">
             <div class="skew-label">
               <span>DePIN</span>
-              <span class="review-pill no-review">No Review</span>
+              <span class="review-pill no-review" data-en-text="No Review" data-th-text="ไม่ต้อง Review">No Review</span>
             </div>
             <div class="skew-track" aria-label="DePIN mean -4.9% median -7.5%">
-              
+
               <span class="zero-line" style="left: 88.27%;"></span>
-              
-              
+
+
               <span class="skew-marker mean" style="left: 47.78%;" title="Mean 7D Return -4.9%"></span>
-              
-              
+
+
               <span class="skew-marker median" style="left: 26.67%;" title="Median 7D Return -7.5%"></span>
-              
+
             </div>
             <div class="skew-values">
-              <span>Mean -4.9%</span>
-              <span>Median -7.5%</span>
-              <span>Gap 2.6pp | IQR 5.2pp</span>
+              <span><span data-i18n="meanLabel">Mean</span> -4.9%</span>
+              <span><span data-i18n="medianLabel">Median</span> -7.5%</span>
+              <span><span data-i18n="gapLabel">Gap</span> 2.6pp | IQR 5.2pp</span>
             </div>
           </div>
-          
+
           <div class="skew-row">
             <div class="skew-label">
               <span>Exchange Tokens</span>
-              <span class="review-pill skew-review">Skew Review</span>
+              <span class="review-pill skew-review" data-en-text="Skew Review" data-th-text="Review เพราะ Skew">Skew Review</span>
             </div>
             <div class="skew-track" aria-label="Exchange Tokens mean 0.4% median -2.6%">
-              
+
               <span class="zero-line" style="left: 88.27%;"></span>
-              
-              
+
+
               <span class="skew-marker mean" style="left: 91.76%;" title="Mean 7D Return 0.4%"></span>
-              
-              
+
+
               <span class="skew-marker median" style="left: 66.98%;" title="Median 7D Return -2.6%"></span>
-              
+
             </div>
             <div class="skew-values">
-              <span>Mean 0.4%</span>
-              <span>Median -2.6%</span>
-              <span>Gap 3.0pp | IQR 3.7pp</span>
+              <span><span data-i18n="meanLabel">Mean</span> 0.4%</span>
+              <span><span data-i18n="medianLabel">Median</span> -2.6%</span>
+              <span><span data-i18n="gapLabel">Gap</span> 3.0pp | IQR 3.7pp</span>
             </div>
           </div>
-          
+
           <div class="skew-row">
             <div class="skew-label">
               <span>Gaming / GameFi</span>
-              <span class="review-pill no-review">No Review</span>
+              <span class="review-pill no-review" data-en-text="No Review" data-th-text="ไม่ต้อง Review">No Review</span>
             </div>
             <div class="skew-track" aria-label="Gaming / GameFi mean -9.1% median -7.3%">
-              
+
               <span class="zero-line" style="left: 88.27%;"></span>
-              
-              
+
+
               <span class="skew-marker mean" style="left: 13.63%;" title="Mean 7D Return -9.1%"></span>
-              
-              
+
+
               <span class="skew-marker median" style="left: 27.84%;" title="Median 7D Return -7.3%"></span>
-              
+
             </div>
             <div class="skew-values">
-              <span>Mean -9.1%</span>
-              <span>Median -7.3%</span>
-              <span>Gap -1.7pp | IQR 3.8pp</span>
+              <span><span data-i18n="meanLabel">Mean</span> -9.1%</span>
+              <span><span data-i18n="medianLabel">Median</span> -7.3%</span>
+              <span><span data-i18n="gapLabel">Gap</span> -1.7pp | IQR 3.8pp</span>
             </div>
           </div>
-          
+
           <div class="skew-row">
             <div class="skew-label">
               <span>Layer 1</span>
-              <span class="review-pill no-review">No Review</span>
+              <span class="review-pill no-review" data-en-text="No Review" data-th-text="ไม่ต้อง Review">No Review</span>
             </div>
             <div class="skew-track" aria-label="Layer 1 mean -5.2% median -5.6%">
-              
+
               <span class="zero-line" style="left: 88.27%;"></span>
-              
-              
+
+
               <span class="skew-marker mean" style="left: 45.53%;" title="Mean 7D Return -5.2%"></span>
-              
-              
+
+
               <span class="skew-marker median" style="left: 42.17%;" title="Median 7D Return -5.6%"></span>
-              
+
             </div>
             <div class="skew-values">
-              <span>Mean -5.2%</span>
-              <span>Median -5.6%</span>
-              <span>Gap 0.4pp | IQR 2.7pp</span>
+              <span><span data-i18n="meanLabel">Mean</span> -5.2%</span>
+              <span><span data-i18n="medianLabel">Median</span> -5.6%</span>
+              <span><span data-i18n="gapLabel">Gap</span> 0.4pp | IQR 2.7pp</span>
             </div>
           </div>
-          
+
           <div class="skew-row">
             <div class="skew-label">
               <span>Layer 2</span>
-              <span class="review-pill no-review">No Review</span>
+              <span class="review-pill no-review" data-en-text="No Review" data-th-text="ไม่ต้อง Review">No Review</span>
             </div>
             <div class="skew-track" aria-label="Layer 2 mean -9.7% median -9.0%">
-              
+
               <span class="zero-line" style="left: 88.27%;"></span>
-              
-              
+
+
               <span class="skew-marker mean" style="left: 8.24%;" title="Mean 7D Return -9.7%"></span>
-              
-              
+
+
               <span class="skew-marker median" style="left: 14.29%;" title="Median 7D Return -9.0%"></span>
-              
+
             </div>
             <div class="skew-values">
-              <span>Mean -9.7%</span>
-              <span>Median -9.0%</span>
-              <span>Gap -0.7pp | IQR 4.8pp</span>
+              <span><span data-i18n="meanLabel">Mean</span> -9.7%</span>
+              <span><span data-i18n="medianLabel">Median</span> -9.0%</span>
+              <span><span data-i18n="gapLabel">Gap</span> -0.7pp | IQR 4.8pp</span>
             </div>
           </div>
-          
+
           <div class="skew-row">
             <div class="skew-label">
               <span>RWA</span>
-              <span class="review-pill dispersion-review">Dispersion Review</span>
+              <span class="review-pill dispersion-review" data-en-text="Dispersion Review" data-th-text="Review เพราะ Dispersion">Dispersion Review</span>
             </div>
             <div class="skew-track" aria-label="RWA mean -4.9% median -6.9%">
-              
+
               <span class="zero-line" style="left: 88.27%;"></span>
-              
-              
+
+
               <span class="skew-marker mean" style="left: 47.49%;" title="Mean 7D Return -4.9%"></span>
-              
-              
+
+
               <span class="skew-marker median" style="left: 31.46%;" title="Median 7D Return -6.9%"></span>
-              
+
             </div>
             <div class="skew-values">
-              <span>Mean -4.9%</span>
-              <span>Median -6.9%</span>
-              <span>Gap 1.9pp | IQR 12.1pp</span>
+              <span><span data-i18n="meanLabel">Mean</span> -4.9%</span>
+              <span><span data-i18n="medianLabel">Median</span> -6.9%</span>
+              <span><span data-i18n="gapLabel">Gap</span> 1.9pp | IQR 12.1pp</span>
             </div>
           </div>
-          
-        </div>
-        <div class="axis-labels">
-          <span>-10.7%</span>
-          <span>1.4%</span>
+
         </div>
         <div class="legend">
-          <span class="legend-item"><span class="legend-dot mean"></span>Mean 7D Return</span>
-          <span class="legend-item"><span class="legend-dot median"></span>Median 7D Return</span>
+          <span class="legend-item"><span class="legend-dot mean"></span><span data-i18n="meanLegend">Mean 7D Return</span></span>
+          <span class="legend-item"><span class="legend-dot median"></span><span data-i18n="medianLegend">Median 7D Return</span></span>
         </div>
       </div>
     </section>
-    
+
 
     <section>
-      <h2>Narrative Ranking</h2>
-      <p class="section-note">The ranking table compares narrative-level analysis across momentum, relative strength, volume confirmation, breadth of participation, and concentration context.</p>
-      
-      
+      <h2 data-i18n="rankingHeading">Narrative Ranking</h2>
+      <p class="section-note" data-i18n="rankingCaption">The ranking table compares narrative-level analysis across momentum, relative strength, volume confirmation, breadth of participation, and concentration context.</p>
+
+
       <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              
-              <th>Rank</th>
-              
-              <th>Narrative</th>
-              
-              <th>Token Count</th>
-              
-              <th>Narrative Momentum Score</th>
-              
-              <th>Mean 7D Return</th>
-              
-              <th>Median 7D Return</th>
-              
-              <th>Mean 30D Return</th>
-              
-              <th>Total Market Cap</th>
-              
-              <th>Total Volume</th>
-              
-              <th>7D Breadth</th>
-              
-              <th>Avg RS vs BTC/ETH 7D</th>
-              
-              <th>Concentration</th>
-              
-            </tr>
-          </thead>
-          <tbody>
-            
-            <tr>
-              
-              <td>1</td>
-              
-              <td>Exchange Tokens</td>
-              
-              <td>10</td>
-              
-              <td>76.9</td>
-              
-              <td>0.4%</td>
-              
-              <td>-2.6%</td>
-              
-              <td>2.4%</td>
-              
-              <td>$129,302,164,885</td>
-              
-              <td>$1,482,824,826</td>
-              
-              <td>30.0%</td>
-              
-              <td>1.8%</td>
-              
-              <td>High</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>2</td>
-              
-              <td>DePIN</td>
-              
-              <td>10</td>
-              
-              <td>72.2</td>
-              
-              <td>-4.9%</td>
-              
-              <td>-7.5%</td>
-              
-              <td>14.1%</td>
-              
-              <td>$1,718,585,459</td>
-              
-              <td>$108,805,822</td>
-              
-              <td>10.0%</td>
-              
-              <td>-3.1%</td>
-              
-              <td>Medium</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>3</td>
-              
-              <td>Layer 1</td>
-              
-              <td>10</td>
-              
-              <td>69.1</td>
-              
-              <td>-5.2%</td>
-              
-              <td>-5.6%</td>
-              
-              <td>6.8%</td>
-              
-              <td>$2,002,481,112,774</td>
-              
-              <td>$44,205,001,268</td>
-              
-              <td>10.0%</td>
-              
-              <td>-1.3%</td>
-              
-              <td>High</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>4</td>
-              
-              <td>RWA</td>
-              
-              <td>10</td>
-              
-              <td>68.8</td>
-              
-              <td>-4.9%</td>
-              
-              <td>-6.9%</td>
-              
-              <td>0.3%</td>
-              
-              <td>$15,461,816,842</td>
-              
-              <td>$772,114,188</td>
-              
-              <td>40.0%</td>
-              
-              <td>-2.6%</td>
-              
-              <td>Medium</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>5</td>
-              
-              <td>Gaming / GameFi</td>
-              
-              <td>10</td>
-              
-              <td>55.3</td>
-              
-              <td>-9.1%</td>
-              
-              <td>-7.3%</td>
-              
-              <td>0.2%</td>
-              
-              <td>$1,054,597,173</td>
-              
-              <td>$107,664,239</td>
-              
-              <td>0.0%</td>
-              
-              <td>-3.0%</td>
-              
-              <td>Low</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>6</td>
-              
-              <td>DeFi</td>
-              
-              <td>10</td>
-              
-              <td>45.9</td>
-              
-              <td>-8.8%</td>
-              
-              <td>-8.4%</td>
-              
-              <td>4.8%</td>
-              
-              <td>$7,267,079,578</td>
-              
-              <td>$576,536,637</td>
-              
-              <td>0.0%</td>
-              
-              <td>-4.0%</td>
-              
-              <td>Medium</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>7</td>
-              
-              <td>AI</td>
-              
-              <td>10</td>
-              
-              <td>34.4</td>
-              
-              <td>-7.9%</td>
-              
-              <td>-7.5%</td>
-              
-              <td>0.4%</td>
-              
-              <td>$5,952,457,132</td>
-              
-              <td>$345,886,798</td>
-              
-              <td>10.0%</td>
-              
-              <td>-3.2%</td>
-              
-              <td>Medium</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>8</td>
-              
-              <td>Layer 2</td>
-              
-              <td>10</td>
-              
-              <td>27.5</td>
-              
-              <td>-9.7%</td>
-              
-              <td>-9.0%</td>
-              
-              <td>-1.0%</td>
-              
-              <td>$4,556,905,057</td>
-              
-              <td>$176,267,991</td>
-              
-              <td>0.0%</td>
-              
-              <td>-4.6%</td>
-              
-              <td>Medium</td>
-              
-            </tr>
-            
-          </tbody>
-        </table>
-      </div>
-      
+      <table>
+        <thead>
+          <tr>
+
+            <th>Rank</th>
+
+            <th>Narrative</th>
+
+            <th>Token Count</th>
+
+            <th>Narrative Momentum Score</th>
+
+            <th>Mean 7D Return</th>
+
+            <th>Median 7D Return</th>
+
+            <th>Mean 30D Return</th>
+
+            <th>Total Market Cap</th>
+
+            <th>Total Volume</th>
+
+            <th>7D Breadth</th>
+
+            <th>Avg RS vs BTC/ETH 7D</th>
+
+            <th>Concentration</th>
+
+          </tr>
+        </thead>
+        <tbody>
+
+
+
+          <tr>
+
+
+
+            <td>1</td>
+
+
+
+            <td>Exchange Tokens</td>
+
+
+
+            <td>10</td>
+
+
+
+            <td>76.9</td>
+
+
+
+            <td>0.4%</td>
+
+
+
+            <td>-2.6%</td>
+
+
+
+            <td>2.4%</td>
+
+
+
+            <td>$129,302,164,885</td>
+
+
+
+            <td>$1,482,824,826</td>
+
+
+
+            <td>30.0%</td>
+
+
+
+            <td>1.8%</td>
+
+
+
+            <td>High</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>2</td>
+
+
+
+            <td>DePIN</td>
+
+
+
+            <td>10</td>
+
+
+
+            <td>72.2</td>
+
+
+
+            <td>-4.9%</td>
+
+
+
+            <td>-7.5%</td>
+
+
+
+            <td>14.1%</td>
+
+
+
+            <td>$1,718,585,459</td>
+
+
+
+            <td>$108,805,822</td>
+
+
+
+            <td>10.0%</td>
+
+
+
+            <td>-3.1%</td>
+
+
+
+            <td>Medium</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>3</td>
+
+
+
+            <td>Layer 1</td>
+
+
+
+            <td>10</td>
+
+
+
+            <td>69.1</td>
+
+
+
+            <td>-5.2%</td>
+
+
+
+            <td>-5.6%</td>
+
+
+
+            <td>6.8%</td>
+
+
+
+            <td>$2,002,481,112,774</td>
+
+
+
+            <td>$44,205,001,268</td>
+
+
+
+            <td>10.0%</td>
+
+
+
+            <td>-1.3%</td>
+
+
+
+            <td>High</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>4</td>
+
+
+
+            <td>RWA</td>
+
+
+
+            <td>10</td>
+
+
+
+            <td>68.8</td>
+
+
+
+            <td>-4.9%</td>
+
+
+
+            <td>-6.9%</td>
+
+
+
+            <td>0.3%</td>
+
+
+
+            <td>$15,461,816,842</td>
+
+
+
+            <td>$772,114,188</td>
+
+
+
+            <td>40.0%</td>
+
+
+
+            <td>-2.6%</td>
+
+
+
+            <td>Medium</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>5</td>
+
+
+
+            <td>Gaming / GameFi</td>
+
+
+
+            <td>10</td>
+
+
+
+            <td>55.3</td>
+
+
+
+            <td>-9.1%</td>
+
+
+
+            <td>-7.3%</td>
+
+
+
+            <td>0.2%</td>
+
+
+
+            <td>$1,054,597,173</td>
+
+
+
+            <td>$107,664,239</td>
+
+
+
+            <td>0.0%</td>
+
+
+
+            <td>-3.0%</td>
+
+
+
+            <td>Low</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>6</td>
+
+
+
+            <td>DeFi</td>
+
+
+
+            <td>10</td>
+
+
+
+            <td>45.9</td>
+
+
+
+            <td>-8.8%</td>
+
+
+
+            <td>-8.4%</td>
+
+
+
+            <td>4.8%</td>
+
+
+
+            <td>$7,267,079,578</td>
+
+
+
+            <td>$576,536,637</td>
+
+
+
+            <td>0.0%</td>
+
+
+
+            <td>-4.0%</td>
+
+
+
+            <td>Medium</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>7</td>
+
+
+
+            <td>AI</td>
+
+
+
+            <td>10</td>
+
+
+
+            <td>34.4</td>
+
+
+
+            <td>-7.9%</td>
+
+
+
+            <td>-7.5%</td>
+
+
+
+            <td>0.4%</td>
+
+
+
+            <td>$5,952,457,132</td>
+
+
+
+            <td>$345,886,798</td>
+
+
+
+            <td>10.0%</td>
+
+
+
+            <td>-3.2%</td>
+
+
+
+            <td>Medium</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>8</td>
+
+
+
+            <td>Layer 2</td>
+
+
+
+            <td>10</td>
+
+
+
+            <td>27.5</td>
+
+
+
+            <td>-9.7%</td>
+
+
+
+            <td>-9.0%</td>
+
+
+
+            <td>-1.0%</td>
+
+
+
+            <td>$4,556,905,057</td>
+
+
+
+            <td>$176,267,991</td>
+
+
+
+            <td>0.0%</td>
+
+
+
+            <td>-4.6%</td>
+
+
+
+            <td>Medium</td>
+
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
     </section>
 
-    
+
     <section>
-      <h2>Score Component Breakdown</h2>
-      <p class="section-note">
+      <h2 data-i18n="componentHeading">Score Component Breakdown</h2>
+      <p class="section-note" data-i18n="componentCaption">
         Component scores are percentile-rank normalized within the current narrative universe and combined into the Narrative Momentum Score. They are relative research ranking inputs, not statistical confidence.
       </p>
-      
+
       <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              
-              <th>Rank</th>
-              
-              <th>Narrative</th>
-              
-              <th>Narrative Momentum Score</th>
-              
-              <th>Price Momentum Score</th>
-              
-              <th>Relative Strength Score</th>
-              
-              <th>Volume Confirmation Score</th>
-              
-              <th>Breadth Score</th>
-              
-              <th>Scoring Note</th>
-              
-            </tr>
-          </thead>
-          <tbody>
-            
-            <tr>
-              
-              <td>1</td>
-              
-              <td>Exchange Tokens</td>
-              
-              <td>76.9</td>
-              
-              <td>100.0</td>
-              
-              <td>100.0</td>
-              
-              <td>12.5</td>
-              
-              <td>62.5</td>
-              
-              <td>Full V1 scoring weights applied.</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>2</td>
-              
-              <td>DePIN</td>
-              
-              <td>72.2</td>
-              
-              <td>87.5</td>
-              
-              <td>50.0</td>
-              
-              <td>62.5</td>
-              
-              <td>81.2</td>
-              
-              <td>Full V1 scoring weights applied.</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>3</td>
-              
-              <td>Layer 1</td>
-              
-              <td>69.1</td>
-              
-              <td>75.0</td>
-              
-              <td>87.5</td>
-              
-              <td>25.0</td>
-              
-              <td>81.2</td>
-              
-              <td>Full V1 scoring weights applied.</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>4</td>
-              
-              <td>RWA</td>
-              
-              <td>68.8</td>
-              
-              <td>62.5</td>
-              
-              <td>75.0</td>
-              
-              <td>50.0</td>
-              
-              <td>100.0</td>
-              
-              <td>Full V1 scoring weights applied.</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>5</td>
-              
-              <td>Gaming / GameFi</td>
-              
-              <td>55.3</td>
-              
-              <td>37.5</td>
-              
-              <td>62.5</td>
-              
-              <td>100.0</td>
-              
-              <td>31.2</td>
-              
-              <td>Full V1 scoring weights applied.</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>6</td>
-              
-              <td>DeFi</td>
-              
-              <td>45.9</td>
-              
-              <td>50.0</td>
-              
-              <td>25.0</td>
-              
-              <td>75.0</td>
-              
-              <td>31.2</td>
-              
-              <td>Full V1 scoring weights applied.</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>7</td>
-              
-              <td>AI</td>
-              
-              <td>34.4</td>
-              
-              <td>25.0</td>
-              
-              <td>37.5</td>
-              
-              <td>37.5</td>
-              
-              <td>50.0</td>
-              
-              <td>Full V1 scoring weights applied.</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>8</td>
-              
-              <td>Layer 2</td>
-              
-              <td>27.5</td>
-              
-              <td>12.5</td>
-              
-              <td>12.5</td>
-              
-              <td>87.5</td>
-              
-              <td>12.5</td>
-              
-              <td>Full V1 scoring weights applied.</td>
-              
-            </tr>
-            
-          </tbody>
-        </table>
-      </div>
+      <table>
+        <thead>
+          <tr>
+
+            <th>Rank</th>
+
+            <th>Narrative</th>
+
+            <th>Narrative Momentum Score</th>
+
+            <th>Price Momentum Score</th>
+
+            <th>Relative Strength Score</th>
+
+            <th>Volume Confirmation Score</th>
+
+            <th>Breadth Score</th>
+
+            <th>Scoring Note</th>
+
+          </tr>
+        </thead>
+        <tbody>
+
+
+
+          <tr>
+
+
+
+            <td>1</td>
+
+
+
+            <td>Exchange Tokens</td>
+
+
+
+            <td>76.9</td>
+
+
+
+            <td>100.0</td>
+
+
+
+            <td>100.0</td>
+
+
+
+            <td>12.5</td>
+
+
+
+            <td>62.5</td>
+
+
+
+            <td data-en-text="Full V1 scoring weights applied." data-th-text="ใช้ weighting ของ V1 scoring ครบถ้วน">Full V1 scoring weights applied.</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>2</td>
+
+
+
+            <td>DePIN</td>
+
+
+
+            <td>72.2</td>
+
+
+
+            <td>87.5</td>
+
+
+
+            <td>50.0</td>
+
+
+
+            <td>62.5</td>
+
+
+
+            <td>81.2</td>
+
+
+
+            <td data-en-text="Full V1 scoring weights applied." data-th-text="ใช้ weighting ของ V1 scoring ครบถ้วน">Full V1 scoring weights applied.</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>3</td>
+
+
+
+            <td>Layer 1</td>
+
+
+
+            <td>69.1</td>
+
+
+
+            <td>75.0</td>
+
+
+
+            <td>87.5</td>
+
+
+
+            <td>25.0</td>
+
+
+
+            <td>81.2</td>
+
+
+
+            <td data-en-text="Full V1 scoring weights applied." data-th-text="ใช้ weighting ของ V1 scoring ครบถ้วน">Full V1 scoring weights applied.</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>4</td>
+
+
+
+            <td>RWA</td>
+
+
+
+            <td>68.8</td>
+
+
+
+            <td>62.5</td>
+
+
+
+            <td>75.0</td>
+
+
+
+            <td>50.0</td>
+
+
+
+            <td>100.0</td>
+
+
+
+            <td data-en-text="Full V1 scoring weights applied." data-th-text="ใช้ weighting ของ V1 scoring ครบถ้วน">Full V1 scoring weights applied.</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>5</td>
+
+
+
+            <td>Gaming / GameFi</td>
+
+
+
+            <td>55.3</td>
+
+
+
+            <td>37.5</td>
+
+
+
+            <td>62.5</td>
+
+
+
+            <td>100.0</td>
+
+
+
+            <td>31.2</td>
+
+
+
+            <td data-en-text="Full V1 scoring weights applied." data-th-text="ใช้ weighting ของ V1 scoring ครบถ้วน">Full V1 scoring weights applied.</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>6</td>
+
+
+
+            <td>DeFi</td>
+
+
+
+            <td>45.9</td>
+
+
+
+            <td>50.0</td>
+
+
+
+            <td>25.0</td>
+
+
+
+            <td>75.0</td>
+
+
+
+            <td>31.2</td>
+
+
+
+            <td data-en-text="Full V1 scoring weights applied." data-th-text="ใช้ weighting ของ V1 scoring ครบถ้วน">Full V1 scoring weights applied.</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>7</td>
+
+
+
+            <td>AI</td>
+
+
+
+            <td>34.4</td>
+
+
+
+            <td>25.0</td>
+
+
+
+            <td>37.5</td>
+
+
+
+            <td>37.5</td>
+
+
+
+            <td>50.0</td>
+
+
+
+            <td data-en-text="Full V1 scoring weights applied." data-th-text="ใช้ weighting ของ V1 scoring ครบถ้วน">Full V1 scoring weights applied.</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>8</td>
+
+
+
+            <td>Layer 2</td>
+
+
+
+            <td>27.5</td>
+
+
+
+            <td>12.5</td>
+
+
+
+            <td>12.5</td>
+
+
+
+            <td>87.5</td>
+
+
+
+            <td>12.5</td>
+
+
+
+            <td data-en-text="Full V1 scoring weights applied." data-th-text="ใช้ weighting ของ V1 scoring ครบถ้วน">Full V1 scoring weights applied.</td>
+
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
     </section>
-    
+
 
     <section>
-      <h2>Return Skew Diagnostics</h2>
-      <p class="section-note">
+      <h2 data-i18n="returnSkewHeading">Return Skew Diagnostics</h2>
+      <p class="section-note" data-i18n="returnSkewCaption">
         This diagnostic compares mean, median, and IQR of 7D returns to show whether a narrative basket is broadly representative or influenced by one/few return outliers. It is diagnostic-only and does not affect the Narrative Momentum Score.
       </p>
-      
-      
-      
+
+
+
       <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              
-              <th>Narrative</th>
-              
-              <th>Mean 7D Return</th>
-              
-              <th>Median 7D Return</th>
-              
-              <th>Mean-Median Gap</th>
-              
-              <th>7D Return IQR</th>
-              
-              <th>Top 7D Token</th>
-              
-              <th>Bottom 7D Token</th>
-              
-              <th>Review Flag</th>
-              
-              <th>Diagnostic Note</th>
-              
-            </tr>
-          </thead>
-          <tbody>
-            
-            <tr>
-              
-              <td>AI</td>
-              
-              <td>-7.9%</td>
-              
-              <td>-7.5%</td>
-              
-              <td>-0.4pp</td>
-              
-              <td>4.1pp</td>
-              
-              <td>RENDER (2.1%)</td>
-              
-              <td>NOS (-14.2%)</td>
-              
-              <td>No Review</td>
-              
-              <td>Mean-median gap was -0.4pp and 7D return IQR was 4.1pp; neither exceeded V1 review thresholds.</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DeFi</td>
-              
-              <td>-8.8%</td>
-              
-              <td>-8.4%</td>
-              
-              <td>-0.4pp</td>
-              
-              <td>2.6pp</td>
-              
-              <td>COMP (-0.6%)</td>
-              
-              <td>RUNE (-24.7%)</td>
-              
-              <td>No Review</td>
-              
-              <td>Mean-median gap was -0.4pp and 7D return IQR was 2.6pp; neither exceeded V1 review thresholds.</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DePIN</td>
-              
-              <td>-4.9%</td>
-              
-              <td>-7.5%</td>
-              
-              <td>2.6pp</td>
-              
-              <td>5.2pp</td>
-              
-              <td>PEAQ (21.8%)</td>
-              
-              <td>IOTX (-15.8%)</td>
-              
-              <td>No Review</td>
-              
-              <td>Mean-median gap was 2.6pp and 7D return IQR was 5.2pp; neither exceeded V1 review thresholds.</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Exchange Tokens</td>
-              
-              <td>0.4%</td>
-              
-              <td>-2.6%</td>
-              
-              <td>3.0pp</td>
-              
-              <td>3.7pp</td>
-              
-              <td>HYPE (31.5%)</td>
-              
-              <td>CRO (-9.5%)</td>
-              
-              <td>Skew Review</td>
-              
-              <td>Mean-median gap was 3.0pp. Top 7D token was HYPE at 31.5%; bottom 7D token was CRO at -9.5%.</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Gaming / GameFi</td>
-              
-              <td>-9.1%</td>
-              
-              <td>-7.3%</td>
-              
-              <td>-1.7pp</td>
-              
-              <td>3.8pp</td>
-              
-              <td>RON (-3.1%)</td>
-              
-              <td>PIXEL (-17.2%)</td>
-              
-              <td>No Review</td>
-              
-              <td>Mean-median gap was -1.7pp and 7D return IQR was 3.8pp; neither exceeded V1 review thresholds.</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Layer 1</td>
-              
-              <td>-5.2%</td>
-              
-              <td>-5.6%</td>
-              
-              <td>0.4pp</td>
-              
-              <td>2.7pp</td>
-              
-              <td>TRX (2.2%)</td>
-              
-              <td>SUI (-11.7%)</td>
-              
-              <td>No Review</td>
-              
-              <td>Mean-median gap was 0.4pp and 7D return IQR was 2.7pp; neither exceeded V1 review thresholds.</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Layer 2</td>
-              
-              <td>-9.7%</td>
-              
-              <td>-9.0%</td>
-              
-              <td>-0.7pp</td>
-              
-              <td>4.8pp</td>
-              
-              <td>MNT (-4.1%)</td>
-              
-              <td>ARB (-15.7%)</td>
-              
-              <td>No Review</td>
-              
-              <td>Mean-median gap was -0.7pp and 7D return IQR was 4.8pp; neither exceeded V1 review thresholds.</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>RWA</td>
-              
-              <td>-4.9%</td>
-              
-              <td>-6.9%</td>
-              
-              <td>1.9pp</td>
-              
-              <td>12.1pp</td>
-              
-              <td>POLYX (5.4%)</td>
-              
-              <td>GFI (-21.6%)</td>
-              
-              <td>Dispersion Review</td>
-              
-              <td>7D return IQR was 12.1pp versus snapshot median IQR of 3.9pp. Top 7D token was POLYX at 5.4%; bottom 7D token was GFI at -21.6%.</td>
-              
-            </tr>
-            
-          </tbody>
-        </table>
-      </div>
-      
+      <table>
+        <thead>
+          <tr>
+
+            <th>Narrative</th>
+
+            <th>Mean 7D Return</th>
+
+            <th>Median 7D Return</th>
+
+            <th>Mean-Median Gap</th>
+
+            <th>7D Return IQR</th>
+
+            <th>Top 7D Token</th>
+
+            <th>Bottom 7D Token</th>
+
+            <th>Review Flag</th>
+
+            <th>Diagnostic Note</th>
+
+          </tr>
+        </thead>
+        <tbody>
+
+
+
+          <tr>
+
+
+
+            <td>AI</td>
+
+
+
+            <td>-7.9%</td>
+
+
+
+            <td>-7.5%</td>
+
+
+
+            <td>-0.4pp</td>
+
+
+
+            <td>4.1pp</td>
+
+
+
+            <td>RENDER (2.1%)</td>
+
+
+
+            <td>NOS (-14.2%)</td>
+
+
+
+            <td data-en-text="No Review" data-th-text="ไม่ต้อง Review">No Review</td>
+
+
+
+            <td data-en-text="Mean-median gap was -0.4pp and 7D return IQR was 4.1pp; neither exceeded V1 review thresholds." data-th-text="ช่องว่างระหว่าง mean และ median อยู่ที่ -0.4pp และ IQR ของ 7D return อยู่ที่ 4.1pp; ทั้งสองค่าไม่เกิน threshold สำหรับ review ใน V1.">Mean-median gap was -0.4pp and 7D return IQR was 4.1pp; neither exceeded V1 review thresholds.</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DeFi</td>
+
+
+
+            <td>-8.8%</td>
+
+
+
+            <td>-8.4%</td>
+
+
+
+            <td>-0.4pp</td>
+
+
+
+            <td>2.6pp</td>
+
+
+
+            <td>COMP (-0.6%)</td>
+
+
+
+            <td>RUNE (-24.7%)</td>
+
+
+
+            <td data-en-text="No Review" data-th-text="ไม่ต้อง Review">No Review</td>
+
+
+
+            <td data-en-text="Mean-median gap was -0.4pp and 7D return IQR was 2.6pp; neither exceeded V1 review thresholds." data-th-text="ช่องว่างระหว่าง mean และ median อยู่ที่ -0.4pp และ IQR ของ 7D return อยู่ที่ 2.6pp; ทั้งสองค่าไม่เกิน threshold สำหรับ review ใน V1.">Mean-median gap was -0.4pp and 7D return IQR was 2.6pp; neither exceeded V1 review thresholds.</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DePIN</td>
+
+
+
+            <td>-4.9%</td>
+
+
+
+            <td>-7.5%</td>
+
+
+
+            <td>2.6pp</td>
+
+
+
+            <td>5.2pp</td>
+
+
+
+            <td>PEAQ (21.8%)</td>
+
+
+
+            <td>IOTX (-15.8%)</td>
+
+
+
+            <td data-en-text="No Review" data-th-text="ไม่ต้อง Review">No Review</td>
+
+
+
+            <td data-en-text="Mean-median gap was 2.6pp and 7D return IQR was 5.2pp; neither exceeded V1 review thresholds." data-th-text="ช่องว่างระหว่าง mean และ median อยู่ที่ 2.6pp และ IQR ของ 7D return อยู่ที่ 5.2pp; ทั้งสองค่าไม่เกิน threshold สำหรับ review ใน V1.">Mean-median gap was 2.6pp and 7D return IQR was 5.2pp; neither exceeded V1 review thresholds.</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Exchange Tokens</td>
+
+
+
+            <td>0.4%</td>
+
+
+
+            <td>-2.6%</td>
+
+
+
+            <td>3.0pp</td>
+
+
+
+            <td>3.7pp</td>
+
+
+
+            <td>HYPE (31.5%)</td>
+
+
+
+            <td>CRO (-9.5%)</td>
+
+
+
+            <td data-en-text="Skew Review" data-th-text="Review เพราะ Skew">Skew Review</td>
+
+
+
+            <td data-en-text="Mean-median gap was 3.0pp. Top 7D token was HYPE at 31.5%; bottom 7D token was CRO at -9.5%." data-th-text="ช่องว่างระหว่าง mean และ median อยู่ที่ 3.0pp. token ที่แข็งแรงที่สุดใน 7D คือ HYPE ที่ 31.5% และ token ที่อ่อนที่สุดคือ CRO ที่ -9.5%.">Mean-median gap was 3.0pp. Top 7D token was HYPE at 31.5%; bottom 7D token was CRO at -9.5%.</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Gaming / GameFi</td>
+
+
+
+            <td>-9.1%</td>
+
+
+
+            <td>-7.3%</td>
+
+
+
+            <td>-1.7pp</td>
+
+
+
+            <td>3.8pp</td>
+
+
+
+            <td>RON (-3.1%)</td>
+
+
+
+            <td>PIXEL (-17.2%)</td>
+
+
+
+            <td data-en-text="No Review" data-th-text="ไม่ต้อง Review">No Review</td>
+
+
+
+            <td data-en-text="Mean-median gap was -1.7pp and 7D return IQR was 3.8pp; neither exceeded V1 review thresholds." data-th-text="ช่องว่างระหว่าง mean และ median อยู่ที่ -1.7pp และ IQR ของ 7D return อยู่ที่ 3.8pp; ทั้งสองค่าไม่เกิน threshold สำหรับ review ใน V1.">Mean-median gap was -1.7pp and 7D return IQR was 3.8pp; neither exceeded V1 review thresholds.</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Layer 1</td>
+
+
+
+            <td>-5.2%</td>
+
+
+
+            <td>-5.6%</td>
+
+
+
+            <td>0.4pp</td>
+
+
+
+            <td>2.7pp</td>
+
+
+
+            <td>TRX (2.2%)</td>
+
+
+
+            <td>SUI (-11.7%)</td>
+
+
+
+            <td data-en-text="No Review" data-th-text="ไม่ต้อง Review">No Review</td>
+
+
+
+            <td data-en-text="Mean-median gap was 0.4pp and 7D return IQR was 2.7pp; neither exceeded V1 review thresholds." data-th-text="ช่องว่างระหว่าง mean และ median อยู่ที่ 0.4pp และ IQR ของ 7D return อยู่ที่ 2.7pp; ทั้งสองค่าไม่เกิน threshold สำหรับ review ใน V1.">Mean-median gap was 0.4pp and 7D return IQR was 2.7pp; neither exceeded V1 review thresholds.</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Layer 2</td>
+
+
+
+            <td>-9.7%</td>
+
+
+
+            <td>-9.0%</td>
+
+
+
+            <td>-0.7pp</td>
+
+
+
+            <td>4.8pp</td>
+
+
+
+            <td>MNT (-4.1%)</td>
+
+
+
+            <td>ARB (-15.7%)</td>
+
+
+
+            <td data-en-text="No Review" data-th-text="ไม่ต้อง Review">No Review</td>
+
+
+
+            <td data-en-text="Mean-median gap was -0.7pp and 7D return IQR was 4.8pp; neither exceeded V1 review thresholds." data-th-text="ช่องว่างระหว่าง mean และ median อยู่ที่ -0.7pp และ IQR ของ 7D return อยู่ที่ 4.8pp; ทั้งสองค่าไม่เกิน threshold สำหรับ review ใน V1.">Mean-median gap was -0.7pp and 7D return IQR was 4.8pp; neither exceeded V1 review thresholds.</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>RWA</td>
+
+
+
+            <td>-4.9%</td>
+
+
+
+            <td>-6.9%</td>
+
+
+
+            <td>1.9pp</td>
+
+
+
+            <td>12.1pp</td>
+
+
+
+            <td>POLYX (5.4%)</td>
+
+
+
+            <td>GFI (-21.6%)</td>
+
+
+
+            <td data-en-text="Dispersion Review" data-th-text="Review เพราะ Dispersion">Dispersion Review</td>
+
+
+
+            <td data-en-text="7D return IQR was 12.1pp versus snapshot median IQR of 3.9pp. Top 7D token was POLYX at 5.4%; bottom 7D token was GFI at -21.6%." data-th-text="IQR ของ 7D return อยู่ที่ 12.1pp เทียบกับ snapshot median IQR ที่ 3.9pp. token ที่แข็งแรงที่สุดใน 7D คือ POLYX ที่ 5.4% และ token ที่อ่อนที่สุดคือ GFI ที่ -21.6%.">7D return IQR was 12.1pp versus snapshot median IQR of 3.9pp. Top 7D token was POLYX at 5.4%; bottom 7D token was GFI at -21.6%.</td>
+
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
     </section>
 
     <section>
-      <h2>Token-Level Contributors</h2>
-      <p class="section-note">Token-level contributors show which assets are contributing most to narrative-level market activity.</p>
-      
-      
-      
+      <h2 data-i18n="contributorsHeading">Token-Level Contributors</h2>
+      <p class="section-note" data-i18n="contributorsCaption">Token-level contributors show which assets are contributing most to narrative-level market activity.</p>
+
+
+
       <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              
-              <th>Narrative</th>
-              
-              <th>Symbol</th>
-              
-              <th>Name</th>
-              
-              <th>Total Volume</th>
-              
-              <th>Market Cap</th>
-              
-              <th>7D Return</th>
-              
-              <th>Volume Share</th>
-              
-              <th>Market Cap Share</th>
-              
-            </tr>
-          </thead>
-          <tbody>
-            
-            <tr>
-              
-              <td>AI</td>
-              
-              <td>TAO</td>
-              
-              <td>Bittensor</td>
-              
-              <td>$139,341,085</td>
-              
-              <td>$2,629,417,353</td>
-              
-              <td>-7.8%</td>
-              
-              <td>40.3%</td>
-              
-              <td>44.2%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>AI</td>
-              
-              <td>RENDER</td>
-              
-              <td>Render</td>
-              
-              <td>$47,657,428</td>
-              
-              <td>$998,816,453</td>
-              
-              <td>2.1%</td>
-              
-              <td>13.8%</td>
-              
-              <td>16.8%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>AI</td>
-              
-              <td>WLD</td>
-              
-              <td>Worldcoin</td>
-              
-              <td>$45,972,776</td>
-              
-              <td>$835,342,680</td>
-              
-              <td>-7.2%</td>
-              
-              <td>13.3%</td>
-              
-              <td>14.0%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>AI</td>
-              
-              <td>VIRTUAL</td>
-              
-              <td>Virtuals Protocol</td>
-              
-              <td>$45,286,351</td>
-              
-              <td>$483,172,732</td>
-              
-              <td>-6.6%</td>
-              
-              <td>13.1%</td>
-              
-              <td>8.1%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>AI</td>
-              
-              <td>FET</td>
-              
-              <td>Artificial Superintelligence Alliance</td>
-              
-              <td>$40,469,330</td>
-              
-              <td>$435,916,263</td>
-              
-              <td>-11.1%</td>
-              
-              <td>11.7%</td>
-              
-              <td>7.3%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DeFi</td>
-              
-              <td>UNI</td>
-              
-              <td>Uniswap</td>
-              
-              <td>$192,620,568</td>
-              
-              <td>$2,314,785,507</td>
-              
-              <td>-0.8%</td>
-              
-              <td>33.4%</td>
-              
-              <td>31.9%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DeFi</td>
-              
-              <td>AAVE</td>
-              
-              <td>Aave</td>
-              
-              <td>$176,253,218</td>
-              
-              <td>$1,344,969,930</td>
-              
-              <td>-8.2%</td>
-              
-              <td>30.6%</td>
-              
-              <td>18.5%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DeFi</td>
-              
-              <td>ENA</td>
-              
-              <td>Ethena</td>
-              
-              <td>$71,982,580</td>
-              
-              <td>$963,481,825</td>
-              
-              <td>-9.6%</td>
-              
-              <td>12.5%</td>
-              
-              <td>13.3%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DeFi</td>
-              
-              <td>PENDLE</td>
-              
-              <td>Pendle</td>
-              
-              <td>$30,839,023</td>
-              
-              <td>$312,204,457</td>
-              
-              <td>-9.2%</td>
-              
-              <td>5.3%</td>
-              
-              <td>4.3%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DeFi</td>
-              
-              <td>COMP</td>
-              
-              <td>Compound</td>
-              
-              <td>$26,928,986</td>
-              
-              <td>$221,976,907</td>
-              
-              <td>-0.6%</td>
-              
-              <td>4.7%</td>
-              
-              <td>3.1%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DePIN</td>
-              
-              <td>FIL</td>
-              
-              <td>Filecoin</td>
-              
-              <td>$49,973,160</td>
-              
-              <td>$757,140,348</td>
-              
-              <td>-8.7%</td>
-              
-              <td>45.9%</td>
-              
-              <td>44.1%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DePIN</td>
-              
-              <td>AR</td>
-              
-              <td>Arweave</td>
-              
-              <td>$18,228,537</td>
-              
-              <td>$145,929,708</td>
-              
-              <td>-3.6%</td>
-              
-              <td>16.8%</td>
-              
-              <td>8.5%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DePIN</td>
-              
-              <td>AKT</td>
-              
-              <td>Akash Network</td>
-              
-              <td>$9,452,962</td>
-              
-              <td>$232,077,485</td>
-              
-              <td>-11.0%</td>
-              
-              <td>8.7%</td>
-              
-              <td>13.5%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DePIN</td>
-              
-              <td>GLM</td>
-              
-              <td>Golem</td>
-              
-              <td>$7,571,981</td>
-              
-              <td>$134,918,249</td>
-              
-              <td>-6.9%</td>
-              
-              <td>7.0%</td>
-              
-              <td>7.9%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DePIN</td>
-              
-              <td>LPT</td>
-              
-              <td>Livepeer</td>
-              
-              <td>$7,222,126</td>
-              
-              <td>$101,825,707</td>
-              
-              <td>-8.0%</td>
-              
-              <td>6.6%</td>
-              
-              <td>5.9%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Exchange Tokens</td>
-              
-              <td>HYPE</td>
-              
-              <td>Hyperliquid</td>
-              
-              <td>$814,468,195</td>
-              
-              <td>$12,255,749,667</td>
-              
-              <td>31.5%</td>
-              
-              <td>54.9%</td>
-              
-              <td>9.5%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Exchange Tokens</td>
-              
-              <td>BNB</td>
-              
-              <td>BNB</td>
-              
-              <td>$580,060,912</td>
-              
-              <td>$87,429,053,800</td>
-              
-              <td>-2.9%</td>
-              
-              <td>39.1%</td>
-              
-              <td>67.6%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Exchange Tokens</td>
-              
-              <td>WBT</td>
-              
-              <td>WhiteBIT Coin</td>
-              
-              <td>$36,562,153</td>
-              
-              <td>$12,175,453,635</td>
-              
-              <td>-2.3%</td>
-              
-              <td>2.5%</td>
-              
-              <td>9.4%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Exchange Tokens</td>
-              
-              <td>OKB</td>
-              
-              <td>OKB</td>
-              
-              <td>$15,025,694</td>
-              
-              <td>$1,700,233,095</td>
-              
-              <td>-4.4%</td>
-              
-              <td>1.0%</td>
-              
-              <td>1.3%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Exchange Tokens</td>
-              
-              <td>BGB</td>
-              
-              <td>Bitget Token</td>
-              
-              <td>$14,168,949</td>
-              
-              <td>$1,404,924,260</td>
-              
-              <td>-2.1%</td>
-              
-              <td>1.0%</td>
-              
-              <td>1.1%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Gaming / GameFi</td>
-              
-              <td>AXS</td>
-              
-              <td>Axie Infinity</td>
-              
-              <td>$19,990,352</td>
-              
-              <td>$209,240,564</td>
-              
-              <td>-7.4%</td>
-              
-              <td>18.6%</td>
-              
-              <td>19.8%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Gaming / GameFi</td>
-              
-              <td>SAND</td>
-              
-              <td>The Sandbox</td>
-              
-              <td>$16,985,938</td>
-              
-              <td>$192,514,018</td>
-              
-              <td>-7.2%</td>
-              
-              <td>15.8%</td>
-              
-              <td>18.3%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Gaming / GameFi</td>
-              
-              <td>GALA</td>
-              
-              <td>Gala</td>
-              
-              <td>$16,172,384</td>
-              
-              <td>$164,143,725</td>
-              
-              <td>-7.2%</td>
-              
-              <td>15.0%</td>
-              
-              <td>15.6%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Gaming / GameFi</td>
-              
-              <td>RON</td>
-              
-              <td>Ronin</td>
-              
-              <td>$14,859,360</td>
-              
-              <td>$80,096,989</td>
-              
-              <td>-3.1%</td>
-              
-              <td>13.8%</td>
-              
-              <td>7.6%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Gaming / GameFi</td>
-              
-              <td>IMX</td>
-              
-              <td>Immutable</td>
-              
-              <td>$13,188,475</td>
-              
-              <td>$145,010,222</td>
-              
-              <td>-9.5%</td>
-              
-              <td>12.2%</td>
-              
-              <td>13.8%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Layer 1</td>
-              
-              <td>BTC</td>
-              
-              <td>Bitcoin</td>
-              
-              <td>$28,236,337,889</td>
-              
-              <td>$1,551,088,489,162</td>
-              
-              <td>-2.8%</td>
-              
-              <td>63.9%</td>
-              
-              <td>77.5%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Layer 1</td>
-              
-              <td>ETH</td>
-              
-              <td>Ethereum</td>
-              
-              <td>$10,542,658,690</td>
-              
-              <td>$257,738,462,247</td>
-              
-              <td>-5.8%</td>
-              
-              <td>23.8%</td>
-              
-              <td>12.9%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Layer 1</td>
-              
-              <td>SOL</td>
-              
-              <td>Solana</td>
-              
-              <td>$2,040,042,878</td>
-              
-              <td>$49,626,878,727</td>
-              
-              <td>-7.0%</td>
-              
-              <td>4.6%</td>
-              
-              <td>2.5%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Layer 1</td>
-              
-              <td>XRP</td>
-              
-              <td>XRP</td>
-              
-              <td>$1,763,694,291</td>
-              
-              <td>$84,952,403,515</td>
-              
-              <td>-3.8%</td>
-              
-              <td>4.0%</td>
-              
-              <td>4.2%</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Layer 1</td>
-              
-              <td>TRX</td>
-              
-              <td>TRON</td>
-              
-              <td>$464,668,706</td>
-              
-              <td>$33,963,728,065</td>
-              
-              <td>2.2%</td>
-              
-              <td>1.1%</td>
-              
-              <td>1.7%</td>
-              
-            </tr>
-            
-          </tbody>
-        </table>
-      </div>
-      
+      <table>
+        <thead>
+          <tr>
+
+            <th>Narrative</th>
+
+            <th>Symbol</th>
+
+            <th>Name</th>
+
+            <th>Total Volume</th>
+
+            <th>Market Cap</th>
+
+            <th>7D Return</th>
+
+            <th>Volume Share</th>
+
+            <th>Market Cap Share</th>
+
+          </tr>
+        </thead>
+        <tbody>
+
+
+
+          <tr>
+
+
+
+            <td>AI</td>
+
+
+
+            <td>TAO</td>
+
+
+
+            <td>Bittensor</td>
+
+
+
+            <td>$139,341,085</td>
+
+
+
+            <td>$2,629,417,353</td>
+
+
+
+            <td>-7.8%</td>
+
+
+
+            <td>40.3%</td>
+
+
+
+            <td>44.2%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>AI</td>
+
+
+
+            <td>RENDER</td>
+
+
+
+            <td>Render</td>
+
+
+
+            <td>$47,657,428</td>
+
+
+
+            <td>$998,816,453</td>
+
+
+
+            <td>2.1%</td>
+
+
+
+            <td>13.8%</td>
+
+
+
+            <td>16.8%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>AI</td>
+
+
+
+            <td>WLD</td>
+
+
+
+            <td>Worldcoin</td>
+
+
+
+            <td>$45,972,776</td>
+
+
+
+            <td>$835,342,680</td>
+
+
+
+            <td>-7.2%</td>
+
+
+
+            <td>13.3%</td>
+
+
+
+            <td>14.0%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>AI</td>
+
+
+
+            <td>VIRTUAL</td>
+
+
+
+            <td>Virtuals Protocol</td>
+
+
+
+            <td>$45,286,351</td>
+
+
+
+            <td>$483,172,732</td>
+
+
+
+            <td>-6.6%</td>
+
+
+
+            <td>13.1%</td>
+
+
+
+            <td>8.1%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>AI</td>
+
+
+
+            <td>FET</td>
+
+
+
+            <td>Artificial Superintelligence Alliance</td>
+
+
+
+            <td>$40,469,330</td>
+
+
+
+            <td>$435,916,263</td>
+
+
+
+            <td>-11.1%</td>
+
+
+
+            <td>11.7%</td>
+
+
+
+            <td>7.3%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DeFi</td>
+
+
+
+            <td>UNI</td>
+
+
+
+            <td>Uniswap</td>
+
+
+
+            <td>$192,620,568</td>
+
+
+
+            <td>$2,314,785,507</td>
+
+
+
+            <td>-0.8%</td>
+
+
+
+            <td>33.4%</td>
+
+
+
+            <td>31.9%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DeFi</td>
+
+
+
+            <td>AAVE</td>
+
+
+
+            <td>Aave</td>
+
+
+
+            <td>$176,253,218</td>
+
+
+
+            <td>$1,344,969,930</td>
+
+
+
+            <td>-8.2%</td>
+
+
+
+            <td>30.6%</td>
+
+
+
+            <td>18.5%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DeFi</td>
+
+
+
+            <td>ENA</td>
+
+
+
+            <td>Ethena</td>
+
+
+
+            <td>$71,982,580</td>
+
+
+
+            <td>$963,481,825</td>
+
+
+
+            <td>-9.6%</td>
+
+
+
+            <td>12.5%</td>
+
+
+
+            <td>13.3%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DeFi</td>
+
+
+
+            <td>PENDLE</td>
+
+
+
+            <td>Pendle</td>
+
+
+
+            <td>$30,839,023</td>
+
+
+
+            <td>$312,204,457</td>
+
+
+
+            <td>-9.2%</td>
+
+
+
+            <td>5.3%</td>
+
+
+
+            <td>4.3%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DeFi</td>
+
+
+
+            <td>COMP</td>
+
+
+
+            <td>Compound</td>
+
+
+
+            <td>$26,928,986</td>
+
+
+
+            <td>$221,976,907</td>
+
+
+
+            <td>-0.6%</td>
+
+
+
+            <td>4.7%</td>
+
+
+
+            <td>3.1%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DePIN</td>
+
+
+
+            <td>FIL</td>
+
+
+
+            <td>Filecoin</td>
+
+
+
+            <td>$49,973,160</td>
+
+
+
+            <td>$757,140,348</td>
+
+
+
+            <td>-8.7%</td>
+
+
+
+            <td>45.9%</td>
+
+
+
+            <td>44.1%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DePIN</td>
+
+
+
+            <td>AR</td>
+
+
+
+            <td>Arweave</td>
+
+
+
+            <td>$18,228,537</td>
+
+
+
+            <td>$145,929,708</td>
+
+
+
+            <td>-3.6%</td>
+
+
+
+            <td>16.8%</td>
+
+
+
+            <td>8.5%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DePIN</td>
+
+
+
+            <td>AKT</td>
+
+
+
+            <td>Akash Network</td>
+
+
+
+            <td>$9,452,962</td>
+
+
+
+            <td>$232,077,485</td>
+
+
+
+            <td>-11.0%</td>
+
+
+
+            <td>8.7%</td>
+
+
+
+            <td>13.5%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DePIN</td>
+
+
+
+            <td>GLM</td>
+
+
+
+            <td>Golem</td>
+
+
+
+            <td>$7,571,981</td>
+
+
+
+            <td>$134,918,249</td>
+
+
+
+            <td>-6.9%</td>
+
+
+
+            <td>7.0%</td>
+
+
+
+            <td>7.9%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DePIN</td>
+
+
+
+            <td>LPT</td>
+
+
+
+            <td>Livepeer</td>
+
+
+
+            <td>$7,222,126</td>
+
+
+
+            <td>$101,825,707</td>
+
+
+
+            <td>-8.0%</td>
+
+
+
+            <td>6.6%</td>
+
+
+
+            <td>5.9%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Exchange Tokens</td>
+
+
+
+            <td>HYPE</td>
+
+
+
+            <td>Hyperliquid</td>
+
+
+
+            <td>$814,468,195</td>
+
+
+
+            <td>$12,255,749,667</td>
+
+
+
+            <td>31.5%</td>
+
+
+
+            <td>54.9%</td>
+
+
+
+            <td>9.5%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Exchange Tokens</td>
+
+
+
+            <td>BNB</td>
+
+
+
+            <td>BNB</td>
+
+
+
+            <td>$580,060,912</td>
+
+
+
+            <td>$87,429,053,800</td>
+
+
+
+            <td>-2.9%</td>
+
+
+
+            <td>39.1%</td>
+
+
+
+            <td>67.6%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Exchange Tokens</td>
+
+
+
+            <td>WBT</td>
+
+
+
+            <td>WhiteBIT Coin</td>
+
+
+
+            <td>$36,562,153</td>
+
+
+
+            <td>$12,175,453,635</td>
+
+
+
+            <td>-2.3%</td>
+
+
+
+            <td>2.5%</td>
+
+
+
+            <td>9.4%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Exchange Tokens</td>
+
+
+
+            <td>OKB</td>
+
+
+
+            <td>OKB</td>
+
+
+
+            <td>$15,025,694</td>
+
+
+
+            <td>$1,700,233,095</td>
+
+
+
+            <td>-4.4%</td>
+
+
+
+            <td>1.0%</td>
+
+
+
+            <td>1.3%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Exchange Tokens</td>
+
+
+
+            <td>BGB</td>
+
+
+
+            <td>Bitget Token</td>
+
+
+
+            <td>$14,168,949</td>
+
+
+
+            <td>$1,404,924,260</td>
+
+
+
+            <td>-2.1%</td>
+
+
+
+            <td>1.0%</td>
+
+
+
+            <td>1.1%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Gaming / GameFi</td>
+
+
+
+            <td>AXS</td>
+
+
+
+            <td>Axie Infinity</td>
+
+
+
+            <td>$19,990,352</td>
+
+
+
+            <td>$209,240,564</td>
+
+
+
+            <td>-7.4%</td>
+
+
+
+            <td>18.6%</td>
+
+
+
+            <td>19.8%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Gaming / GameFi</td>
+
+
+
+            <td>SAND</td>
+
+
+
+            <td>The Sandbox</td>
+
+
+
+            <td>$16,985,938</td>
+
+
+
+            <td>$192,514,018</td>
+
+
+
+            <td>-7.2%</td>
+
+
+
+            <td>15.8%</td>
+
+
+
+            <td>18.3%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Gaming / GameFi</td>
+
+
+
+            <td>GALA</td>
+
+
+
+            <td>Gala</td>
+
+
+
+            <td>$16,172,384</td>
+
+
+
+            <td>$164,143,725</td>
+
+
+
+            <td>-7.2%</td>
+
+
+
+            <td>15.0%</td>
+
+
+
+            <td>15.6%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Gaming / GameFi</td>
+
+
+
+            <td>RON</td>
+
+
+
+            <td>Ronin</td>
+
+
+
+            <td>$14,859,360</td>
+
+
+
+            <td>$80,096,989</td>
+
+
+
+            <td>-3.1%</td>
+
+
+
+            <td>13.8%</td>
+
+
+
+            <td>7.6%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Gaming / GameFi</td>
+
+
+
+            <td>IMX</td>
+
+
+
+            <td>Immutable</td>
+
+
+
+            <td>$13,188,475</td>
+
+
+
+            <td>$145,010,222</td>
+
+
+
+            <td>-9.5%</td>
+
+
+
+            <td>12.2%</td>
+
+
+
+            <td>13.8%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Layer 1</td>
+
+
+
+            <td>BTC</td>
+
+
+
+            <td>Bitcoin</td>
+
+
+
+            <td>$28,236,337,889</td>
+
+
+
+            <td>$1,551,088,489,162</td>
+
+
+
+            <td>-2.8%</td>
+
+
+
+            <td>63.9%</td>
+
+
+
+            <td>77.5%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Layer 1</td>
+
+
+
+            <td>ETH</td>
+
+
+
+            <td>Ethereum</td>
+
+
+
+            <td>$10,542,658,690</td>
+
+
+
+            <td>$257,738,462,247</td>
+
+
+
+            <td>-5.8%</td>
+
+
+
+            <td>23.8%</td>
+
+
+
+            <td>12.9%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Layer 1</td>
+
+
+
+            <td>SOL</td>
+
+
+
+            <td>Solana</td>
+
+
+
+            <td>$2,040,042,878</td>
+
+
+
+            <td>$49,626,878,727</td>
+
+
+
+            <td>-7.0%</td>
+
+
+
+            <td>4.6%</td>
+
+
+
+            <td>2.5%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Layer 1</td>
+
+
+
+            <td>XRP</td>
+
+
+
+            <td>XRP</td>
+
+
+
+            <td>$1,763,694,291</td>
+
+
+
+            <td>$84,952,403,515</td>
+
+
+
+            <td>-3.8%</td>
+
+
+
+            <td>4.0%</td>
+
+
+
+            <td>4.2%</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Layer 1</td>
+
+
+
+            <td>TRX</td>
+
+
+
+            <td>TRON</td>
+
+
+
+            <td>$464,668,706</td>
+
+
+
+            <td>$33,963,728,065</td>
+
+
+
+            <td>2.2%</td>
+
+
+
+            <td>1.1%</td>
+
+
+
+            <td>1.7%</td>
+
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
     </section>
 
     <section>
-      <h2>Concentration Review</h2>
-      <p class="section-note">Concentration review shows whether narrative-level market cap is more distributed or driven by a small number of large tokens. Labels and comments are judgment-based V1 heuristics, not statistically derived cutoffs.</p>
-      
-      
-      
+      <h2 data-i18n="concentrationHeading">Concentration Review</h2>
+      <p class="section-note" data-i18n="concentrationCaption">Concentration review shows whether narrative-level market cap is more distributed or driven by a small number of large tokens. Labels and comments are judgment-based V1 heuristics, not statistically derived cutoffs.</p>
+
+
+
       <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              
-              <th>Narrative</th>
-              
-              <th>Top 1 Market Cap Share</th>
-              
-              <th>Top 3 Market Cap Share</th>
-              
-              <th>Concentration Comment</th>
-              
-            </tr>
-          </thead>
-          <tbody>
-            
-            <tr>
-              
-              <td>AI</td>
-              
-              <td>44.2%</td>
-              
-              <td>75.0%</td>
-              
-              <td>Lower concentration: market cap is more distributed</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DeFi</td>
-              
-              <td>31.9%</td>
-              
-              <td>66.5%</td>
-              
-              <td>Lower concentration: market cap is more distributed</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DePIN</td>
-              
-              <td>44.1%</td>
-              
-              <td>66.3%</td>
-              
-              <td>Lower concentration: market cap is more distributed</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Exchange Tokens</td>
-              
-              <td>67.6%</td>
-              
-              <td>86.5%</td>
-              
-              <td>High concentration: one token dominates market cap</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Gaming / GameFi</td>
-              
-              <td>19.8%</td>
-              
-              <td>54.5%</td>
-              
-              <td>Lower concentration: market cap is more distributed</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Layer 1</td>
-              
-              <td>77.5%</td>
-              
-              <td>94.6%</td>
-              
-              <td>High concentration: one token dominates market cap</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Layer 2</td>
-              
-              <td>45.7%</td>
-              
-              <td>82.5%</td>
-              
-              <td>Moderate concentration: top three tokens dominate market cap</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>RWA</td>
-              
-              <td>45.2%</td>
-              
-              <td>89.1%</td>
-              
-              <td>Moderate concentration: top three tokens dominate market cap</td>
-              
-            </tr>
-            
-          </tbody>
-        </table>
-      </div>
-      
+      <table>
+        <thead>
+          <tr>
+
+            <th>Narrative</th>
+
+            <th>Top 1 Market Cap Share</th>
+
+            <th>Top 3 Market Cap Share</th>
+
+            <th>Concentration Comment</th>
+
+          </tr>
+        </thead>
+        <tbody>
+
+
+
+          <tr>
+
+
+
+            <td>AI</td>
+
+
+
+            <td>44.2%</td>
+
+
+
+            <td>75.0%</td>
+
+
+
+            <td data-en-text="Lower concentration: market cap is more distributed" data-th-text="กระจุกตัวต่ำกว่า: market cap กระจายตัวมากกว่า narrative อื่น">Lower concentration: market cap is more distributed</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DeFi</td>
+
+
+
+            <td>31.9%</td>
+
+
+
+            <td>66.5%</td>
+
+
+
+            <td data-en-text="Lower concentration: market cap is more distributed" data-th-text="กระจุกตัวต่ำกว่า: market cap กระจายตัวมากกว่า narrative อื่น">Lower concentration: market cap is more distributed</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DePIN</td>
+
+
+
+            <td>44.1%</td>
+
+
+
+            <td>66.3%</td>
+
+
+
+            <td data-en-text="Lower concentration: market cap is more distributed" data-th-text="กระจุกตัวต่ำกว่า: market cap กระจายตัวมากกว่า narrative อื่น">Lower concentration: market cap is more distributed</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Exchange Tokens</td>
+
+
+
+            <td>67.6%</td>
+
+
+
+            <td>86.5%</td>
+
+
+
+            <td data-en-text="High concentration: one token dominates market cap" data-th-text="กระจุกตัวสูง: market cap ถูกขับเคลื่อนโดย token หลักตัวเดียว">High concentration: one token dominates market cap</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Gaming / GameFi</td>
+
+
+
+            <td>19.8%</td>
+
+
+
+            <td>54.5%</td>
+
+
+
+            <td data-en-text="Lower concentration: market cap is more distributed" data-th-text="กระจุกตัวต่ำกว่า: market cap กระจายตัวมากกว่า narrative อื่น">Lower concentration: market cap is more distributed</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Layer 1</td>
+
+
+
+            <td>77.5%</td>
+
+
+
+            <td>94.6%</td>
+
+
+
+            <td data-en-text="High concentration: one token dominates market cap" data-th-text="กระจุกตัวสูง: market cap ถูกขับเคลื่อนโดย token หลักตัวเดียว">High concentration: one token dominates market cap</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Layer 2</td>
+
+
+
+            <td>45.7%</td>
+
+
+
+            <td>82.5%</td>
+
+
+
+            <td data-en-text="Moderate concentration: top three tokens dominate market cap" data-th-text="กระจุกตัวปานกลาง: market cap ถูกขับเคลื่อนโดย token ใหญ่ 3 อันดับแรก">Moderate concentration: top three tokens dominate market cap</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>RWA</td>
+
+
+
+            <td>45.2%</td>
+
+
+
+            <td>89.1%</td>
+
+
+
+            <td data-en-text="Moderate concentration: top three tokens dominate market cap" data-th-text="กระจุกตัวปานกลาง: market cap ถูกขับเคลื่อนโดย token ใหญ่ 3 อันดับแรก">Moderate concentration: top three tokens dominate market cap</td>
+
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
     </section>
 
     <section>
-      <h2>90-Day Historical Context</h2>
-      
-      <p class="section-note">
-        Historical narrative data covers 8 narratives from 2026-02-22 to 2026-05-22. This view is descriptive trend context only.
-      </p>
-      
-      
+      <h2 data-i18n="historicalHeading">90-Day Historical Context</h2>
+
+      <p class="section-note" data-en-text="Historical narrative data covers 8 narratives from 2026-02-22 to 2026-05-22. This view is descriptive trend context only." data-th-text="ข้อมูล historical narrative ครอบคลุม 8 narratives ตั้งแต่ 2026-02-22 ถึง 2026-05-22. มุมมองนี้เป็น descriptive trend context เท่านั้น.">Historical narrative data covers 8 narratives from 2026-02-22 to 2026-05-22. This view is descriptive trend context only.</p>
+
+
       <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              
-              <th>Narrative</th>
-              
-              <th>Mean 7D Return</th>
-              
-              <th>Median 7D Return</th>
-              
-              <th>Mean 30D Return</th>
-              
-              <th>Median 30D Return</th>
-              
-              <th>7D Breadth</th>
-              
-              <th>RS vs BTC 7D</th>
-              
-              <th>RS vs ETH 7D</th>
-              
-              <th>RS vs BTC 30D</th>
-              
-              <th>RS vs ETH 30D</th>
-              
-              <th>Avg RS vs BTC/ETH 7D</th>
-              
-              <th>Relative Strength 30D</th>
-              
-              <th>Total Market Cap</th>
-              
-              <th>Total Volume</th>
-              
-            </tr>
-          </thead>
-          <tbody>
-            
-            <tr>
-              
-              <td>AI</td>
-              
-              <td>2.4%</td>
-              
-              <td>-1.8%</td>
-              
-              <td>11.8%</td>
-              
-              <td>12.4%</td>
-              
-              <td>44.4%</td>
-              
-              <td>3.4%</td>
-              
-              <td>5.4%</td>
-              
-              <td>11.8%</td>
-              
-              <td>21.4%</td>
-              
-              <td>4.4%</td>
-              
-              <td>16.6%</td>
-              
-              <td>$5,375,987,277</td>
-              
-              <td>$857,709,032</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DeFi</td>
-              
-              <td>-7.4%</td>
-              
-              <td>-4.4%</td>
-              
-              <td>5.1%</td>
-              
-              <td>-1.4%</td>
-              
-              <td>11.1%</td>
-              
-              <td>0.8%</td>
-              
-              <td>2.8%</td>
-              
-              <td>-2.1%</td>
-              
-              <td>7.6%</td>
-              
-              <td>1.8%</td>
-              
-              <td>2.8%</td>
-              
-              <td>$6,953,202,240</td>
-              
-              <td>$539,933,066</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>DePIN</td>
-              
-              <td>-3.0%</td>
-              
-              <td>-4.8%</td>
-              
-              <td>19.4%</td>
-              
-              <td>6.3%</td>
-              
-              <td>20.0%</td>
-              
-              <td>0.3%</td>
-              
-              <td>2.3%</td>
-              
-              <td>5.6%</td>
-              
-              <td>15.2%</td>
-              
-              <td>1.3%</td>
-              
-              <td>10.4%</td>
-              
-              <td>$1,790,557,121</td>
-              
-              <td>$238,548,722</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Exchange Tokens</td>
-              
-              <td>-0.4%</td>
-              
-              <td>-3.2%</td>
-              
-              <td>4.4%</td>
-              
-              <td>0.1%</td>
-              
-              <td>10.0%</td>
-              
-              <td>2.0%</td>
-              
-              <td>3.9%</td>
-              
-              <td>-0.5%</td>
-              
-              <td>9.1%</td>
-              
-              <td>2.9%</td>
-              
-              <td>4.3%</td>
-              
-              <td>$126,854,338,587</td>
-              
-              <td>$2,198,306,043</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Gaming / GameFi</td>
-              
-              <td>-9.1%</td>
-              
-              <td>-8.5%</td>
-              
-              <td>-0.9%</td>
-              
-              <td>-1.9%</td>
-              
-              <td>0.0%</td>
-              
-              <td>-3.3%</td>
-              
-              <td>-1.4%</td>
-              
-              <td>-2.6%</td>
-              
-              <td>7.1%</td>
-              
-              <td>-2.3%</td>
-              
-              <td>2.3%</td>
-              
-              <td>$1,049,512,971</td>
-              
-              <td>$109,246,935</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Layer 1</td>
-              
-              <td>-5.7%</td>
-              
-              <td>-6.4%</td>
-              
-              <td>5.8%</td>
-              
-              <td>0.8%</td>
-              
-              <td>10.0%</td>
-              
-              <td>-1.3%</td>
-              
-              <td>0.7%</td>
-              
-              <td>0.1%</td>
-              
-              <td>9.8%</td>
-              
-              <td>-0.3%</td>
-              
-              <td>4.9%</td>
-              
-              <td>$1,988,118,099,534</td>
-              
-              <td>$45,354,907,458</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>Layer 2</td>
-              
-              <td>-8.3%</td>
-              
-              <td>-8.0%</td>
-              
-              <td>-0.2%</td>
-              
-              <td>-2.0%</td>
-              
-              <td>0.0%</td>
-              
-              <td>-2.8%</td>
-              
-              <td>-0.8%</td>
-              
-              <td>-2.6%</td>
-              
-              <td>7.0%</td>
-              
-              <td>-1.8%</td>
-              
-              <td>2.2%</td>
-              
-              <td>$4,646,426,140</td>
-              
-              <td>$209,468,452</td>
-              
-            </tr>
-            
-            <tr>
-              
-              <td>RWA</td>
-              
-              <td>-4.3%</td>
-              
-              <td>-7.6%</td>
-              
-              <td>-4.0%</td>
-              
-              <td>4.1%</td>
-              
-              <td>33.3%</td>
-              
-              <td>-2.5%</td>
-              
-              <td>-0.5%</td>
-              
-              <td>3.5%</td>
-              
-              <td>13.1%</td>
-              
-              <td>-1.5%</td>
-              
-              <td>8.3%</td>
-              
-              <td>$13,852,949,497</td>
-              
-              <td>$492,350,934</td>
-              
-            </tr>
-            
-          </tbody>
-        </table>
-      </div>
-      
-      
+      <table>
+        <thead>
+          <tr>
+
+            <th>Narrative</th>
+
+            <th>Mean 7D Return</th>
+
+            <th>Median 7D Return</th>
+
+            <th>Mean 30D Return</th>
+
+            <th>Median 30D Return</th>
+
+            <th>7D Breadth</th>
+
+            <th>RS vs BTC 7D</th>
+
+            <th>RS vs ETH 7D</th>
+
+            <th>RS vs BTC 30D</th>
+
+            <th>RS vs ETH 30D</th>
+
+            <th>Avg RS vs BTC/ETH 7D</th>
+
+            <th>Relative Strength 30D</th>
+
+            <th>Total Market Cap</th>
+
+            <th>Total Volume</th>
+
+          </tr>
+        </thead>
+        <tbody>
+
+
+
+          <tr>
+
+
+
+            <td>AI</td>
+
+
+
+            <td>2.4%</td>
+
+
+
+            <td>-1.8%</td>
+
+
+
+            <td>11.8%</td>
+
+
+
+            <td>12.4%</td>
+
+
+
+            <td>44.4%</td>
+
+
+
+            <td>3.4%</td>
+
+
+
+            <td>5.4%</td>
+
+
+
+            <td>11.8%</td>
+
+
+
+            <td>21.4%</td>
+
+
+
+            <td>4.4%</td>
+
+
+
+            <td>16.6%</td>
+
+
+
+            <td>$5,375,987,277</td>
+
+
+
+            <td>$857,709,032</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DeFi</td>
+
+
+
+            <td>-7.4%</td>
+
+
+
+            <td>-4.4%</td>
+
+
+
+            <td>5.1%</td>
+
+
+
+            <td>-1.4%</td>
+
+
+
+            <td>11.1%</td>
+
+
+
+            <td>0.8%</td>
+
+
+
+            <td>2.8%</td>
+
+
+
+            <td>-2.1%</td>
+
+
+
+            <td>7.6%</td>
+
+
+
+            <td>1.8%</td>
+
+
+
+            <td>2.8%</td>
+
+
+
+            <td>$6,953,202,240</td>
+
+
+
+            <td>$539,933,066</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>DePIN</td>
+
+
+
+            <td>-3.0%</td>
+
+
+
+            <td>-4.8%</td>
+
+
+
+            <td>19.4%</td>
+
+
+
+            <td>6.3%</td>
+
+
+
+            <td>20.0%</td>
+
+
+
+            <td>0.3%</td>
+
+
+
+            <td>2.3%</td>
+
+
+
+            <td>5.6%</td>
+
+
+
+            <td>15.2%</td>
+
+
+
+            <td>1.3%</td>
+
+
+
+            <td>10.4%</td>
+
+
+
+            <td>$1,790,557,121</td>
+
+
+
+            <td>$238,548,722</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Exchange Tokens</td>
+
+
+
+            <td>-0.4%</td>
+
+
+
+            <td>-3.2%</td>
+
+
+
+            <td>4.4%</td>
+
+
+
+            <td>0.1%</td>
+
+
+
+            <td>10.0%</td>
+
+
+
+            <td>2.0%</td>
+
+
+
+            <td>3.9%</td>
+
+
+
+            <td>-0.5%</td>
+
+
+
+            <td>9.1%</td>
+
+
+
+            <td>2.9%</td>
+
+
+
+            <td>4.3%</td>
+
+
+
+            <td>$126,854,338,587</td>
+
+
+
+            <td>$2,198,306,043</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Gaming / GameFi</td>
+
+
+
+            <td>-9.1%</td>
+
+
+
+            <td>-8.5%</td>
+
+
+
+            <td>-0.9%</td>
+
+
+
+            <td>-1.9%</td>
+
+
+
+            <td>0.0%</td>
+
+
+
+            <td>-3.3%</td>
+
+
+
+            <td>-1.4%</td>
+
+
+
+            <td>-2.6%</td>
+
+
+
+            <td>7.1%</td>
+
+
+
+            <td>-2.3%</td>
+
+
+
+            <td>2.3%</td>
+
+
+
+            <td>$1,049,512,971</td>
+
+
+
+            <td>$109,246,935</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Layer 1</td>
+
+
+
+            <td>-5.7%</td>
+
+
+
+            <td>-6.4%</td>
+
+
+
+            <td>5.8%</td>
+
+
+
+            <td>0.8%</td>
+
+
+
+            <td>10.0%</td>
+
+
+
+            <td>-1.3%</td>
+
+
+
+            <td>0.7%</td>
+
+
+
+            <td>0.1%</td>
+
+
+
+            <td>9.8%</td>
+
+
+
+            <td>-0.3%</td>
+
+
+
+            <td>4.9%</td>
+
+
+
+            <td>$1,988,118,099,534</td>
+
+
+
+            <td>$45,354,907,458</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>Layer 2</td>
+
+
+
+            <td>-8.3%</td>
+
+
+
+            <td>-8.0%</td>
+
+
+
+            <td>-0.2%</td>
+
+
+
+            <td>-2.0%</td>
+
+
+
+            <td>0.0%</td>
+
+
+
+            <td>-2.8%</td>
+
+
+
+            <td>-0.8%</td>
+
+
+
+            <td>-2.6%</td>
+
+
+
+            <td>7.0%</td>
+
+
+
+            <td>-1.8%</td>
+
+
+
+            <td>2.2%</td>
+
+
+
+            <td>$4,646,426,140</td>
+
+
+
+            <td>$209,468,452</td>
+
+          </tr>
+
+
+
+          <tr>
+
+
+
+            <td>RWA</td>
+
+
+
+            <td>-4.3%</td>
+
+
+
+            <td>-7.6%</td>
+
+
+
+            <td>-4.0%</td>
+
+
+
+            <td>4.1%</td>
+
+
+
+            <td>33.3%</td>
+
+
+
+            <td>-2.5%</td>
+
+
+
+            <td>-0.5%</td>
+
+
+
+            <td>3.5%</td>
+
+
+
+            <td>13.1%</td>
+
+
+
+            <td>-1.5%</td>
+
+
+
+            <td>8.3%</td>
+
+
+
+            <td>$13,852,949,497</td>
+
+
+
+            <td>$492,350,934</td>
+
+          </tr>
+
+        </tbody>
+      </table>
+    </div>
+
+
     </section>
 
     <section>
-      <h2>Methodology</h2>
+      <h2 data-i18n="methodologyHeading">Methodology</h2>
       <div class="method-box">
-        <p>Crypto Narrative Radar uses a manually reviewed narrative taxonomy, CoinGecko market data, token-level market snapshots, and narrative-level aggregation to create a descriptive research view.</p>
-        <p>Narrative Momentum Score is a relative research ranking score, not statistical confidence. Small score gaps should be interpreted cautiously.</p>
-        <p>The Narrative Momentum Score uses the current V1 framework: 40% price momentum, 25% relative strength, 20% volume confirmation, and 15% breadth of participation.</p>
+        <p data-i18n="methodologyIntro">Crypto Narrative Radar uses a manually reviewed narrative taxonomy, CoinGecko market data, token-level market snapshots, and narrative-level aggregation to create a descriptive research view.</p>
+        <p data-en-text="Narrative Momentum Score is a relative research ranking score, not statistical confidence. Small score gaps should be interpreted cautiously." data-th-text="Narrative Momentum Score เป็น score สำหรับจัดอันดับเชิงเปรียบเทียบเพื่อสนับสนุนงานวิจัย ไม่ใช่ความเชื่อมั่นทางสถิติ. ควรตีความช่องว่างคะแนนที่เล็กด้วยความระมัดระวัง.">Narrative Momentum Score is a relative research ranking score, not statistical confidence. Small score gaps should be interpreted cautiously.</p>
+        <p data-i18n="scoreFramework">The Narrative Momentum Score uses the current V1 framework: 40% price momentum, 25% relative strength, 20% volume confirmation, and 15% breadth of participation.</p>
         <ul>
-          
-          <li>40% Price momentum: 24h, 7D, and 30D median return context.</li>
-          
-          <li>25% Relative strength: 7D median return compared with BTC and ETH.</li>
-          
-          <li>20% Volume confirmation: Volume-to-market-cap activity context.</li>
-          
-          <li>15% Breadth of participation: Share of tokens participating across return windows.</li>
-          
+
+          <li data-en-text="40% Price momentum: 24h, 7D, and 30D median return context." data-th-text="40% Price momentum: ใช้บริบท median return ในกรอบ 24h, 7D และ 30D">40% Price momentum: 24h, 7D, and 30D median return context.</li>
+
+          <li data-en-text="25% Relative strength: 7D median return compared with BTC and ETH." data-th-text="25% Relative strength: เปรียบเทียบ median 7D return กับ BTC และ ETH">25% Relative strength: 7D median return compared with BTC and ETH.</li>
+
+          <li data-en-text="20% Volume confirmation: Volume-to-market-cap activity context." data-th-text="20% Volume confirmation: ใช้บริบท activity จาก volume-to-market-cap">20% Volume confirmation: Volume-to-market-cap activity context.</li>
+
+          <li data-en-text="15% Breadth of participation: Share of tokens participating across return windows." data-th-text="15% Breadth of participation: ดูสัดส่วน token ที่มีส่วนร่วมในหลายกรอบ return">15% Breadth of participation: Share of tokens participating across return windows.</li>
+
         </ul>
-        <p>Component scores are percentile-rank normalized within the current narrative universe using the existing pandas rank percentile method.</p>
-        <p>Relative Strength 7D averages median narrative 7D return minus BTC 7D return and median narrative 7D return minus ETH 7D return.</p>
-        <p>Concentration labels and comments are judgment-based V1 heuristics, not statistically derived cutoffs.</p>
-        <p>Return skew diagnostics are descriptive only. Skew and dispersion review thresholds are judgment-based V1 review heuristics, not statistically derived cutoffs. The IQR threshold is snapshot-relative: each narrative's 7D return IQR is compared with two times the median narrative 7D return IQR in the same report snapshot, not an absolute cross-date threshold. These diagnostics do not affect the Narrative Momentum Score. The review flag does not imply an investment recommendation.</p>
-        <p>The token universe is 80 manually curated tokens: 10 representative tokens per narrative, not full sector coverage.</p>
-        <p>Taxonomy assignments involve judgment and can miss sector breadth or token overlap.</p>
-        <p>DuckDB SQL analytics outputs support narrative summaries, token-level contributors, and concentration context. Historical narrative data, when available, is used only as descriptive trend context.</p>
-        <p>The score is a research ranking tool for market intelligence. It does not imply future returns.</p>
+        <p data-en-text="Component scores are percentile-rank normalized within the current narrative universe using the existing pandas rank percentile method." data-th-text="Component scores ถูก normalize แบบ percentile-rank ภายใน narrative universe ปัจจุบัน โดยใช้วิธี pandas rank percentile เดิม.">Component scores are percentile-rank normalized within the current narrative universe using the existing pandas rank percentile method.</p>
+        <p data-en-text="Relative Strength 7D averages median narrative 7D return minus BTC 7D return and median narrative 7D return minus ETH 7D return." data-th-text="Relative Strength 7D ใช้ค่าเฉลี่ยของ median narrative 7D return ลบ BTC 7D return และ median narrative 7D return ลบ ETH 7D return.">Relative Strength 7D averages median narrative 7D return minus BTC 7D return and median narrative 7D return minus ETH 7D return.</p>
+        <p data-en-text="Concentration labels and comments are judgment-based V1 heuristics, not statistically derived cutoffs." data-th-text="Concentration labels และ comments เป็น V1 heuristics จาก judgment ไม่ใช่ cutoff ที่ derive จากสถิติ.">Concentration labels and comments are judgment-based V1 heuristics, not statistically derived cutoffs.</p>
+        <p data-en-text="Return skew diagnostics are descriptive only. Skew and dispersion review thresholds are judgment-based V1 review heuristics, not statistically derived cutoffs. The IQR threshold is snapshot-relative: each narrative's 7D return IQR is compared with two times the median narrative 7D return IQR in the same report snapshot, not an absolute cross-date threshold. These diagnostics do not affect the Narrative Momentum Score. The review flag does not imply an investment recommendation." data-th-text="Return skew diagnostics เป็นข้อมูลเชิงพรรณนาเท่านั้น. threshold สำหรับ skew และ dispersion review เป็น V1 review heuristics จาก judgment ไม่ใช่ cutoff ที่ derive จากสถิติ. IQR threshold เป็นแบบ snapshot-relative: IQR ของ 7D return ในแต่ละ narrative ถูกเทียบกับ 2 เท่าของ median narrative 7D return IQR ใน report snapshot เดียวกัน ไม่ใช่ threshold แบบ absolute ที่ใช้ข้ามวันที่. diagnostics เหล่านี้ไม่ส่งผลต่อ Narrative Momentum Score และ review flag ไม่ได้สื่อถึงคำแนะนำการลงทุน.">Return skew diagnostics are descriptive only. Skew and dispersion review thresholds are judgment-based V1 review heuristics, not statistically derived cutoffs. The IQR threshold is snapshot-relative: each narrative's 7D return IQR is compared with two times the median narrative 7D return IQR in the same report snapshot, not an absolute cross-date threshold. These diagnostics do not affect the Narrative Momentum Score. The review flag does not imply an investment recommendation.</p>
+        <p data-en-text="The token universe is 80 manually curated tokens: 10 representative tokens per narrative, not full sector coverage." data-th-text="token universe มี 80 token ที่ curate ด้วยมือ: 10 token ตัวแทนต่อ narrative ไม่ใช่การครอบคลุมทั้ง sector.">The token universe is 80 manually curated tokens: 10 representative tokens per narrative, not full sector coverage.</p>
+        <p data-en-text="Taxonomy assignments involve judgment and can miss sector breadth or token overlap." data-th-text="การจัด taxonomy มีส่วนของ judgment และอาจไม่ครอบคลุม breadth ของ sector หรือ overlap ระหว่าง token ทั้งหมด.">Taxonomy assignments involve judgment and can miss sector breadth or token overlap.</p>
+        <p data-i18n="sqlAnalyticsNote">DuckDB SQL analytics outputs support narrative summaries, token-level contributors, and concentration context. Historical narrative data, when available, is used only as descriptive trend context.</p>
+        <p data-i18n="scoreResearchNote">The score is a research ranking tool for market intelligence. It does not imply future returns.</p>
       </div>
     </section>
 
     <section>
-      <h2>Limitations</h2>
+      <h2 data-i18n="limitationsHeading">Limitations</h2>
       <ul>
-        <li>This report is not investment advice.</li>
-        <li>It includes no buy/sell recommendations.</li>
-        <li>It includes no price prediction.</li>
-        <li>It includes no backtesting.</li>
-        <li>It includes no portfolio allocation guidance.</li>
-        <li>Snapshot and 90-day historical views are descriptive.</li>
-        <li>CoinGecko data availability and API limits may affect data quality.</li>
-        <li>Taxonomy design involves judgment and should be reviewed over time.</li>
-        <li>No DeFiLlama fundamentals overlay is included yet.</li>
+        <li data-i18n="limitationAdvice">This report is not investment advice.</li>
+        <li data-i18n="limitationRecommendations">It includes no buy/sell recommendations.</li>
+        <li data-i18n="limitationPrediction">It includes no price prediction.</li>
+        <li data-i18n="limitationBacktesting">It includes no backtesting.</li>
+        <li data-i18n="limitationPortfolio">It includes no portfolio allocation guidance.</li>
+        <li data-i18n="limitationDescriptive">Snapshot and 90-day historical views are descriptive.</li>
+        <li data-i18n="limitationCoingecko">CoinGecko data availability and API limits may affect data quality.</li>
+        <li data-i18n="limitationTaxonomy">Taxonomy design involves judgment and should be reviewed over time.</li>
+        <li data-i18n="limitationDefillama">No DeFiLlama fundamentals overlay is included yet.</li>
       </ul>
     </section>
 
-    <footer>
+    <footer data-i18n="footerText">
       Crypto Narrative Radar static market intelligence report. Generated from existing processed outputs.
     </footer>
   </main>
+  <script>
+    const thaiTranslations = {
+      reportTitle: "Crypto Narrative Radar",
+      reportSubtitle: "รายงาน market intelligence แบบ static จากข้อมูลตลาดคริปโตระดับ narrative",
+      snapshotDateLabel: "วันที่ snapshot:",
+      generatedLabel: "สร้างเมื่อ:",
+      researchDisclaimer: "<strong>หมายเหตุการใช้งาน:</strong> รายงานนี้เป็น market intelligence และระบบสนับสนุนงานวิจัยเท่านั้น ไม่ใช่คำแนะนำการลงทุน ไม่ใช่ trading bot ไม่มีคำแนะนำ buy/sell ไม่ใช่การทำนายราคา ไม่มี backtesting และไม่มีคำแนะนำ portfolio allocation",
+      sampleNotice: "รายงานตัวอย่างแบบ pinned: รายงานนี้ใช้ snapshot วันที่ 2026-05-20 เพื่อสาธิตวิธีคิดเรื่อง narrative scoring, data quality notes, component breakdown และ return skew diagnostics โดยเป็นตัวอย่าง methodology ที่ทำซ้ำได้ ไม่ใช่อัปเดตตลาดปัจจุบัน",
+      dataQualityHeading: "หมายเหตุคุณภาพข้อมูล",
+      executiveSummaryHeading: "สรุปผู้บริหาร",
+      executiveUnavailable: "ไม่มีข้อมูลสรุปสำหรับ snapshot นี้",
+      marketSnapshotHeading: "ภาพรวมตลาด",
+      scoreChartHeading: "กราฟ Narrative Momentum Score",
+      scoreChartCaption: "Narrative ถูกจัดเรียงตาม Narrative Momentum Score ปัจจุบัน คะแนนนี้เป็นการจัดอันดับเชิงเปรียบเทียบเพื่อช่วยคัดกรอง narrative สำหรับการวิเคราะห์ต่อ ไม่ใช่ความเชื่อมั่นทางสถิติ และไม่ส่งผลต่อ return skew diagnostics",
+      skewChartHeading: "กราฟ Mean vs Median 7D Return Skew",
+      skewChartCaption: "มุมมอง diagnostic นี้แสดง mean และ median ของ 7D return แยกตาม narrative พร้อม review label ปัจจุบัน โดยไม่ส่งผลต่อ Narrative Momentum Score",
+      meanLabel: "Mean",
+      medianLabel: "Median",
+      gapLabel: "Gap",
+      meanLegend: "Mean 7D Return",
+      medianLegend: "Median 7D Return",
+      rankingHeading: "ตารางจัดอันดับ Narrative",
+      rankingCaption: "ตารางนี้เปรียบเทียบ narrative ผ่าน momentum, relative strength, volume confirmation, breadth of participation และ concentration context",
+      componentHeading: "รายละเอียดองค์ประกอบคะแนน",
+      componentCaption: "Component scores ถูก normalize แบบ percentile-rank ภายใน narrative universe ปัจจุบัน แล้วนำมารวมเป็น Narrative Momentum Score โดยเป็น input สำหรับการจัดอันดับเชิงวิจัย ไม่ใช่ความเชื่อมั่นทางสถิติ",
+      returnSkewHeading: "Return Skew Diagnostics",
+      returnSkewCaption: "Diagnostics ช่วยอธิบายว่า headline return ของ narrative สะท้อนการมีส่วนร่วมที่กว้าง การกระจุกตัว หรืออาจถูกลากโดย token บางตัวหรือไม่ โดยเปรียบเทียบ mean, median และ IQR ของ 7D return และไม่ส่งผลต่อ Narrative Momentum Score",
+      contributorsHeading: "Token-Level Contributors",
+      contributorsCaption: "Token-level contributors แสดงว่า asset ใดมีส่วนเกี่ยวข้องกับ market activity ของแต่ละ narrative มากที่สุด",
+      concentrationHeading: "Concentration Review",
+      concentrationCaption: "Concentration review แสดงว่า market cap ระดับ narrative กระจายตัวหรือถูกขับเคลื่อนโดย token ขนาดใหญ่ไม่กี่ตัว โดย label และ comment เป็น V1 heuristics ไม่ใช่ cutoff ทางสถิติ",
+      historicalHeading: "บริบทข้อมูลย้อนหลัง 90 วัน",
+      methodologyHeading: "Methodology",
+      methodologyIntro: "Crypto Narrative Radar ใช้ taxonomy ที่รีวิวด้วยมือ ข้อมูล CoinGecko, token-level market snapshots และการ aggregate ระดับ narrative เพื่อสร้างมุมมองเชิงวิจัยแบบ descriptive",
+      smallGapCaution: "ควรตีความช่องว่างคะแนนที่เล็กด้วยความระมัดระวัง",
+      scoreFramework: "Narrative Momentum Score ใช้กรอบ V1 ปัจจุบัน: 40% price momentum, 25% relative strength, 20% volume confirmation และ 15% breadth of participation",
+      sqlAnalyticsNote: "DuckDB SQL analytics outputs สนับสนุน narrative summaries, token-level contributors และ concentration context ส่วนข้อมูล historical narrative ใช้เป็น descriptive trend context เท่านั้น",
+      scoreResearchNote: "คะแนนนี้เป็น research ranking tool สำหรับ market intelligence และไม่ได้บอกผลตอบแทนในอนาคต",
+      limitationsHeading: "ข้อจำกัด",
+      limitationAdvice: "รายงานนี้ไม่ใช่คำแนะนำการลงทุน",
+      limitationRecommendations: "ไม่มีคำแนะนำ buy/sell",
+      limitationPrediction: "ไม่มีการทำนายราคา",
+      limitationBacktesting: "ไม่มี backtesting",
+      limitationPortfolio: "ไม่มีคำแนะนำ portfolio allocation",
+      limitationDescriptive: "มุมมอง snapshot และข้อมูลย้อนหลัง 90 วันเป็นข้อมูลเชิงพรรณนา",
+      limitationCoingecko: "ความพร้อมของข้อมูล CoinGecko และ API limits อาจกระทบคุณภาพข้อมูล",
+      limitationTaxonomy: "การออกแบบ taxonomy มีส่วนของ judgment และควรถูกทบทวนเป็นระยะ",
+      limitationDefillama: "ยังไม่มี DeFiLlama fundamentals overlay",
+      footerText: "รายงาน static market intelligence ของ Crypto Narrative Radar สร้างจาก processed outputs ที่มีอยู่"
+    };
+
+    const thaiColumnLabels = {
+      "Rank": "อันดับ",
+      "Narrative": "Narrative",
+      "Token Count": "จำนวน Token",
+      "Narrative Momentum Score": "Narrative Momentum Score",
+      "Mean 7D Return": "Mean 7D Return",
+      "Median 7D Return": "Median 7D Return",
+      "Mean 30D Return": "Mean 30D Return",
+      "Total Market Cap": "Total Market Cap",
+      "Total Volume": "Total Volume",
+      "7D Breadth": "7D Breadth",
+      "Positive Breadth": "Positive Breadth",
+      "Avg RS vs BTC/ETH 7D": "Avg RS vs BTC/ETH 7D",
+      "Concentration": "Concentration",
+      "Price Momentum Score": "Price Momentum Score",
+      "Relative Strength Score": "Relative Strength Score",
+      "Volume Confirmation Score": "Volume Confirmation Score",
+      "Breadth Score": "Breadth Score",
+      "Scoring Note": "หมายเหตุคะแนน",
+      "Mean-Median Gap": "Mean-Median Gap",
+      "7D Return IQR": "7D Return IQR",
+      "Top 7D Token": "Top 7D Token",
+      "Bottom 7D Token": "Bottom 7D Token",
+      "Review Flag": "Review Flag",
+      "Diagnostic Note": "หมายเหตุ Diagnostics",
+      "Symbol": "Symbol",
+      "Name": "Name",
+      "Market Cap": "Market Cap",
+      "7D Return": "7D Return",
+      "Volume Share": "Volume Share",
+      "Market Cap Share": "Market Cap Share",
+      "Top 1 Market Cap Share": "Top 1 Market Cap Share",
+      "Top 3 Market Cap Share": "Top 3 Market Cap Share",
+      "Concentration Comment": "หมายเหตุ Concentration",
+      "Snapshot Median 7D Return IQR": "Snapshot Median 7D Return IQR",
+      "RS vs BTC 7D": "RS vs BTC 7D",
+      "RS vs ETH 7D": "RS vs ETH 7D",
+      "RS vs BTC 30D": "RS vs BTC 30D",
+      "RS vs ETH 30D": "RS vs ETH 30D",
+      "Relative Strength 30D": "Relative Strength 30D"
+    };
+
+    function setReportLanguage(language) {
+      const selectedLanguage = language === "th" ? "th" : "en";
+      document.documentElement.lang = selectedLanguage === "th" ? "th" : "en";
+      document.body.dataset.language = selectedLanguage;
+      document.title = selectedLanguage === "th"
+        ? "Crypto Narrative Radar - รายงานตัวอย่าง"
+        : "Crypto Narrative Radar - 2026-05-20";
+
+      document.querySelectorAll("[data-i18n]").forEach((element) => {
+        if (!element.dataset.enHtml) {
+          element.dataset.enHtml = element.innerHTML;
+        }
+        const key = element.dataset.i18n;
+        element.innerHTML = selectedLanguage === "th" && thaiTranslations[key]
+          ? thaiTranslations[key]
+          : element.dataset.enHtml;
+      });
+
+      document.querySelectorAll("[data-th-text]").forEach((element) => {
+        element.textContent = selectedLanguage === "th"
+          ? element.dataset.thText
+          : element.dataset.enText;
+      });
+
+      document.querySelectorAll("th").forEach((heading) => {
+        if (!heading.dataset.enText) {
+          heading.dataset.enText = heading.textContent.trim();
+        }
+        heading.textContent = selectedLanguage === "th"
+          ? thaiColumnLabels[heading.dataset.enText] || heading.dataset.enText
+          : heading.dataset.enText;
+      });
+
+      document.querySelectorAll("[data-language-button]").forEach((button) => {
+        const isActive = button.dataset.languageButton === selectedLanguage;
+        button.classList.toggle("active", isActive);
+        button.setAttribute("aria-pressed", String(isActive));
+      });
+    }
+
+    document.querySelectorAll("[data-language-button]").forEach((button) => {
+      button.addEventListener("click", () => {
+        setReportLanguage(button.dataset.languageButton);
+      });
+    });
+  </script>
 </body>
 </html>
