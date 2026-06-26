@@ -819,6 +819,32 @@ Verification:
 Scope note:
 No Narrative Momentum Score, scoring formula, taxonomy, CoinGecko API logic, new APIs, new metrics, prediction, backtesting, trading-signal, buy/sell, alpha, or portfolio-allocation logic was added.
 
+### Milestone 6.5B Summary
+
+Thai Toggle Coverage follow-up is complete.
+
+The static HTML report now includes fuller Thai coverage for Python-generated prose:
+
+- executive summary bullets
+- market snapshot card descriptions
+- review flags
+- diagnostic notes
+- concentration comments
+- methodology text
+
+The English/Thai toggle now switches generated report text through `data-th-text`, while keeping English as the default and fallback.
+
+Validation:
+
+- compileall passed
+- pytest passed: 119 passed
+- git diff --check passed
+- browser toggle QA in Chrome passed for English default, Thai switch, and English restore
+- the pinned showcase sample was regenerated at `docs/showcase/sample_2026-05-20.html`
+
+Scope note:
+No Narrative Momentum Score, scoring formula, taxonomy, CoinGecko API logic, new API, new metric, prediction, backtesting, trading-signal, buy/sell, alpha, or portfolio-allocation logic was changed. No contribution-share metric was added.
+
 ### Strategic Context Pack Summary
 
 The public-safe strategic context pack is complete:
