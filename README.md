@@ -89,6 +89,10 @@ reproducible methodology example. It demonstrates narrative scoring, data
 quality notes, component breakdown, and return skew diagnostics without claiming
 to be a current market update.
 
+### Research Memos
+- [Decision Memos (EN)](docs/memos/narrative_decision_memos_en.md)
+- [Decision Memos (TH)](docs/memos/narrative_decision_memos_th.md)
+
 Sample vs. latest report:
 
 | Report | Path | Purpose | Git tracking |
