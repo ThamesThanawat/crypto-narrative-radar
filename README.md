@@ -8,6 +8,9 @@ The project transforms CoinGecko token market data into structured research outp
 
 It is designed as a research support workflow for monitoring crypto narrative rotation and market structure. It is not a trading bot, price prediction model, investment advice product, or buy/sell signal generator.
 
+Live sample report:
+[GitHub Pages showcase](https://ThamesThanawat.github.io/crypto-narrative-radar/showcase/sample_2026-05-20.html)
+
 ## Why Narrative-Level Market Intelligence Matters
 
 Crypto markets often move by narrative rather than by isolated token performance. Analysts may need to know whether AI tokens are broadly strengthening, whether Layer 2 participation is narrowing, whether DeFi volume confirmation is improving, or whether a move is concentrated in only a few large assets.
@@ -81,10 +84,7 @@ reports/html/latest.html
 
 #### Sample Research Report
 
-Live sample report:
-[docs/showcase/sample_2026-05-20.html](https://ThamesThanawat.github.io/crypto-narrative-radar/showcase/sample_2026-05-20.html)
-
-The sample report uses the fixed 2026-05-20 snapshot as an intentionally pinned,
+The GitHub Pages sample report linked in the Project Overview uses the fixed 2026-05-20 snapshot as an intentionally pinned,
 reproducible methodology example. It demonstrates narrative scoring, data
 quality notes, component breakdown, and return skew diagnostics without claiming
 to be a current market update.
@@ -144,9 +144,7 @@ These outputs support repeatable research review, dashboard visualizations, stat
 
 ## Dashboard and Report Preview
 
-To preview the project without cloning or running the pipeline, open the live
-sample report first:
-[docs/showcase/sample_2026-05-20.html](https://ThamesThanawat.github.io/crypto-narrative-radar/showcase/sample_2026-05-20.html)
+To preview the project without cloning or running the pipeline, open the live sample report linked in the Project Overview first.
 
 The dashboard is built for market research workflows rather than trade execution. It emphasizes narrative rankings, relative momentum, volume confirmation, breadth of participation, concentration context, token contributors, and historical narrative trends.
 
@@ -366,10 +364,18 @@ Windows:
 python -m pip install -r requirements.txt
 ```
 
+Run the remaining commands from the activated project virtual environment.
+
 ### 4. Run the current snapshot pipeline
 
 ```bash
 python scripts/run_daily_pipeline.py
+```
+
+Windows, from the project root:
+
+```powershell
+.venv\Scripts\python.exe scripts\run_daily_pipeline.py
 ```
 
 This validates the taxonomy, fetches CoinGecko market data, validates the current market snapshot, calculates narrative metrics, runs DuckDB SQL analytics, and validates SQL outputs.
@@ -430,6 +436,13 @@ If Python is not available directly on `PATH`, use:
 
 ```bash
 python -m pytest tests
+```
+
+Windows, from the project root:
+
+```powershell
+.venv\Scripts\activate
+.venv\Scripts\python.exe -m pytest tests
 ```
 
 ## Skills Demonstrated

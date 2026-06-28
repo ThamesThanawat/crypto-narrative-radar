@@ -147,8 +147,10 @@ data/processed/historical/narrative_market_history_90d.csv
 
 The current verified historical outputs are:
 
-- `token_market_history_90d.csv`: 7,200 rows, 80 tokens, date range 2026-02-25 to 2026-05-25
-- `narrative_market_history_90d.csv`: 720 rows, 8 narratives, date range 2026-02-25 to 2026-05-25
+- `token_market_history_90d.csv`: 6,930 rows, 77 successful tokens, date range 2026-02-22 to 2026-05-22
+- `narrative_market_history_90d.csv`: 720 rows, 8 narratives, date range 2026-02-22 to 2026-05-22
+
+The historical token layer had 77/80 successful backfills due to prior API/backfill failures; this limitation is documented rather than hidden.
 
 Generated raw and processed data files are local/generated outputs and generally should not be committed unless explicitly intended.
 
@@ -407,8 +409,6 @@ The static HTML report generator is implemented and presents market intelligence
 Current sections include:
 
 - Executive Summary
-- Top 3 narratives by Narrative Momentum Score
-- Lowest 3 narratives by Narrative Momentum Score
 - Narrative ranking table
 - Score Component Breakdown
 - Token contributors
@@ -586,9 +586,9 @@ The pipeline:
 
 Current verified output:
 
-- rows: 7,200
-- tokens: 80
-- date range: 2026-02-25 to 2026-05-25
+- rows: 6,930
+- successful tokens: 77
+- date range: 2026-02-22 to 2026-05-22
 
 Scope note:
 Milestone 5.8A does not add narrative historical metrics, historical scoring, dashboard charts, SQL changes, backtesting, prediction logic, or trading signals.
@@ -611,7 +611,7 @@ The output has:
 - 90 dates
 - 8 narratives
 - one row per `date + primary_narrative`
-- date range: 2026-02-25 to 2026-05-25
+- date range: 2026-02-22 to 2026-05-22
 
 Metrics include:
 
@@ -690,7 +690,7 @@ Methodology Transparency & Report Clarity is complete.
 The static HTML report now includes:
 
 - Score Component Breakdown using existing component score columns
-- Top 3 and Lowest 3 Narrative Momentum Score sections
+- Narrative Momentum Score context consolidated into the main report flow
 - clearer Narrative Momentum Score methodology
 - score interpretation caveat: relative ranking, not statistical confidence
 - small-gap interpretation caution
@@ -753,13 +753,13 @@ The report generator now supports a pinned sample mode:
 
 Normal report generation remains unchanged and still writes the dated report plus `latest.html`.
 
-A fresh pipeline check passed and generated 2026-06-19 outputs.
+A fresh pre-application audit check passed and confirmed 2026-06-29 outputs.
 
 Latest report status:
 
-- `latest.html` now uses snapshot date 2026-06-19
+- `latest.html` now uses snapshot date 2026-06-29
 - the stale warning no longer appears on the normal latest report
-- the normal QA layer currently flags one extreme 30D return for later data sanity review
+- the prior extreme 30D return QA item is not present in the current 2026-06-29 latest outputs
 
 Validation:
 
@@ -813,7 +813,7 @@ Verification:
 - pytest passed: 117 passed
 - git diff --check passed
 - run_daily_pipeline.py ran successfully
-- fresh processed outputs generated for 2026-06-25
+- fresh processed outputs generated for 2026-06-29
 - watchlist indicators refreshed successfully
 
 Scope note:
