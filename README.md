@@ -93,6 +93,10 @@ to be a current market update.
 - [Decision Memos (EN)](docs/memos/narrative_decision_memos_en.md)
 - [Decision Memos (TH)](docs/memos/narrative_decision_memos_th.md)
 
+### Project Due Diligence
+- [ONDO Finance DD Memo (EN)](docs/memos/ondo_dd_memo_en.md)
+- [ONDO Finance DD Memo (TH)](docs/memos/ondo_dd_memo_th.md)
+
 Sample vs. latest report:
 
 | Report | Path | Purpose | Git tracking |
